@@ -1,2 +1,2 @@
-# mymanga.github.io
+# mymanga
 My Manga
