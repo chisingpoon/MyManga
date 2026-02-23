@@ -25,7 +25,13 @@ fetch(SHEET_URL)
   .then(data => {
 
     // Filter rows where Show = YES
-    const filtered = data.filter(row => row.Show === "YES");
+    const filtered = data.filter(row => {
+          return (
+            row.Show?.toLowerCase() === "yes" &&
+            row.Role?.toLowerCase() === "manager"                            
+                                        
+         );                               
+    });
 
     // Build HTML
     const html = filtered.map(row => `
