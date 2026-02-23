@@ -25,7 +25,7 @@ fetch(SHEET_URL)
   .then(data => {
 
       // Filter rows where Show = YES
-    const filtered = data.filter(row => row.Show === "YES");
+    const filtered = data.filter(row => row.Show === "Yes");
 
     // Build HTML
     const html = filtered.map(row => `
