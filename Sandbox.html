@@ -75,7 +75,7 @@ function applyFilters() {
       </div>
     `).join("");
     */
-    document.getElementById("output").innerHTML = html;
+    document.getElementById("data").innerHTML = filtered.length ? output : "<p>No matching records found.</p>";
 
   })
   .catch(err => {
