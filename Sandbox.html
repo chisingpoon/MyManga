@@ -15,7 +15,21 @@
 <body>
 
 <h2>Team Members</h2>
+<select id="roleFilter">
+  <option value="">All Role</option>
+  <option value="Engineer">Engineer</option>
+  <option value="Designer">Designer</option>
+  <option value="Manager">Manager</option>
+</select>
 
+<select id="showFilter">
+  <option value="">Show YES and NO</option>
+  <option value="YES">Yes</option>
+  <option value="NO">No</option>
+</select>
+
+<button onclick="applyFilters()">Filter</button>
+  
 <div id="output">Loading...</div>
 
 <script>
