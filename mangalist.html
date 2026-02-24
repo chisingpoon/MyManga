@@ -57,14 +57,20 @@ input, select {
 <div class="controls">
   <input type="text" id="searchInput" placeholder="Search title..." oninput="applyFilters()">
 
-  <select id="publisherFilter" onchange="applyFilters()">
-    <option value="">所有出版社</option>
-  </select>
   <select id="titleFilter" onchange="applyFilters()">
     <option value="">所有書名</option>
   </select>
-    <select id="authorFilter" onchange="applyFilters()">
+  <select id="publisherFilter" onchange="applyFilters()">
+    <option value="">所有出版社</option>
+  </select>
+  <select id="authorFilter" onchange="applyFilters()">
     <option value="">所有作者</option>
+  </select>
+
+  <select id="sortPrice" onchange="applyFilters()">
+    <option value="">Sort by Price</option>
+    <option value="low">Low → High</option>
+    <option value="high">High → Low</option>
   </select>
 <!--
   <select id="sortPrice" onchange="applyFilters()">
@@ -143,7 +149,7 @@ function applyFilters() {
   const publisher = document.getElementById("publisherFilter").value;
   const title = document.getElementById("titleFilter").value;
   const author = document.getElementById("authorFilter").value;
-//  const sort = document.getElementById("sortPrice").value; 
+  const sort = document.getElementById("sortPrice").value; 
 
   let filtered = sheetData.filter(row => {
 
@@ -167,13 +173,13 @@ function applyFilters() {
   });
 
   // Sort price
-  //if (sort === "low") {
-  //  filtered.sort((a,b) => Number(a.Price) - Number(b.Price));
-  //}
+  if (sort === "low") {
+    filtered.sort((a,b) => Number(a.Price) - Number(b.Price));
+  }
 
-  //if (sort === "high") {
-  //  filtered.sort((a,b) => Number(b.Price) - Number(a.Price));
-  //}
+  if (sort === "high") {
+    filtered.sort((a,b) => Number(b.Price) - Number(a.Price));
+  }
 
   const html = filtered.map(row => `
     <div class="card">
