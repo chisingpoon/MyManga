@@ -204,11 +204,11 @@ function applyFilters() {
 
   // Sort Issue Date
   if (sortIssueDate === "newest") {
-    filtered.sort((a, b) => Date(b.IssueDate) - Date(a.IssueDate) );
+    filtered.sort((a, b) => new Date(b.IssueDate) - new Date(a.IssueDate) );
   }
 
   if (sortIssueDate === "oldest") {
-    filtered.sort((a, b) =>  Date(a.IssueDate) - Date(b.IssueDate)  );
+    filtered.sort((a, b) => new Date(a.IssueDate) - new Date(b.IssueDate)  );
   }
   
   const html = filtered.map(row => `
