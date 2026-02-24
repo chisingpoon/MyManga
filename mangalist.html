@@ -133,9 +133,16 @@ function applyFilters() {
   const html = filtered.map(row => `
     <div class="card">
       <img src="${row.Image}" alt="${row.Title}">
-      <h3>${row.Title}</h3>
+      <h3>${row.Title} #${row.Volume}</h3>
+      <h4>${row.Subtitle}</h4>
+      <div>${row.Author}</div>
+      <div>${row.Publisher}</div>
+      <div>${row.Size}</div>
+      <div class="date">${row.IssueDate}</div>
       <div class="price">$${row.Price}</div>
-      <div>${row.Volume}</div>
+      <div>${row.Page}</div>
+      <div>${row.ISBN}</div>
+      <div>${row.OriginalTitle}</div>
     </div>
   `).join("");
 
