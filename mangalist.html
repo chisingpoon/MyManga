@@ -191,7 +191,7 @@ function applyFilters() {
     const originCountryMatch =
       originCountry === "" || row.OriginCountry === originCountry;
     
-    return searchMatch && publisherMatch && titleMatch && authorMatch;
+    return searchMatch && publisherMatch && titleMatch && authorMatch && originCountryMatch;
   });
 
   // Sort price
