@@ -58,10 +58,13 @@ input, select {
   <input type="text" id="searchInput" placeholder="Search title..." oninput="applyFilters()">
 
   <select id="publisherFilter" onchange="applyFilters()">
-    <option value="">All Publishers</option>
+    <option value="">所有出版社</option>
   </select>
   <select id="titleFilter" onchange="applyFilters()">
-    <option value="">All Titles</option>
+    <option value="">所有書名</option>
+  </select>
+    <select id="authorFilter" onchange="applyFilters()">
+    <option value="">所有作者</option>
   </select>
 <!--
   <select id="sortPrice" onchange="applyFilters()">
@@ -88,6 +91,7 @@ fetch(SHEET_URL)
 
     populatePublishers();
     populateTitles();
+    populateAuthors();
     applyFilters();
   })
   .catch(error => {
@@ -121,11 +125,24 @@ function populateTitles() {
   });
 }
 
+function populateAuthors() {
+  const authorSelect = document.getElementById("authorFilter");
+
+  const authors = [...new Set(sheetData.map(row => row.Author ))];
+
+  authors.forEach(auth => {
+    const option = document.createElement("option");
+    option.value = auth;
+    option.textContent = auth;
+    authorSelect.appendChild(option);
+  });
+}
 function applyFilters() {
 
   const search = document.getElementById("searchInput").value.toLowerCase();
   const publisher = document.getElementById("publisherFilter").value;
   const title = document.getElementById("titleFilter").value;
+  const author = document.getElementById("authorFilter").value;
 //  const sort = document.getElementById("sortPrice").value; 
 
   let filtered = sheetData.filter(row => {
@@ -142,8 +159,11 @@ function applyFilters() {
 
     const titleMatch =
       title === "" || row.Title === title;
+
+      const authorMatch =
+      author === "" || row.Author === author;
     
-    return searchMatch && publisherMatch && titleMatch;
+    return searchMatch && publisherMatch && titleMatch && authorMatch;
   });
 
   // Sort price
@@ -167,6 +187,7 @@ function applyFilters() {
       <div class="price">價格: $${row.Price}</div>
       <div>頁數: ${row.Page}</div>
       <div>ISBN: ${row.ISBN}</div>
+      <div>出版地: ${row.OriginCountry}</div>
       <div>日文書名: ${row.OriginalTitle} #${row.Volume}</div>
       <div>日文副題: ${row.OriginalSubtitle}</div>
     </div>
