@@ -167,10 +167,19 @@ function openDetail(id) {
       "No detail found.";
   } else {
     document.getElementById("detailContent").innerHTML = `
-      <h2>${detail.Title || ""}</h2>
-      <p><strong>Pages:</strong> ${detail.Page || ""}</p>
+      <p><img src="${detail.Image || ""}" alt="${detail.Title} ${detail.Volume}"></p>
+      <h2>${detail.Title || ""} ${detail.Volume || ""}<</h2>
+      <h3>${detail.Subtitle || ""}</h3>
+      <h4>日文書名: ${detail.OriginalTitle || ""} ${detail.Volume || ""}</h4>
+      <h4>日文副題: ${detail.OriginalSubtitle || ""}</h4>
+      <p><strong>作者: </strong>${detail.Author || ""}</p>
+      <p><strong>出版社: </strong> ${detail.Publisher || ""}</p>
+      <p><strong>尺碼: </strong> ${detail.Size || ""}</p>
+      <p><strong>出版日期: </strong> ${detail.IssueDate || ""}</p>
+      <p><strong>售價: </strong> ${detail.Price || ""}</p>
+      <p><strong>頁數: </strong> $${detail.Page || ""}</p>
+      <p><strong>出版地區: </strong> ${detail.OriginCountry || ""}</p>
       <p><strong>ISBN:</strong> ${detail.ISBN || ""}</p>
-
     `;
   }
 
