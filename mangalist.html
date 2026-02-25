@@ -139,6 +139,8 @@ input, select {
 <script>
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/MangaList";
 let sheetData = [];
+let currentIndex = 0;
+let currentList = [];
 
 fetch(SHEET_URL)
   .then(res => res.json())
@@ -214,7 +216,8 @@ function populateOriginCountries() {
 
 function openDetail(id) {
 
-  const detail = sheetData.find(d => d.ISBN === id);
+  currentIndex = currentList.findIndex(d => d.ISBN === id);
+  const detail = currentList[currentIndex];
 
   if (!detail) {
     document.getElementById("detailContent").innerHTML =
@@ -224,14 +227,16 @@ function openDetail(id) {
   <div class="detail-container">
 
     <div class="detail-left">
-      <img src="${detail.Image || ""}" alt="${detail.Title} ${detail.Volume}">
+      <img src="${detail.Image || ""}" 
+      alt="${detail.Title} ${detail.Volume}"      
+      onclick="openLightbox('${detail.Image}')"
+      style="cursor: zoom-in;">
     </div>
 
     <div class="detail-right">
-      <h3>${detail.Title || ""} ${detail.Volume || ""}</h3>
-      <h3>${detail.Subtitle || ""}</h3>
-      <div class="detail-row"><strong>>日文書名: </strong>${detail.OriginalTitle || ""} ${detail.Volume || ""}</div>
-      <div class="detail-row"><strong>日文副題: </strong>${detail.OriginalSubtitle || ""}</div>     
+      <h1>${detail.Title || ""} ${detail.Volume || ""}</h1>
+      <h2>${detail.Subtitle || ""}</h2>
+      <div class="detail-row"><strong>日文書名: </strong>${detail.OriginalTitle || ""} ${detail.Volume || ""}  ${detail.OriginalSubtitle || ""}</div>  
       <div class="detail-row"><strong>作者: </strong>${detail.Author || ""}</div>
       <div class="detail-row"><strong>出版社: </strong> ${detail.Publisher || ""}</div>
       <div class="detail-row"><strong>尺碼: </strong> ${detail.Size || ""}</div>
@@ -243,7 +248,8 @@ function openDetail(id) {
     </div>
 
   </div>
-
+  <button onclick="prevItem()" style="position:absolute; left:10px; top:50%;">◀</button>
+  <button onclick="nextItem()" style="position:absolute; right:10px; top:50%;">▶</button>
     `;
   }
 
@@ -252,6 +258,29 @@ function openDetail(id) {
 
 function closeModal() {
   document.getElementById("detailModal").style.display = "none";
+}
+
+function openLightbox(src) {
+  document.getElementById("lightboxImg").src = src;
+  document.getElementById("imageLightbox").style.display = "flex";
+}
+
+function closeLightbox() {
+  document.getElementById("imageLightbox").style.display = "none";
+}
+
+function nextItem() {
+  if (currentIndex < currentList.length - 1) {
+    currentIndex++;
+    openDetail(currentList[currentIndex].ISBN);
+  }
+}
+
+function prevItem() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    openDetail(currentList[currentIndex].ISBN);
+  }
 }
   
 function applyFilters() {
@@ -327,6 +356,7 @@ function applyFilters() {
 
   document.getElementById("mangalist").innerHTML =
     filtered.length ? html : "No Manga found.";
+  currentList = filtered;
 }
 </script>
 <div id="detailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
@@ -334,6 +364,23 @@ function applyFilters() {
     <button onclick="closeModal()" style="position:absolute; right:10px; top:10px;">X</button>
     <div id="detailContent"></div>
   </div>
+</div>
+
+<div id="imageLightbox" onclick="closeLightbox()" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.9);
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+">
+  <img id="lightboxImg" style="
+    max-width:90%;
+    max-height:90%;
+    object-fit:contain;
+    cursor:zoom-out;
+  ">
 </div>
 </body>
 </html>
