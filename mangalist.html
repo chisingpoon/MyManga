@@ -157,6 +157,29 @@ function populateOriginCountries() {
     originCountrySelect.appendChild(option);
   });
 }
+
+function openDetail(id) {
+
+  const detail = sheetData.find(d => d.ISBN === id);
+
+  if (!detail) {
+    document.getElementById("detailContent").innerHTML =
+      "No detail found.";
+  } else {
+    document.getElementById("detailContent").innerHTML = `
+      <h2>${detail.Title || ""}</h2>
+      <p><strong>Pages:</strong> ${detail.Page || ""}</p>
+      <p><strong>ISBN:</strong> ${detail.ISBN || ""}</p>
+
+    `;
+  }
+
+  document.getElementById("detailModal").style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("detailModal").style.display = "none";
+}
   
 function applyFilters() {
 
@@ -211,7 +234,7 @@ function applyFilters() {
   }
   
   const html = filtered.map(row => `
-    <div class="card">
+    <div class="card" onclick="openDetail('${row.ISBN}')">
       <img src="${row.Image}" alt="${row.Title}">
       <h3>書名: ${row.Title} ${row.Volume}</h3>
       <h4>${row.Subtitle}</h4>
@@ -233,6 +256,11 @@ function applyFilters() {
     filtered.length ? html : "No Manga found.";
 }
 </script>
-
+<div id="detailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
+  <div style="background:white; max-width:600px; margin:5% auto; padding:20px; border-radius:8px; position:relative;">
+    <button onclick="closeModal()" style="position:absolute; right:10px; top:10px;">X</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
 </body>
 </html>
