@@ -66,7 +66,7 @@ input, select {
     <option value="">所有作者</option>
   </select>
   <select id="originCountryFilter" onchange="applyFilters()">
-    <option value="">所有出版地</option>
+    <option value="">所有出版地區</option>
   </select>
   <select id="sortIssueDate" onchange="applyFilters()">
     <option value="">按出版日期</option>
@@ -224,7 +224,7 @@ function applyFilters() {
       <div class="price">售價: $${row.Price}</div>
       <div>頁數: ${row.Page}</div>
       <div>ISBN: ${row.ISBN}</div>
-      <div>出版地: ${row.OriginCountry}</div>
+      <div>出版地區: ${row.OriginCountry}</div>
 
     </div>
   `).join("");
