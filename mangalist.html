@@ -135,12 +135,13 @@ input, select {
 </div>
 
 <div class="grid" id="mangalist">Loading...</div>
-
+<div id="pagination" style="margin-top:20px; text-align:center;"></div>
 <script>
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/MangaList";
 let sheetData = [];
-let currentIndex = 0;
-let currentList = [];
+let currentPage = 1;
+const itemsPerPage = 12;   // change this to 8, 16, etc.
+let currentList = [];      // you already use this for modal nav
 
 fetch(SHEET_URL)
   .then(res => res.json())
@@ -354,11 +355,75 @@ function applyFilters() {
     </div>
   `).join("");
 
-  document.getElementById("mangalist").innerHTML =
-    filtered.length ? html : "No Manga found.";
+//  document.getElementById("mangalist").innerHTML =
+//    filtered.length ? html : "No Manga found.";
   currentList = filtered;
+  currentPage = 1; // reset to first page when filtering
+  renderPage();
 }
 
+function renderPage() {
+
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const pageItems = currentList.slice(start, end);
+
+  const html = pageItems.map(row => `
+    <div class="card" onclick="openDetail('${row.ISBN}')">
+      <img src="${row.Image}" alt="${row.Title}">
+      <h3>書名: ${row.Title} ${row.Volume}</h3>
+      <h4>${row.Subtitle}</h4>
+      <div>作者: ${row.Author}</div>
+      <div>出版社: ${row.Publisher}</div>
+      <div class="date">出版日期: ${row.IssueDate}</div>
+    </div>
+  `).join("");
+
+  document.getElementById("mangalist").innerHTML =
+    pageItems.length ? html : "No Manga found.";
+
+  renderPaginationControls();
+}
+
+function renderPaginationControls() {
+
+  const totalPages = Math.ceil(currentList.length / itemsPerPage);
+  let paginationHTML = "";
+
+  if (totalPages <= 1) {
+    document.getElementById("pagination").innerHTML = "";
+    return;
+  }
+
+  paginationHTML += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>Prev</button>`;
+
+  for (let i = 1; i <= totalPages; i++) {
+    paginationHTML += `
+      <button onclick="changePage(${i})" 
+        ${i === currentPage ? "style='font-weight:bold;'" : ""}>
+        ${i}
+      </button>
+    `;
+  }
+
+  paginationHTML += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>Next</button>`;
+
+  document.getElementById("pagination").innerHTML = paginationHTML;
+}
+
+function changePage(page) {
+
+  const totalPages = Math.ceil(currentList.length / itemsPerPage);
+
+  if (page < 1 || page > totalPages) return;
+
+  currentPage = page;
+  renderPage();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+  
   document.addEventListener("contextmenu", function(e) {
     if (e.target.tagName === "IMG") {
       e.preventDefault();
