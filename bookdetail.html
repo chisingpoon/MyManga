@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Book Detail</title>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 40px;
+}
+
+.container {
+  display: flex;
+  gap: 40px;
+}
+
+.left {
+  width: 35%;
+}
+
+.left img {
+  width: 100%;
+  object-fit: contain;
+}
+
+.right {
+  width: 65%;
+}
+
+.detail-block {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+</style>
+</head>
+<body>
+
+<div id="content">Loading...</div>
+
+<script>
+
+// 1️⃣ Get ISBN from URL
+const params = new URLSearchParams(window.location.search);
+const isbn = params.get("isbn");
+
+// 2️⃣ Sheet URLs
+const MANGALIST_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/MangaList";
+const STORYMAP_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/StoriesMangaMapping";
+const STORY_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/Stories";
+
+// 3️⃣ Load everything
+Promise.all([
+  fetch(MANGALIST_SHEET).then(r => r.json()),
+  fetch(STORYMAP_SHEET).then(r => r.json()),
+  fetch(STORY_SHEET).then(r => r.json())
+])
+.then(([mangas, storymaps, stories]) => {
+
+  // 4️⃣ Find manga
+  const manga = mangas.find(b => b.ISBN?.trim() === isbn?.trim());
+
+  if (!manga) {
+    document.getElementById("content").innerHTML = "Manga not found.";
+    return;
+  }
+
+  // 5️⃣ Get join rows for this ISBN
+  const mangamaps = storymaps
+    .filter(j => j.ISBN?.trim() === isbn?.trim())
+    .sort((a,b) => Number(a.SeqNum) - Number(b.SeqNum));
+
+  // 6️⃣ Map join rows to actual story rows
+  const storyRows = mangamaps.map(j =>
+    stories.find(d => d.StoryId?.trim() === j.StoryId?.trim())
+  ).filter(Boolean);
+
+  render(manga, storyRows);
+
+})
+.catch(err => {
+  document.getElementById("content").innerHTML = "Failed to load data.";
+  console.error(err);
+});
+
+
+// 7️⃣ Render page
+function render(manga, storyRows) {
+
+  const detailHTML = storyRows.map(d => `
+    <div class="detail-block">
+      <h3>${d.Title}</h3>
+      <div>${d.日本原名}</div>
+    </div>
+  `).join("");
+
+  document.getElementById("content").innerHTML = `
+    <div class="container">
+
+      <div class="left">
+        <img src="${manga.Image || ""}">
+      </div>
+
+      <div class="right">
+        <h1>${manga.Title} ${manga.Volume || ""}</h1>
+        <div><strong>Author:</strong> ${manga.Author}</div>
+        <div><strong>Publisher:</strong> ${manga.Publisher}</div>
+        <div><strong>Price:</strong> $${manga.Price}</div>
+        <div><strong>Issue Date:</strong> ${manga.IssueDate}</div>
+
+        ${detailHTML}
+      </div>
+
+    </div>
+  `;
+}
+
+</script>
+</body>
+</html>
