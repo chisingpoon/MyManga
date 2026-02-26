@@ -358,6 +358,12 @@ function applyFilters() {
     filtered.length ? html : "No Manga found.";
   currentList = filtered;
 }
+
+  document.addEventListener("contextmenu", function(e) {
+    if (e.target.tagName === "IMG") {
+      e.preventDefault();
+    }
+  });
 </script>
 <div id="detailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
   <div class="modal-box">
