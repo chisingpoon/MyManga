@@ -10,33 +10,58 @@ body {
   padding: 40px;
 }
 
-.container {
+/* ===== Top Section ===== */
+.top-section {
   display: flex;
   gap: 40px;
+  align-items: flex-start;
+  margin-bottom: 40px;
 }
 
-.left {
-  width: 35%;
+.book-image {
+  width: 30%;
 }
 
-.left img {
+.book-image img {
   width: 100%;
+  height: auto;
   object-fit: contain;
-}
-
-.right {
-  width: 65%;
-}
-
-.detail-block {
-  margin-top: 20px;
-  padding: 15px;
-  background: #f5f5f5;
   border-radius: 8px;
 }
 
-.detail-row {
+.book-info {
+  width: 70%;
+}
+
+.book-info h1 {
+  margin-top: 0;
+}
+
+.info-row {
   margin-bottom: 8px;
+}
+
+/* ===== Details Table ===== */
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.details-table th,
+.details-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  vertical-align: top;
+}
+
+.details-table th {
+  background: #f5f5f5;
+  width: 20%;
+  text-align: left;
+}
+
+.details-table tr:nth-child(even) {
+  background: #fafafa;
 }
 </style>
 </head>
@@ -93,25 +118,26 @@ Promise.all([
 // 7️⃣ Render page
 function render(manga, storyRows) {
 
-  const detailHTML = storyRows.map(d => `
-<!--    <div class="detail-block"> -->
-    <div>
-<!--      <h3>${d.Title}</h3>  -->
-      <div>${d.日本原名}</div>
-      <div>${d.初刊}</div>
-      <div>${d.香港譯名}</div>
-    </div>
+  // Build table rows from joined detail sheet
+  const tableRows = detailRows.map(d => `
+    <tr>
+      <th>${d.Title || ""}</th>
+      <td>${d.日本原名 || ""}</td>
+      <td>${d.初刊 || ""}</td>
+      <td>${d.香港譯名 || ""}</td>
+    </tr>
   `).join("");
-
+  
   document.getElementById("content").innerHTML = `
-    <div class="container">
 
-      <div class="left">
-        <img src="${manga.Image || ""}" 
-      alt="${manga.Title} ${manga.Volume}">
+  <!-- ===== Top Section ===== -->
+    <div class="top-section">
+
+      <div class="book-image">
+        <img src="${manga.Image || ""}" alt="${manga.Title} ${manga.Volume}">
       </div>
 
-      <div class="right">
+      <div class="book-info">
      
         <h1>${manga.Title || ""} ${manga.Volume || ""}</h1>
         <h2>${manga.Subtitle || ""}</h2>
@@ -124,9 +150,14 @@ function render(manga, storyRows) {
         <div class="detail-row"><strong>頁數: </strong> ${manga.Page || ""}</div>
         <div class="detail-row"><strong>出版地區: </strong> ${manga.OriginCountry || ""}</div>      
         <div class="detail-row"><strong>ISBN:</strong> ${manga.ISBN || ""}</div>
-
-        ${detailHTML}
       </div>
+    
+    <!-- ===== Bottom Details Table ===== -->
+    <table class="details-table">
+      <tbody>
+        ${tableRows}
+      </tbody>
+    </table>
 
     </div>
   `;
