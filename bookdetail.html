@@ -163,39 +163,53 @@ function render(manga, storyRows) {
   </table>
 `;
   
-  document.getElementById("content").innerHTML = `
+document.getElementById("content").innerHTML = `
 
   <!-- ===== Top Section ===== -->
-    <div class="top-section">
+  <div class="top-section">
 
-      <div class="book-image">
-        <img src="${manga.Image || ""}" alt="${manga.Title} ${manga.Volume}">
-      </div>
-
-      <div class="book-info">
-     
-        <h1>${manga.Title || ""} ${manga.Volume || ""}</h1>
-        <h2>${manga.Subtitle || ""}</h2>
-        <div class="detail-row"><strong>日文書名: </strong>${manga.OriginalTitle || ""} ${manga.Volume || ""}  ${manga.OriginalSubtitle || ""}</div>  
-        <div class="detail-row"><strong>作者: </strong>${manga.Author || ""}</div>
-        <div class="detail-row"><strong>出版社: </strong> ${manga.Publisher || ""}</div>
-        <div class="detail-row"><strong>尺碼: </strong> ${manga.Size || ""}</div>
-        <div class="detail-row date"><strong>出版日期: </strong> ${manga.IssueDate || ""}</div>
-        <div class="detail-row price"><strong>售價: </strong> $${manga.Price || ""}</div>
-        <div class="detail-row"><strong>頁數: </strong> ${manga.Page || ""}</div>
-        <div class="detail-row"><strong>出版地區: </strong> ${manga.OriginCountry || ""}</div>      
-        <div class="detail-row"><strong>ISBN:</strong> ${manga.ISBN || ""}</div>
-      </div>
-    
-    <!-- ===== Bottom Details Table ===== -->
-    <table class="details-table">
-      <tbody>
-        ${tableRows}
-      </tbody>
-    </table>
-
+    <div class="book-image">
+      <img src="${manga.Image || ""}" 
+           alt="${manga.Title} ${manga.Volume}">
     </div>
-  `;
+
+    <div class="book-info">
+      <h1>${manga.Title || ""} ${manga.Volume || ""}</h1>
+      <h2>${manga.Subtitle || ""}</h2>
+
+      <div><strong>日文書名: </strong>
+        ${manga.OriginalTitle || ""} 
+        ${manga.Volume || ""}  
+        ${manga.OriginalSubtitle || ""}
+      </div>
+
+      <div><strong>作者: </strong>${manga.Author || ""}</div>
+      <div><strong>出版社: </strong>${manga.Publisher || ""}</div>
+      <div><strong>尺碼: </strong>${manga.Size || ""}</div>
+      <div><strong>出版日期: </strong>${manga.IssueDate || ""}</div>
+      <div><strong>售價: </strong>$${manga.Price || ""}</div>
+      <div><strong>頁數: </strong>${manga.Page || ""}</div>
+      <div><strong>出版地區: </strong>${manga.OriginCountry || ""}</div>
+      <div><strong>ISBN: </strong>${manga.ISBN || ""}</div>
+    </div>
+
+  </div>
+
+  <!-- ===== Bottom Details Table (OUTSIDE top-section) ===== -->
+  <table class="details-table">
+    <thead>
+      <tr>
+        <th>日本原名</th>
+        <th>初刊</th>
+        <th>香港譯名</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${tableRows}
+    </tbody>
+  </table>
+
+`;
 }
 
 </script>
