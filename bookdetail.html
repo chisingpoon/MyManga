@@ -148,20 +148,22 @@ function render(manga, storyRows) {
     </tr>
   `).join("");
 
-  const tableHTML = `
-  <table class="details-table">
-    <thead>
-      <tr>
-        <th>日本原名</th>
-        <th>初刊</th>
-        <th>香港譯名</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${tableRows}
-    </tbody>
-  </table>
-`;
+  // Only show table if there is data
+  const tableSection = storyRows.length > 0 ? `
+    <h2>收錄故事</h2>
+    <table class="details-table">
+      <thead>
+        <tr>
+          <th>日本原名</th>
+          <th>初刊</th>
+          <th>香港譯名</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tableRows}
+      </tbody>
+    </table>
+  ` : "";
   
 document.getElementById("content").innerHTML = `
 
@@ -169,8 +171,7 @@ document.getElementById("content").innerHTML = `
   <div class="top-section">
 
     <div class="book-image">
-      <img src="${manga.Image || ""}" 
-           alt="${manga.Title} ${manga.Volume}">
+      <img src="${manga.Image || ""}" alt="${manga.Title} ${manga.Volume}">
     </div>
 
     <div class="book-info">
@@ -196,7 +197,8 @@ document.getElementById("content").innerHTML = `
   </div>
 
   <!-- ===== Bottom Details Table (OUTSIDE top-section) ===== -->
-  <h2>收錄故事</h2>
+  ${tableSection}
+<!--  <h2>收錄故事</h2>
   <table class="details-table">
     <thead>
       <tr>
@@ -209,7 +211,7 @@ document.getElementById("content").innerHTML = `
       ${tableRows}
     </tbody>
   </table>
-
+-->
 `;
 }
 
