@@ -119,6 +119,10 @@ body {
   cursor: zoom-in;
 }
 
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
 </style>
 </head>
 <body>
@@ -270,7 +274,8 @@ window.addEventListener("load", function () {
 
   const modal = document.getElementById("imageModal");
   const closeBtn = document.querySelector(".image-close");
-
+  const modalImage = document.getElementById("modalImage");
+  
   closeBtn.addEventListener("click", closeImageModal);
 
   modal.addEventListener("click", function (e) {
@@ -278,7 +283,9 @@ window.addEventListener("load", function () {
       closeImageModal();
     }
   });
-
+  modalImage.addEventListener("contextmenu", function(e) {
+    e.preventDefault();
+  });
 });
 
 // ESC key close
@@ -290,7 +297,12 @@ document.addEventListener("keydown", function(e) {
 
 modal.classList.add("show");
 modal.classList.remove("show");
-  
+
+// Disable right-click on entire page
+document.addEventListener("contextmenu", function(e) {
+  e.preventDefault();
+});
+
 </script>
   <!-- Image Modal -->
   <div id="imageModal" class="image-modal">
