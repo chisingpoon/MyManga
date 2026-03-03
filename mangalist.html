@@ -244,6 +244,41 @@ body {
     width: 100%;
   }
 }
+
+/* Collapsible filter styling */
+.sidebar details {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.sidebar summary {
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.sidebar summary::-webkit-details-marker {
+  display: none;
+}
+
+.sidebar summary::after {
+  content: "▾";
+  float: right;
+  transition: transform 0.2s ease;
+}
+
+.sidebar details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.filter-group {
+  max-height: 250px;   /* scroll if long */
+  overflow-y: auto;
+  padding-right: 5px;
+}
 </style>
 </head>
 
@@ -261,17 +296,25 @@ body {
            placeholder="任何文字搜尋..."
            oninput="applyFilters()">
     
-    <h3>書名</h3>
-    <div id="titleFilter"></div>
+    <details>
+      <summary>書名</summary>
+      <div id="titleFilter" class="filter-group"></div>
+    </details>
     
-    <h3>出版社</h3>
-    <div id="publisherFilter"></div>
+    <details>
+      <summary>出版社</summary>
+      <div id="publisherFilter" class="filter-group"></div>
+    </details>
 
-    <h3>作者</h3>
-    <div id="authorFilter"></div>
+    <details>
+      <summary>作者</summary>
+      <div id="authorFilter" class="filter-group"></div>
+    </details>
 
-    <h3>出版地區</h3>
-    <div id="originCountryFilter"></div>
+    <details>
+      <summary>出版地區</summary>
+      <div id="originCountryFilter" class="filter-group"></div>
+    </details>
 
     <h3>排序</h3>
     <select id="sortIssueDate" onchange="applyFilters()">
