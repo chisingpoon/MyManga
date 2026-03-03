@@ -298,6 +298,10 @@ body {
 }
 
 /* Clear button */
+#clearFiltersBtn:hover {
+  background: #f0f0f0;
+}
+  
 .clear-btn {
   position: absolute;
   right: 8px;
@@ -336,6 +340,9 @@ body {
 
   <!-- LEFT SIDEBAR -->
   <aside class="sidebar">
+    <button id="clearFiltersBtn" onclick="clearAllFilters()" style="margin-bottom:10px; width:100%; padding:6px 0; font-size:13px; border-radius:6px; border:1px solid #ccc; cursor:pointer;">
+      清除所有篩選
+    </button>
   
     <h3>排序</h3>
     <select id="sortIssueDate" onchange="applyFilters()">
@@ -416,6 +423,28 @@ fetch(SHEET_URL)
     document.getElementById("mangalist").innerHTML = "Failed to load data.";
     console.error(error);
   });
+
+function clearAllFilters() {
+  // Clear search input
+  const searchInput = document.getElementById("searchInput");
+  searchInput.value = "";
+
+  // Clear all checkboxes
+  document.querySelectorAll('.sidebar input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+  });
+
+  // Reset sort selects
+  document.getElementById("sortIssueDate").value = "";
+  document.getElementById("sortPrice").value = "";
+
+  // Hide the clear (×) button
+  const clearBtn = document.querySelector(".clear-btn");
+  if (clearBtn) clearBtn.style.display = "none";
+
+  // Apply filters again to refresh list
+  applyFilters();
+}
 
 function populateTitles() {
   const container = document.getElementById("titleFilter");
