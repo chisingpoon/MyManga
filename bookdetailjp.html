@@ -245,6 +245,11 @@ function render(manga, storyRows) {
       <td>${d.副題 || ""}</td>
       <td>${d.初出掲載誌 || ""}</td>
       <td>${d.初出掲載号 || ""}</td>
+      <td>${d.単行本 || ""}</td>
+      <td>${d.その他単行本 || ""}</td>
+      <td>${d.文庫 || ""}</td>
+      <td>${d.兒童版 || ""}</td>
+      <td>${d.大全集 || ""}</td>
       <td>${d.備考 || ""}</td>
     </tr>
   `).join("");
@@ -262,6 +267,11 @@ function render(manga, storyRows) {
           <th>副題</th>
           <th>初出掲載誌</th>
           <th>初出掲載号</th>
+          <th>単行本</th>
+          <th>その他単行本</th>
+          <th>文庫</th>
+          <th>兒童版</th>
+          <th>大全集</th>
           <th>備考</th>
         </tr>
       </thead>
