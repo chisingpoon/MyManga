@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My Manga List</title>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 30px;
+  background: #f5f5f5;
+}
+
+.layout {
+  display: flex;
+  gap: 20px;
+}
+
+.sidebar {
+  width: 260px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  height: fit-content;
+  font-size: 13px;
+}
+
+.sidebar h3 {
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.sidebar input,
+.sidebar select {
+  width: 100%;
+  padding: 6px 8px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 13px;
+}
+
+.sidebar label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.filter-group {
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* Collapsible filter styling */
+.sidebar details {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.sidebar summary {
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.sidebar summary::-webkit-details-marker {
+  display: none;
+}
+
+.sidebar summary::after {
+  content: "▾";
+  float: right;
+  transition: transform 0.2s ease;
+}
+
+.sidebar details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+/* Search Wrapper */
+.search-wrapper {
+  position: relative;
+  margin-bottom: 6px;
+}
+
+.search-wrapper input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 28px 6px 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Clear button */
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  cursor: pointer;
+  color: #888;
+  display: none;
+}
+
+.clear-btn:hover {
+  color: #000;
+}
+
+/* Result counter */
+.result-count {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.content {
+  flex: 1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+#pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+#pagination button {
+  margin: 0 4px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#pagination button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+#pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.active-page {
+  background: #333 !important;
+  color: white;
+  font-weight: bold;
+}
+
+/* Detail Modal */
+.detail-container {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.detail-left {
+  width: 35%;
+}
+
+.detail-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  cursor: zoom-in;
+}
+
+.detail-right {
+  width: 65%;
+}
+
+.detail-row {
+  margin-bottom: 8px;
+}
+
+.modal-box {
+  background: white;
+  width: 90%;
+  max-width: 900px;
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+}
+
+/* Lightbox */
+#imageLightbox {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.9);
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+}
+
+#imageLightbox img {
+  max-width:90%;
+  max-height:90%;
+  object-fit:contain;
+  cursor:zoom-out;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h1>出版目録</h1>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <button id="clearFiltersBtn" onclick="clearAllFilters()" style="margin-bottom:10px; width:100%; padding:6px 0; font-size:13px; border-radius:6px; border:1px solid #ccc; cursor:pointer;">
+      清除所有篩選
+    </button>
+
+    <h3>排序</h3>
+    <select id="sortIssueDate" onchange="applyFilters()">
+      <option value="">按出版日期</option>
+      <option value="newest">從新到舊</option>
+      <option value="oldest">從舊到新</option>
+    </select>
+
+    <select id="sortPrice" onchange="applyFilters()">
+      <option value="">按定價</option>
+      <option value="low">從低到高</option>
+      <option value="high">從高到低</option>
+    </select>
+
+    <h3>搜尋</h3>
+    <div class="search-wrapper">
+      <input type="text"
+             id="searchInput"
+             placeholder="任何文字搜尋..."
+             oninput="handleSearchInput()">
+      <span class="clear-btn" onclick="clearSearch()">×</span>
+    </div>
+    <div id="resultCount" class="result-count"></div>
+
+    <details>
+      <summary>書名</summary>
+      <div id="titleFilter" class="filter-group"></div>
+    </details>
+
+    <details>
+      <summary>作者</summary>
+      <div id="authorFilter" class="filter-group"></div>
+    </details>
+
+    <details>
+      <summary>出版社</summary>
+      <div id="publisherFilter" class="filter-group"></div>
+    </details>
+
+    <details>
+      <summary>系列</summary>
+      <div id="seriesFilter" class="filter-group"></div>
+    </details>
+  </aside>
+
+  <main class="content">
+    <div id="pagination"></div>
+    <div class="grid" id="mangalist">Loading...</div>
+  </main>
+
+</div>
+
+<script>
+const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP"; // replace with your sheet
+let sheetData = [];
+let currentPage = 1;
+const itemsPerPage = 12;
+let currentList = [];
+
+fetch(SHEET_URL)
+  .then(res => res.json())
+  .then(data => {
+    sheetData = data.filter(row => row.標題); // basic filter to avoid empty rows
+    populateTitles();
+    populateAuthors();
+    populatePublishers();
+    populateSeries();
+    applyFilters();
+  })
+  .catch(error => {
+    document.getElementById("mangalist").innerHTML = "Failed to load data.";
+    console.error(error);
+  });
+
+function clearAllFilters() {
+  document.getElementById("searchInput").value = "";
+  document.querySelectorAll('.sidebar input[type="checkbox"]').forEach(cb => cb.checked = false);
+  document.getElementById("sortIssueDate").value = "";
+  document.getElementById("sortPrice").value = "";
+  document.querySelector(".clear-btn").style.display = "none";
+  applyFilters();
+}
+
+function handleSearchInput() {
+  const input = document.getElementById("searchInput");
+  document.querySelector(".clear-btn").style.display = input.value ? "block" : "none";
+  applyFilters();
+}
+
+function clearSearch() {
+  document.getElementById("searchInput").value = "";
+  document.querySelector(".clear-btn").style.display = "none";
+  applyFilters();
+}
+
+function populateTitles() {
+  const container = document.getElementById("titleFilter");
+  const titles = [...new Set(sheetData.map(row => row.標題))].sort();
+  titles.forEach(title => {
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" value="${title}" onchange="applyFilters()"> ${title}`;
+    container.appendChild(label);
+  });
+}
+
+function populateAuthors() {
+  const container = document.getElementById("authorFilter");
+  const authors = [...new Set(sheetData.map(row => row.著))].sort();
+  authors.forEach(author => {
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" value="${author}" onchange="applyFilters()"> ${author}`;
+    container.appendChild(label);
+  });
+}
+
+function populatePublishers() {
+  const container = document.getElementById("publisherFilter");
+  const publishers = [...new Set(sheetData.map(row => row.記号))].sort(); // assuming 記号 is like Publisher
+  publishers.forEach(pub => {
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" value="${pub}" onchange="applyFilters()"> ${pub}`;
+    container.appendChild(label);
+  });
+}
+
+function populateSeries() {
+  const container = document.getElementById("seriesFilter");
+  const series = [...new Set(sheetData.map(row => row.系列))].sort();
+  series.forEach(s => {
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" value="${s}" onchange="applyFilters()"> ${s}`;
+    container.appendChild(label);
+  });
+}
+
+function applyFilters() {
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const title = [...document.querySelectorAll('#titleFilter input:checked')].map(cb => cb.value);
+  const author = [...document.querySelectorAll('#authorFilter input:checked')].map(cb => cb.value);
+  const publisher = [...document.querySelectorAll('#publisherFilter input:checked')].map(cb => cb.value);
+  const series = [...document.querySelectorAll('#seriesFilter input:checked')].map(cb => cb.value);
+  const sortPrice = document.getElementById("sortPrice").value;
+  const sortIssueDate = document.getElementById("sortIssueDate").value;
+
+  let filtered = sheetData.filter(row => {
+    const searchMatch = Object.values(row).join(" ").toLowerCase().includes(search);
+    const titleMatch = title.length === 0 || title.includes(row.標題);
+    const authorMatch = author.length === 0 || author.includes(row.著);
+    const publisherMatch = publisher.length === 0 || publisher.includes(row.記号);
+    const seriesMatch = series.length === 0 || series.includes(row.系列);
+    return searchMatch && titleMatch && authorMatch && publisherMatch && seriesMatch;
+  });
+
+  if (sortPrice === "low") filtered.sort((a,b)=>Number(a.定価)-Number(b.定価));
+  if (sortPrice === "high") filtered.sort((a,b)=>Number(b.定価)-Number(a.定価));
+  if (sortIssueDate === "newest") filtered.sort((a,b)=>new Date(b.初版発行日)-new Date(a.初版発行日));
+  if (sortIssueDate === "oldest") filtered.sort((a,b)=>new Date(a.初版発行日)-new Date(b.初版発行日));
+
+  currentList = filtered;
+  currentPage = 1;
+
+  document.getElementById("resultCount").textContent = `共 ${filtered.length} 本漫畫`;
+  renderPage();
+}
+
+function renderPage() {
+  const start = (currentPage-1)*itemsPerPage;
+  const end = start+itemsPerPage;
+  const pageItems = currentList.slice(start,end);
+
+  const html = pageItems.map(row => `
+    <div class="card" onclick="openDetail('${row.ISBN}')">
+      <h3>${row.標題} ${row.巻}</h3>
+      <h4>${row.副標題 || ''}</h4>
+      <div>作者: ${row.著}</div>
+      <div>系列: ${row.系列}</div>
+      <div>記号: ${row.記号}</div>
+      <div>頁數: ${row.頁}</div>
+      <div class="date">出版日: ${row.初版発行日}</div>
+      <div class="price">定価: ${row.定価}</div>
+      <div>ISBN: ${row.ISBN}</div>
+      <div>サイズ: ${row.判型}</div>
+    </div>
+  `).join("");
+
+  document.getElementById("mangalist").innerHTML = pageItems.length ? html : "No Manga found.";
+  renderPaginationControls();
+}
+
+function renderPaginationControls() {
+  const totalPages = Math.ceil(currentList.length/itemsPerPage);
+  if(totalPages <= 1) { document.getElementById("pagination").innerHTML=""; return; }
+
+  let html = `<div style="margin-bottom:10px;">Page ${currentPage} of ${totalPages}</div>`;
+  html += `<button onclick="changePage(1)" ${currentPage===1?'disabled':''}>&laquo; First</button>`;
+  html += `<button onclick="changePage(${currentPage-1})" ${currentPage===1?'disabled':''}>&lsaquo; Prev</button>`;
+
+  const maxVisible = 5;
+  let startPage = Math.max(1, currentPage-2);
+  let endPage = Math.min(totalPages, currentPage+2);
+  if(currentPage <= 3) endPage = Math.min(totalPages,maxVisible);
+  if(currentPage >= totalPages-2) startPage = Math.max(1,totalPages-(maxVisible-1));
+
+  if(startPage>1){ html += `<button onclick="changePage(1)">1</button>`; if(startPage>2) html += `<span class="ellipsis">...</span>`;}
+  for(let i=startPage;i<=endPage;i++){ html += `<button onclick="changePage(${i})" ${i===currentPage?"class='active-page'":""}>${i}</button>`; }
+  if(endPage<totalPages){ if(endPage<totalPages-1) html+=`<span class="ellipsis">...</span>`; html+=`<button onclick="changePage(${totalPages})">${totalPages}</button>`; }
+  html+=`<button onclick="changePage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>Next &rsaquo;</button>`;
+  html+=`<button onclick="changePage(${totalPages})" ${currentPage===totalPages?'disabled':''}>Last &raquo;</button>`;
+
+  document.getElementById("pagination").innerHTML = html;
+}
+
+function changePage(page){
+  const totalPages = Math.ceil(currentList.length/itemsPerPage);
+  if(page<1||page>totalPages) return;
+  currentPage = page;
+  renderPage();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// Detail modal
+function openDetail(id){
+  const index = currentList.findIndex(d=>d.ISBN===id);
+  if(index===-1) return;
+  const detail = currentList[index];
+  const modal = document.getElementById("detailModal");
+  modal.innerHTML = `
+  <div class="modal-box">
+    <button onclick="closeModal()" style="position:absolute; right:10px; top:10px;">X</button>
+    <div class="detail-container">
+      <div class="detail-left">
+        <img src="" alt="" onclick="openLightbox('${detail.Image||''}')" style="cursor:zoom-in">
+      </div>
+      <div class="detail-right">
+        <h1>${detail.標題} ${detail.巻}</h1>
+        <h2>${detail.副標題||''}</h2>
+        <div class="detail-row">作者: ${detail.著}</div>
+        <div class="detail-row">系列: ${detail.系列}</div>
+        <div class="detail-row">記号: ${detail.記号}</div>
+        <div class="detail-row">頁數: ${detail.頁}</div>
+        <div class="detail-row">出版日: ${detail.初版発行日}</div>
+        <div class="detail-row">定価: ${detail.定価}</div>
+        <div class="detail-row">ISBN: ${detail.ISBN}</div>
+        <div class="detail-row">サイズ: ${detail.判型}</div>
+      </div>
+    </div>
+  </div>`;
+  modal.style.display='block';
+}
+
+function closeModal(){ document.getElementById("detailModal").style.display='none'; }
+function openLightbox(src){ const lb=document.getElementById("imageLightbox"); lb.style.display='flex'; lb.querySelector("img").src=src; }
+function closeLightbox(){ document.getElementById("imageLightbox").style.display='none'; }
+
+</script>
+
+<div id="detailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000;"></div>
+<div id="imageLightbox" onclick="closeLightbox()"><img></div>
+
+</body>
+</html>
