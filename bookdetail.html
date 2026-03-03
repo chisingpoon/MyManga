@@ -279,6 +279,7 @@ document.getElementById("content").innerHTML = `
 
       <!-- Column 2: Main Info -->
       <div class="column-box">
+        <h3>${manga.OriginCountry ||}版資料</h3>
         <h1>${manga.Title || ""} ${manga.Volume || ""}</h1>
         <h2>${manga.Subtitle || ""}</h2>
     <!--
@@ -308,7 +309,6 @@ document.getElementById("content").innerHTML = `
       <!-- Column 3: JP Image -->
       
       <div class="book-image">
-        <h3>日文原版資料</h3>
         <img src="${jpinfo?.Image || ""}" 
              alt="${jpinfo?.標題} ${jpinfo?.巻}" 
              class="clickable-image"
@@ -317,6 +317,7 @@ document.getElementById("content").innerHTML = `
       
       <!-- Column 4: JP Data -->
       <div class="column-box">
+        <h3>日文原版資料</h3>
         <h1>${jpinfo?.標題 || ""} ${jpinfo?.巻 || ""}</h1>
         <h2>${jpinfo?.副標題 || ""}</h2>    
         <div><strong>系列:</strong> ${jpinfo?.系列 || ""}</div>
