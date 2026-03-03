@@ -92,15 +92,17 @@ body {
 
 /* ===== Details Table ===== */
 .details-table {
-  width: 100%;
+  width: auto;                 /* ❗ do NOT force 100% */
   border-collapse: collapse;
+  table-layout: auto;          /* allow natural sizing */
 }
 
 .details-table th,
 .details-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  vertical-align: top;
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  white-space: nowrap;         /* ❗ prevents wrapping */
+  width: 1%;                   /* forces shrink-to-fit */
 }
 
 .details-table th {
@@ -263,6 +265,7 @@ const tableRows = storyRows.map(d => `
     <td>${d.全集副題 || ""}</td>
     <td>${d.初出掲載誌 || ""}</td>
     <td>${d.初出掲載号 || ""}</td>
+    <td>${d.大全集 || ""}</td>
     <td>${d.備考 || ""}</td>
   </tr>
 `).join("");
@@ -282,6 +285,7 @@ const tableRows = storyRows.map(d => `
           <th>全集副題</th>
           <th>初出掲載誌</th>
           <th>初出掲載号</th>
+          <th>大全集</th>
           <th>備考</th>
         </tr>
       </thead>
