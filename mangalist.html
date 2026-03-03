@@ -230,6 +230,14 @@ body {
   margin: 0;
 }
 
+#searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
 .content {
   flex: 1;
 }
@@ -274,6 +282,54 @@ body {
   transform: rotate(180deg);
 }
 
+/* Search Wrapper */
+.search-wrapper {
+  position: relative;
+  margin-bottom: 6px;
+}
+
+.search-wrapper input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 28px 6px 28px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* 🔍 icon */
+.search-icon {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #888;
+}
+
+/* Clear button */
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  cursor: pointer;
+  color: #888;
+  display: none;
+}
+
+.clear-btn:hover {
+  color: #000;
+}
+
+/* Result counter */
+.result-count {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
 .filter-group {
   max-height: 250px;   /* scroll if long */
   overflow-y: auto;
@@ -305,9 +361,15 @@ body {
     </select>
 
     <h3>搜尋</h3>
-    <input type="text" id="searchInput"
-           placeholder="任何文字搜尋..."
-           oninput="applyFilters()">
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text"
+             id="searchInput"
+             placeholder="任何文字搜尋..."
+             oninput="handleSearchInput()">
+      <span class="clear-btn" onclick="clearSearch()">×</span>
+    </div>
+    <div id="resultCount" class="result-count"></div>
     
     <details>
       <summary>書名</summary>
@@ -476,6 +538,24 @@ function openDetail(id) {
   document.getElementById("detailModal").style.display = "block";
 }
 
+function handleSearchInput() {
+  const input = document.getElementById("searchInput");
+  const clearBtn = document.querySelector(".clear-btn");
+
+  clearBtn.style.display = input.value ? "block" : "none";
+  applyFilters();
+}
+
+function clearSearch() {
+  const input = document.getElementById("searchInput");
+  const clearBtn = document.querySelector(".clear-btn");
+
+  input.value = "";
+  clearBtn.style.display = "none";
+  applyFilters();
+}
+
+
 function closeModal() {
   document.getElementById("detailModal").style.display = "none";
 }
@@ -564,6 +644,9 @@ function applyFilters() {
 //    filtered.length ? html : "No Manga found.";
   currentList = filtered;
   currentPage = 1; // reset to first page when filtering
+
+  document.getElementById("resultCount").textContent =
+  `共 ${filtered.length} 本漫畫`;
   renderPage();
 }
 
