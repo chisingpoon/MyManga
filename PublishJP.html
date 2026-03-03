@@ -434,17 +434,14 @@ function renderPage() {
   const pageItems = currentList.slice(start,end);
 
   const html = pageItems.map(row => `
-    <div class="card" onclick="openDetail('${row.ISBN}')">
+    <div class="card" onclick="window.open('bookdetail.html?isbn=${row.ISBN}', '_blank')">
+      <img src="${row.Image}" alt="${row.標題}">
       <h3>${row.標題} ${row.巻}</h3>
       <h4>${row.副標題 || ''}</h4>
-      <div>作者: ${row.著}</div>
       <div>系列: ${row.系列}</div>
-      <div>記号: ${row.記号}</div>
-      <div>頁數: ${row.頁}</div>
-      <div class="date">出版日: ${row.初版発行日}</div>
-      <div class="price">定価: ${row.定価}</div>
+      <div>作者: ${row.著}</div>
       <div>ISBN: ${row.ISBN}</div>
-      <div>サイズ: ${row.判型}</div>
+      <div class="date">出版日: ${row.初版発行日}</div>
     </div>
   `).join("");
 
