@@ -178,6 +178,57 @@ body {
 #detailContent {
   width: 100%;
 }
+
+.layout {
+  display: flex;
+  gap: 20px;
+}
+
+.sidebar {
+  width: 260px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  height: fit-content;
+}
+
+.sidebar h3 {
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.sidebar input,
+.sidebar select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.sidebar label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.content {
+  flex: 1;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+}
 </style>
 </head>
 
@@ -185,31 +236,46 @@ body {
 
 <h1>My Manga</h1>
 
-<div class="controls">
-  <input type="text" id="searchInput" placeholder="任何文字搜尋..." oninput="applyFilters()">
+<div class="layout">
 
-  <select id="titleFilter" onchange="applyFilters()">
-    <option value="">所有書名</option>
-  </select>
-  <select id="publisherFilter" onchange="applyFilters()">
-    <option value="">所有出版社</option>
-  </select>
-  <select id="authorFilter" onchange="applyFilters()">
-    <option value="">所有作者</option>
-  </select>
-  <select id="originCountryFilter" onchange="applyFilters()">
-    <option value="">所有出版地區</option>
-  </select>
-  <select id="sortIssueDate" onchange="applyFilters()">
-    <option value="">按出版日期</option>
-    <option value="newest">從新到舊</option>
-    <option value="oldest">從舊到新</option>
-  </select>
-  <select id="sortPrice" onchange="applyFilters()">
-    <option value="">按售價</option>
-    <option value="low">從低到高排序</option>
-    <option value="high">從高到低排序</option>
-  </select> 
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+
+    <h3>搜尋</h3>
+    <input type="text" id="searchInput"
+           placeholder="任何文字搜尋..."
+           oninput="applyFilters()">
+
+    <h3>出版社</h3>
+    <div id="publisherFilter"></div>
+
+    <h3>作者</h3>
+    <div id="authorFilter"></div>
+
+    <h3>出版地區</h3>
+    <div id="originCountryFilter"></div>
+
+    <h3>排序</h3>
+    <select id="sortIssueDate" onchange="applyFilters()">
+      <option value="">按出版日期</option>
+      <option value="newest">從新到舊</option>
+      <option value="oldest">從舊到新</option>
+    </select>
+
+    <select id="sortPrice" onchange="applyFilters()">
+      <option value="">按售價</option>
+      <option value="low">從低到高</option>
+      <option value="high">從高到低</option>
+    </select>
+
+  </aside>
+
+  <!-- RIGHT CONTENT -->
+  <main class="content">
+    <div id="pagination"></div>
+    <div class="grid" id="mangalist">Loading...</div>
+  </main>
+
 </div>
 <div id="pagination" style="margin-top:20px; text-align:center;"></div>
 <div class="grid" id="mangalist">Loading...</div>
@@ -242,15 +308,18 @@ fetch(SHEET_URL)
   });
 
 function populatePublishers() {
-  const publisherSelect = document.getElementById("publisherFilter");
-
+  const container = document.getElementById("publisherFilter");
   const publishers = [...new Set(sheetData.map(row => row.Publisher))];
 
   publishers.forEach(pub => {
-    const option = document.createElement("option");
-    option.value = pub;
-    option.textContent = pub;
-    publisherSelect.appendChild(option);
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${pub}"
+             onchange="applyFilters()"> ${pub}
+    `;
+
+    container.appendChild(label);
   });
 }
 
@@ -268,28 +337,34 @@ function populateTitles() {
 }
 
 function populateAuthors() {
-  const authorSelect = document.getElementById("authorFilter");
+  const container = document.getElementById("authorFilter");
+  const authors = [...new Set(sheetData.map(row => row.Author))];
 
-  const authors = [...new Set(sheetData.map(row => row.Author ))];
+  authors.forEach(author => {
+    const label = document.createElement("label");
 
-  authors.forEach(auth => {
-    const option = document.createElement("option");
-    option.value = auth;
-    option.textContent = auth;
-    authorSelect.appendChild(option);
+    label.innerHTML = `
+      <input type="checkbox" value="${author}"
+             onchange="applyFilters()"> ${author}
+    `;
+
+    container.appendChild(label);
   });
 }
 
 function populateOriginCountries() {
-  const originCountrySelect = document.getElementById("originCountryFilter");
+  const container = document.getElementById("originCountryFilter");
+  const origins = [...new Set(sheetData.map(row => row.OriginCountry))];
 
-  const originCountries = [...new Set(sheetData.map(row => row.OriginCountry ))];
+  origins.forEach(origin => {
+    const label = document.createElement("label");
 
-  originCountries.forEach(origCountry => {
-    const option = document.createElement("option");
-    option.value = origCountry;
-    option.textContent = origCountry;
-    originCountrySelect.appendChild(option);
+    label.innerHTML = `
+      <input type="checkbox" value="${origin}"
+             onchange="applyFilters()"> ${origin}
+    `;
+
+    container.appendChild(label);
   });
 }
 
@@ -365,10 +440,13 @@ function prevItem() {
 function applyFilters() {
 
   const search = document.getElementById("searchInput").value.toLowerCase();
-  const publisher = document.getElementById("publisherFilter").value;
+  const publisher = [...document.querySelectorAll('#publisherFilter input:checked')]
+  .map(cb => cb.value);
   const title = document.getElementById("titleFilter").value;
-  const author = document.getElementById("authorFilter").value;
-  const originCountry = document.getElementById("originCountryFilter").value;
+  const author = [...document.querySelectorAll('#authorFilter input:checked')]
+  .map(cb => cb.value);
+  const originCountry = [...document.querySelectorAll('#originCountryFilter input:checked')]
+  .map(cb => cb.value);
   const sortPrice = document.getElementById("sortPrice").value; 
   const sortIssueDate = document.getElementById("sortIssueDate").value;
   
@@ -382,16 +460,16 @@ function applyFilters() {
       .includes(search);
 
     const publisherMatch =
-      publisher === "" || row.Publisher === publisher;
+      publisher.length === 0 || publisher.includes(row.Publisher);
 
     const titleMatch =
       title === "" || row.Title === title;
 
     const authorMatch =
-      author === "" || row.Author === author;
+      author.length === 0 || author.includes(row.Author);
 
     const originCountryMatch =
-      originCountry === "" || row.OriginCountry === originCountry;
+      originCountry.length === 0 || originCountry.includes(row.OriginCountry);
     
     return searchMatch && publisherMatch && titleMatch && authorMatch && originCountryMatch;
   });
