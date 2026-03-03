@@ -180,7 +180,7 @@ Promise.all([
     j.ISBN_JP?.trim() === manga.ISBN_JP?.trim()
   );
 
-  render(manga, storyRows);
+  render(manga, storyRows, jpinfo);
 
 })
 .catch(err => {
