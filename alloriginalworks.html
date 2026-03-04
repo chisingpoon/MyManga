@@ -5,42 +5,19 @@
 <title>日本原作目録</title>
 
 <style>
+
+/* ===============================
+   BASE
+================================= */
 body {
   font-family: Arial;
   padding: 30px;
   background: #f5f5f5;
 }
 
-.controls {
-  margin-bottom: 20px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.controls input,
-.controls select {
-  padding: 8px 10px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-@media (max-width: 768px) {
-
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .controls input,
-  .controls select {
-    width: 100%;
-    font-size: 16px;   /* better for touch */
-  }
-
-}
+/* ===============================
+   HEADER
+================================= */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -67,293 +44,62 @@ body {
 
 .header-link:hover {
   background: #333;
-  color: white;
-}
-  
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 15px;
+  color: #fff;
 }
 
-.card {
-  background: white;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.card img {
-  width: 100%;
-  height: auto;
-  border-radius: 6px;
-}
-
-.price {
-  color: green;
-  font-weight: bold;
-  margin-top: 5px;
-}
-
-.detail-container {
-  display: flex;
-  gap: 20px;
-  align-items: stretch;  /* important */
-}
-
-.detail-left {
-  width: 35%;
-}
-
-.detail-left img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;   /* show full image */
-  display: block;
-}
-
-.detail-right {
-  width: 65%;
-}
-
-.detail-row {
-  margin-bottom: 8px;
-}
-
-.detail-description {
-  margin-top: 15px;
-}
-
-.detail-description p {
-  margin-top: 5px;
-  line-height: 1.6;
-}
-
-.modal-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-box {
-  background: white;
-  width: 90%;
-  max-width: 900px;
-  margin: 5% auto;
-  padding: 20px;
-  border-radius: 8px;
-  position: relative;
-  display: flex;
-}
-
-#pagination button {
-  margin: 0 4px;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  background: white;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-#pagination button:hover:not(:disabled) {
-  background: #f0f0f0;
-}
-
-#pagination button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  font-size: 13px;
-}
-
-.data-table th,
-.data-table td {
-  border: 1px solid #ddd;
-  padding: 6px 8px;
-  text-align: left;
-}
-
-.data-table th {
-  background: #f0f0f0;
-  font-weight: bold;
-}
-
-.data-table tr:hover {
-  background: #f9f9f9;
-}
-  
-.active-page {
-  background: #333 !important;
-  color: white;
-  font-weight: bold;
-}
-
-#pagination {
-  margin-top: 20px;
-  text-align: center;
-}
-
-#pagination button {
-  margin: 0 4px;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  background: white;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-#pagination button:hover:not(:disabled) {
-  background: #f0f0f0;
-}
-
-#pagination button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.active-page {
-  background: #333 !important;
-  color: white;
-  font-weight: bold;
-}
-
-.ellipsis {
-  margin: 0 6px;
-  color: #888;
-}
-
-#detailContent {
-  width: 100%;
-}
-
-.layout {
-  display: flex;
-  gap: 20px;
-}
-
-.sidebar {
-  width: 260px;
-  background: white;
+/* ===============================
+   TOP FILTER BAR
+================================= */
+.top-filters {
+  background: #fff;
   padding: 15px;
   border-radius: 8px;
+  margin-bottom: 20px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  height: fit-content;
 }
 
-.sidebar h3 {
-  margin-top: 12px;
-  margin-bottom: 6px;
-  font-size: 14px;
+/* Filter rows */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
 }
 
-.sidebar input,
-.sidebar select {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
+.filter-row-top {
+  margin-bottom: 15px;
+}
+
+/* Clear button */
+#clearFiltersBtn {
+  padding: 6px 12px;
+  font-size: 13px;
   border-radius: 6px;
   border: 1px solid #ccc;
-}
-
-.sidebar {
-  font-size: 13px;
-}
-
-.sidebar label {
-  margin-bottom: 3px;
-}
-
-.sidebar label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
-  font-size: 13px;
+  background: #fff;
   cursor: pointer;
 }
 
-.sidebar input[type="checkbox"] {
-  width: auto;
-  margin: 0;
+#clearFiltersBtn:hover {
+  background: #f0f0f0;
 }
 
-#searchInput {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 6px 8px;
-  font-size: 13px;
-  margin-bottom: 8px;
-}
-
-.content {
-  flex: 1;
-}
-
-/* Mobile */
-@media (max-width: 900px) {
-  .layout {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
-}
-
-/* Collapsible filter styling */
-.sidebar details {
-  margin-bottom: 10px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
-}
-
-.sidebar summary {
-  font-weight: bold;
-  cursor: pointer;
-  list-style: none;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-.sidebar summary::-webkit-details-marker {
-  display: none;
-}
-
-.sidebar summary::after {
-  content: "▾";
-  float: right;
-  transition: transform 0.2s ease;
-}
-
-.sidebar details[open] summary::after {
-  transform: rotate(180deg);
-}
-
-/* Search Wrapper */
+/* Search */
 .search-wrapper {
   position: relative;
-  margin-bottom: 6px;
+  flex: 1 1 250px;
+  max-width: 400px;
 }
 
 .search-wrapper input {
   width: 100%;
-  box-sizing: border-box;
-  padding: 6px 28px 6px 28px;
-  font-size: 13px;
+  padding: 6px 28px 6px 8px;
   border-radius: 6px;
   border: 1px solid #ccc;
+  font-size: 13px;
 }
 
-/* Clear button */
-#clearFiltersBtn:hover {
-  background: #f0f0f0;
-}
-  
+/* Search clear (×) */
 .clear-btn {
   position: absolute;
   right: 8px;
@@ -369,34 +115,46 @@ body {
   color: #000;
 }
 
-/* Result counter */
+/* Result count */
 .result-count {
   font-size: 12px;
   color: #666;
-  margin-bottom: 10px;
 }
 
-.filter-group {
-  max-height: 250px;   /* scroll if long */
-  overflow-y: auto;
-  padding-right: 5px;
+/* Dropdown filters */
+.filter-dropdown {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  min-width: 160px;
 }
 
-.data-table th {
-  user-select: none;
+.filter-dropdown label {
+  font-weight: bold;
+  margin-bottom: 4px;
 }
 
-.data-table th:hover {
-  background: #e6e6e6;
+.filter-dropdown select {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 13px;
+}
+
+/* ===============================
+   CONTENT / TABLE
+================================= */
+.content {
+  overflow-x: auto;
 }
 
 .data-table {
   border-collapse: collapse;
-  background: white;
+  background: #fff;
   font-size: 13px;
-  table-layout: auto;   /* important: auto column width based on content */
-  width: auto;           /* table width fits content, not stretched */
-  max-width: 100%;       /* prevents overflow beyond browser width */
+  table-layout: auto;
+  width: auto;
+  max-width: 100%;
 }
 
 .data-table th,
@@ -404,120 +162,124 @@ body {
   border: 1px solid #ddd;
   padding: 6px 8px;
   text-align: left;
-  white-space: nowrap;   /* prevent text from wrapping */
+  white-space: nowrap;
 }
 
 .data-table th {
   background: #f0f0f0;
   font-weight: bold;
+  user-select: none;
+  cursor: pointer;
+}
+
+.data-table th:hover {
+  background: #e6e6e6;
 }
 
 .data-table tr:hover {
   background: #f9f9f9;
 }
 
-/* Make table scrollable horizontally if needed */
-.content {
-  overflow-x: auto;
+/* ===============================
+   PAGINATION
+================================= */
+#pagination {
+  margin-top: 20px;
+  text-align: center;
 }
 
-.top-filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 15px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.top-filters button {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 6px;
+#pagination button {
+  margin: 0 4px;
+  padding: 6px 10px;
   border: 1px solid #ccc;
+  background: #fff;
   cursor: pointer;
+  border-radius: 4px;
 }
 
-.top-filters .search-wrapper {
-  position: relative;
-  flex: 1 1 200px; /* search input expands */
-  min-width: 150px;
+#pagination button:hover:not(:disabled) {
+  background: #f0f0f0;
 }
 
-.top-filters input[type="text"] {
-  width: 100%;
-  padding: 6px 28px 6px 8px;
-  font-size: 13px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+#pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-.top-filters .clear-btn {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 14px;
-  cursor: pointer;
-  color: #888;
-  display: none;
-}
-
-.top-filters details {
-  max-width: 180px;
-}
-
-.top-filters summary {
+.active-page {
+  background: #333 !important;
+  color: #fff;
   font-weight: bold;
-  cursor: pointer;
-  font-size: 13px;
-  margin-bottom: 4px;
 }
 
-.top-filters summary::after {
-  content: "▾";
-  float: right;
-  transition: transform 0.2s ease;
+.ellipsis {
+  margin: 0 6px;
+  color: #888;
 }
 
-.top-filters details[open] summary::after {
-  transform: rotate(180deg);
+/* ===============================
+   MODAL / DETAIL
+================================= */
+.detail-container {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
 }
 
-/* Responsive for mobile */
+.detail-left {
+  width: 35%;
+}
+
+.detail-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.detail-right {
+  width: 65%;
+}
+
+.detail-row {
+  margin-bottom: 8px;
+}
+
+.modal-box {
+  background: #fff;
+  width: 90%;
+  max-width: 900px;
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+}
+
+/* ===============================
+   RESPONSIVE
+================================= */
 @media (max-width: 900px) {
-  .top-filters {
+
+  .filter-row {
     flex-direction: column;
     align-items: stretch;
   }
-  
-  .top-filters details {
+
+  .search-wrapper {
+    max-width: 100%;
+  }
+
+  .detail-container {
+    flex-direction: column;
+  }
+
+  .detail-left,
+  .detail-right {
     width: 100%;
   }
-}  
-
-.top-filters .filter-dropdown {
-  display: flex;
-  flex-direction: column;
-  font-size: 13px;
-  min-width: 150px;
 }
 
-.top-filters .filter-dropdown label {
-  margin-bottom: 3px;
-  font-weight: bold;
-}
-
-.top-filters .filter-dropdown select {
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 13px;
-}
-  
 </style>
 </head>
 
@@ -538,61 +300,72 @@ body {
 
 <!-- TOP FILTERS -->
 <div class="top-filters">
-  <button id="clearFiltersBtn" onclick="clearAllFilters()">清除所有篩選</button>
 
-  <!-- Search -->
-  <div class="search-wrapper">
-    <input type="text" id="searchInput" placeholder="任何文字搜尋..." oninput="handleSearchInput()">
-    <span class="clear-btn" onclick="clearSearch()">×</span>
-  </div>
+  <!-- ROW 1 : Search + Clear -->
+  <div class="filter-row filter-row-top">
+    <button id="clearFiltersBtn" onclick="clearAllFilters()">
+      清除所有篩選
+    </button>
 
-  <!-- Filters -->
-  <div class="filter-dropdown">
-    <label for="magazineFilter">初出掲載誌</label>
-    <select id="magazineFilter" onchange="applyFilters()">
-      <option value="">全部</option>
-      <!-- Options will be populated dynamically -->
-    </select>
-  </div>
+    <div class="search-wrapper">
+      <input type="text"
+             id="searchInput"
+             placeholder="任何文字搜尋..."
+             oninput="handleSearchInput()">
+      <span class="clear-btn" onclick="clearSearch()">×</span>
+    </div>
 
-  <div class="filter-dropdown">
-    <label for="tankobonFilter">単行本系列</label>
-    <select id="tankobonFilter" onchange="applyFilters()">
-      <option value="">全部</option>
-    </select>
-  </div>
-  
-  <div class="filter-dropdown">
-    <label for="othertankobonFilter">その他単行本</label>
-    <select id="othertankobonFilter" onchange="applyFilters()">
-      <option value="">全部</option>
-    </select>
-  </div>
-  
-  <div class="filter-dropdown">
-    <label for="bunkobonFilter">文庫系列</label>
-    <select id="bunkobonFilter" onchange="applyFilters()">
-      <option value="">全部</option>
-    </select>
-  </div>
-  
-  <div class="filter-dropdown">
-    <label for="pikkapikaFilter">ぴっかぴかコミックススペシャル</label>
-    <select id="pikkapikaFilter" onchange="applyFilters()">
-      <option value="">全部</option>
-    </select>
-  </div>
-  
-  <div class="filter-dropdown">
-    <label for="completeCollectionFilter">大全集</label>
-    <select id="completeCollectionFilter" onchange="applyFilters()">
-      <option value="">全部</option>
-    </select>
+    <div id="resultCount" class="result-count"></div>
   </div>
 
-  <div id="resultCount" class="result-count"></div>
+  <!-- ROW 2 : All Dropdown Filters -->
+  <div class="filter-row filter-row-bottom">
+
+    <div class="filter-dropdown">
+      <label>初出掲載誌</label>
+      <select id="magazineFilter" onchange="applyFilters()">
+        <option value="">全部</option>
+      </select>
+    </div>
+
+    <div class="filter-dropdown">
+      <label>単行本系列</label>
+      <select id="tankobonFilter" onchange="applyFilters()">
+        <option value="">全部</option>
+      </select>
+    </div>
+
+    <div class="filter-dropdown">
+      <label>その他単行本</label>
+      <select id="othertankobonFilter" onchange="applyFilters()">
+        <option value="">全部</option>
+      </select>
+    </div>
+
+    <div class="filter-dropdown">
+      <label>文庫系列</label>
+      <select id="bunkobonFilter" onchange="applyFilters()">
+        <option value="">全部</option>
+      </select>
+    </div>
+
+    <div class="filter-dropdown">
+      <label>ぴっかぴかコミックススペシャル</label>
+      <select id="pikkapikaFilter" onchange="applyFilters()">
+        <option value="">全部</option>
+      </select>
+    </div>
+
+    <div class="filter-dropdown">
+      <label>大全集</label>
+      <select id="completeCollectionFilter" onchange="applyFilters()">
+        <option value="">全部</option>
+      </select>
+    </div>
+
+  </div>
+
 </div>
-
 <!-- MAIN CONTENT -->
 <main class="content">
   <div id="pagination"></div>
