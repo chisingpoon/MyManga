@@ -375,6 +375,8 @@ document.getElementById("content").innerHTML = `
         <div><strong>初版発行日:</strong> ${jpinfo?.初版発行日 || ""}</div>
         <div><strong>定価:</strong> ${jpinfo?.定価 || ""}</div>
         <div><strong>ISBN:</strong> ${jpinfo?.ISBN || ""}</div>
+        <!-- ✅ JP detail link -->
+        ${jpinfo?.ISBN ? `<div><a href="bookdetailjp.html?isbn=${encodeURIComponent(jpinfo.ISBN)}" target="_blank">查看日文原版詳情</a></div>` : ''}
       </div>
       </div>
   </div>
