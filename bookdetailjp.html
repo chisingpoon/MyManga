@@ -238,17 +238,30 @@ Promise.all([
     return;
   }
 
-  // 5️⃣ Get join rows for this ISBN
+  // 5️⃣ Get rows for this ISBN
   const mangamaps = storymaps
-    .filter(j => j.ISBN?.trim() === isbn?.trim())
-    .sort((a,b) => Number(a.話) - Number(b.話));
-
-  // 6️⃣ Map join rows to actual story rows
-  const storyRows = mangamaps.map(j =>
-    stories.find(d => d.作品番?.trim() === j.作品番?.trim())
-  ).filter(Boolean);
-
-  render(manga, storyRows, mangamaps);
+    .filter(j => j.ISBN?.trim() === isbn?.trim());
+  
+  // 6️⃣ Join and sort safely
+  const mergedRows = mangamaps
+    .map(map => {
+      const story = stories.find(d =>
+        d.作品番?.trim() === map.作品番?.trim()
+      );
+  
+      return {
+        ...map,
+        ...story
+      };
+    })
+    .filter(r => r.作品番) // remove failed joins
+    .sort((a, b) => {
+      const aNum = parseInt(a.話?.replace(/\D/g, "")) || 0;
+      const bNum = parseInt(b.話?.replace(/\D/g, "")) || 0;
+      return aNum - bNum;
+    });
+  
+  render(manga, mergedRows);
 
 })
 .catch(err => {
@@ -258,16 +271,13 @@ Promise.all([
 
 
 // 7️⃣ Render page
-function render(manga, storyRows, mangamaps) {
+function render(manga, rows) {
 
-  // Build table rows from Stories Map sheet
-  const tableRows = storyRows.map((d,i)  => {
-    const map = mangamaps[i]; // get the corresponding row from story map
-    return `
+  const tableRows = rows.map(d => `
     <tr>
-      <td>${map?.番 || ""}</td>
-      <td>${map?.巻 || ""}</td>
-      <td>${map?.話 || ""}</td>
+      <td>${d.番 || ""}</td>
+      <td>${d.巻 || ""}</td>
+      <td>${d.話 || ""}</td>
       <td>${d.頁 || ""}</td>
       <td>${d.初出副題 || ""}</td>
       <td>${d.全集副題 || ""}</td>
@@ -280,8 +290,7 @@ function render(manga, storyRows, mangamaps) {
       <td>${d.大全集 || ""}</td>
       <td>${d.備考 || ""}</td>
     </tr>
-  `;
-  }).join("");
+  `).join("");
 
   // Only show table if there is data
   const tableSection = storyRows.length > 0 ? `
