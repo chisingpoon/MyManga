@@ -976,7 +976,7 @@ function populateBunkobon() {
 }
 
 function populatePikkapika() {
-    const pks = [...new Set(sheetData.map(r => r.ぴっかぴかコミックススペシャル).filter(Boolean))].sort();
+    const pks = [...new Set(sheetData.map(r => r.兒童版).filter(Boolean))].sort();
     populateCheckboxFilter("pikkapikaFilter", pks);
 }
 
