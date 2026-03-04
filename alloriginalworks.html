@@ -92,6 +92,9 @@ body {
   border: 1px solid #ccc;
   background: #fff;
   cursor: pointer;
+  flex-shrink: 0;        /* Prevent shrinking */
+  min-width: 80px;       /* Ensure it's clickable */
+  z-index: 1;            /* Above other items if overlapping */
 }
 
 #clearFiltersBtn:hover {
@@ -388,7 +391,7 @@ body.dark .resizer:hover {
 
   <!-- ROW 1 : Search + Clear -->
   <div class="filter-row filter-row-top">
-    <button id="clearFiltersBtn" onclick="clearAllFilters()">
+    <button id="clearFiltersBtn" onclick="clearSearch()">
       清除所有篩選
     </button>
 
