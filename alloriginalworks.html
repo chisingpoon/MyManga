@@ -483,7 +483,7 @@ fetch(SHEET_URL)
       console.log("Parsed JSON:", data);
 
       sheetData = data.filter(row =>
-        row.掲載番 && row.掲載番.trim() !== ""
+        row.作品番 && row.作品番.trim() !== ""
       );
 
       populateMagazine(); 
