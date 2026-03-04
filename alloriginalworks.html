@@ -485,7 +485,7 @@ function populateMagazine() {
   const magazines = [...new Set(sheetData.map(row => row.初出掲載誌))];
 
   magazines.forEach(mag => {
-    const label = document.createElement("label"mag);
+    const label = document.createElement("label");
 
     label.innerHTML = `
       <input type="checkbox" value="${mag}"
