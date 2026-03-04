@@ -389,6 +389,39 @@ body {
 .data-table th:hover {
   background: #e6e6e6;
 }
+
+.data-table {
+  border-collapse: collapse;
+  background: white;
+  font-size: 13px;
+  table-layout: auto;   /* important: auto column width based on content */
+  width: auto;           /* table width fits content, not stretched */
+  max-width: 100%;       /* prevents overflow beyond browser width */
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: left;
+  white-space: nowrap;   /* prevent text from wrapping */
+}
+
+.data-table th {
+  background: #f0f0f0;
+  font-weight: bold;
+}
+
+.data-table tr:hover {
+  background: #f9f9f9;
+}
+
+/* Make table scrollable horizontally if needed */
+.content {
+  overflow-x: auto;
+}
+
+  
 </style>
 </head>
 
@@ -813,7 +846,7 @@ let html = `
 `;
 
   html += pageItems.map(row => `
-    <tr onclick="window.open('bookdetailjp.html?isbn=${row.ISBN}', '_blank')" style="cursor:pointer;">
+    <tr>
       <td>${row.初出掲載誌 || ""}</td>
       <td>${row.初出掲載号 || ""}</td>
       <td>${row.初出掲載頁 || ""}</td>
