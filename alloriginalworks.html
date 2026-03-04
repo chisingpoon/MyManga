@@ -647,9 +647,8 @@ function clearSearch() {
   });
 
   // 4. Reset dropdown selects
-  const dropdowns = document.querySelectorAll('.sidebar select');
-  dropdowns.forEach(dd => {
-    dd.selectedIndex = 0;
+  document.querySelectorAll('.sidebar select').forEach(dd => {
+    dd.selectedIndex = 0;   // resets to first option (usually 全部)
   });
 
   // 5. Reset currentList to all rows with 掲載番
