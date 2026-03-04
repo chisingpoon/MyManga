@@ -915,6 +915,41 @@ function changePage(page) {
       e.preventDefault();
     }
   });
+
+function makeColumnsResizable() {
+
+  const thElements = document.querySelectorAll(".data-table th");
+
+  thElements.forEach(th => {
+
+    const resizer = document.createElement("div");
+    resizer.classList.add("resizer");
+    th.appendChild(resizer);
+
+    let startX, startWidth;
+
+    resizer.addEventListener("mousedown", function (e) {
+
+      startX = e.pageX;
+      startWidth = th.offsetWidth;
+
+      function onMouseMove(e) {
+        const newWidth = startWidth + (e.pageX - startX);
+        th.style.width = newWidth + "px";
+      }
+
+      function onMouseUp() {
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+      }
+
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    });
+
+  });
+}
+   
 </script>
 <div id="detailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
   <div class="modal-box">
