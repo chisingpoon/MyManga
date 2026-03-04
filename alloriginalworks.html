@@ -498,6 +498,26 @@ body {
     width: 100%;
   }
 }  
+
+.top-filters .filter-dropdown {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  min-width: 150px;
+}
+
+.top-filters .filter-dropdown label {
+  margin-bottom: 3px;
+  font-weight: bold;
+}
+
+.top-filters .filter-dropdown select {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 13px;
+}
+  
 </style>
 </head>
 
@@ -527,35 +547,48 @@ body {
   </div>
 
   <!-- Filters -->
-  <details>
-    <summary>初出掲載誌</summary>
-    <div id="magazineFilter" class="filter-group"></div>
-  </details>
+  <div class="filter-dropdown">
+    <label for="magazineFilter">初出掲載誌</label>
+    <select id="magazineFilter" onchange="applyFilters()">
+      <option value="">全部</option>
+      <!-- Options will be populated dynamically -->
+    </select>
+  </div>
 
-  <details>
-    <summary>単行本系列</summary>
-    <div id="tankobonFilter" class="filter-group"></div>
-  </details>
-
-  <details>
-    <summary>その他単行本</summary>
-    <div id="othertankobonFilter" class="filter-group"></div>
-  </details>
-
-  <details>
-    <summary>文庫系列</summary>
-    <div id="bunkobonFilter" class="filter-group"></div>
-  </details>
-
-  <details>
-    <summary>ぴっかぴかコミックススペシャル</summary>
-    <div id="pikkapikaFilter" class="filter-group"></div>
-  </details>
-
-  <details>
-    <summary>大全集</summary>
-    <div id="completeCollectionFilter" class="filter-group"></div>
-  </details>
+  <div class="filter-dropdown">
+    <label for="tankobonFilter">単行本系列</label>
+    <select id="tankobonFilter" onchange="applyFilters()">
+      <option value="">全部</option>
+    </select>
+  </div>
+  
+  <div class="filter-dropdown">
+    <label for="othertankobonFilter">その他単行本</label>
+    <select id="othertankobonFilter" onchange="applyFilters()">
+      <option value="">全部</option>
+    </select>
+  </div>
+  
+  <div class="filter-dropdown">
+    <label for="bunkobonFilter">文庫系列</label>
+    <select id="bunkobonFilter" onchange="applyFilters()">
+      <option value="">全部</option>
+    </select>
+  </div>
+  
+  <div class="filter-dropdown">
+    <label for="pikkapikaFilter">ぴっかぴかコミックススペシャル</label>
+    <select id="pikkapikaFilter" onchange="applyFilters()">
+      <option value="">全部</option>
+    </select>
+  </div>
+  
+  <div class="filter-dropdown">
+    <label for="completeCollectionFilter">大全集</label>
+    <select id="completeCollectionFilter" onchange="applyFilters()">
+      <option value="">全部</option>
+    </select>
+  </div>
 
   <div id="resultCount" class="result-count"></div>
 </div>
@@ -621,14 +654,10 @@ function populateMagazine() {
   const magazines = [...new Set(sheetData.map(row => row.初出掲載誌))];
 
   magazines.forEach(mag => {
-    const label = document.createElement("label");
-
-    label.innerHTML = `
-      <input type="checkbox" value="${mag}"
-             onchange="applyFilters()"> ${mag}
-    `;
-
-    container.appendChild(label);
+    const option = document.createElement("option");
+    option.value = mag;
+    option.textContent = mag;
+    container.appendChild(option);
   });
 }
 
@@ -639,14 +668,10 @@ function populateTankobon() {
   const tankobons = [...new Set(sheetData.map(row => row.単行本))];
 
   tankobons.forEach(tkb => {
-    const label = document.createElement("label");
-
-    label.innerHTML = `
-      <input type="checkbox" value="${tkb}"
-             onchange="applyFilters()"> ${tkb}
-    `;
-
-    container.appendChild(label);
+    const option = document.createElement("option");
+    option.value = tkb;
+    option.textContent = tkb;
+    container.appendChild(option);
   });
 }
   
@@ -655,14 +680,10 @@ function populateOtherTankobon() {
   const othertankobons = [...new Set(sheetData.map(row => row.その他単行本))];
 
   othertankobons.forEach(otkb => {
-    const label = document.createElement("label");
-
-    label.innerHTML = `
-      <input type="checkbox" value="${otkb}"
-             onchange="applyFilters()"> ${otkb}
-    `;
-
-    container.appendChild(label);
+    const option = document.createElement("option");
+    option.value = otkb;
+    option.textContent = otkb;
+    container.appendChild(option);
   });
 }
 
@@ -671,14 +692,10 @@ function populateBunkobon() {
   const bunkobons = [...new Set(sheetData.map(row => row.文庫))];
 
   bunkobons.forEach(bkb => {
-    const label = document.createElement("label");
-
-    label.innerHTML = `
-      <input type="checkbox" value="${bkb}"
-             onchange="applyFilters()"> ${bkb}
-    `;
-
-    container.appendChild(label);
+    const option = document.createElement("option");
+    option.value = bkb;
+    option.textContent = bkb;
+    container.appendChild(option);
   });
 }
 
@@ -689,14 +706,10 @@ function populatePikkapika() {
   const pikkapikas = [...new Set(sheetData.map(row => row.ぴっかぴかコミックススペシャル))];
 
   pikkapikas.forEach(pkpk => {
-    const label = document.createElement("label");
-
-    label.innerHTML = `
-      <input type="checkbox" value="${pkpk}"
-             onchange="applyFilters()"> ${pkpk}
-    `;
-
-    container.appendChild(label);
+    const option = document.createElement("option");
+    option.value = pkpk;
+    option.textContent = pkpk;
+    container.appendChild(option);
   });
 }
 
@@ -705,14 +718,10 @@ function populateCompleteCollection() {
   const completeCollections = [...new Set(sheetData.map(row => row.大全集))];
 
   completeCollections.forEach(cc => {
-    const label = document.createElement("label");
-
-    label.innerHTML = `
-      <input type="checkbox" value="${cc}"
-             onchange="applyFilters()"> ${cc}
-    `;
-
-    container.appendChild(label);
+    const option = document.createElement("option");
+    option.value = cc;
+    option.textContent = cc;
+    container.appendChild(option);
   });
 }
 
@@ -834,21 +843,13 @@ function prevItem() {
 function applyFilters() {
 
   const search = document.getElementById("searchInput").value.toLowerCase();
-  const magazine = [...document.querySelectorAll('#magazineFilter input:checked')]
-  .map(cb => cb.value);
-  const tankobon = [...document.querySelectorAll('#tankobonFilter input:checked')]
-  .map(cb => cb.value);
-  const othertankobo = [...document.querySelectorAll('#othertankobonFilter input:checked')]
-  .map(cb => cb.value);
-  const bunkobon = [...document.querySelectorAll('#bunkobonFilter input:checked')]
-  .map(cb => cb.value);
-  const pikkapika = [...document.querySelectorAll('#pikkapikaFilter input:checked')]
-  .map(cb => cb.value);
-  const completeCollection = [...document.querySelectorAll('#completeCollectionFilter input:checked')]
-  .map(cb => cb.value);
-  
+  const magazine = document.getElementById('magazineFilter').value;
+  const tankobon = document.getElementById('tankobonFilter').value;
+  const othertankobo = document.getElementById('othertankobonFilter').value;
+  const bunkobon = document.getElementById('bunkobonFilter').value;
+  const pikkapika = document.getElementById('pikkapikaFilter').value;
+  const completeCollection = document.getElementById('completeCollectionFilter').value;
 
-  
   let filtered = sheetData.filter(row => {
 
     const searchMatch = Object.values(row)
@@ -856,34 +857,20 @@ function applyFilters() {
       .toLowerCase()
       .includes(search);
 
-    const magazineMatch =
-      magazine.length === 0 || magazine.includes(row.初出掲載誌);
+    const magazineMatch = !magazine || row.初出掲載誌 === magazine;
+    const tankobonMatch = !tankobon || row.単行本 === tankobon;
+    const bunkobonMatch = !bunkobon || row.文庫 === bunkobon;
+    const othertankoboMatch = !othertankobo || row.その他単行本 === othertankobo;
+    const pikkapikaMatch = !pikkapika || row.ぴっかぴかコミックススペシャル === pikkapika;
+    const completeCollectionMatch = !completeCollection || row.大全集 === completeCollection;
 
-    const tankobonMatch =
-      tankobon.length === 0 || tankobon.includes(row.単行本);
-
-    const bunkobonMatch =
-      bunkobon.length === 0 || bunkobon.includes(row.文庫);
-
-    const othertankoboMatch =
-      othertankobo.length === 0 || othertankobo.includes(row.その他単行本);
-    
-    const pikkapikaMatch =
-      pikkapika.length === 0 || pikkapika.includes(row.ぴっかぴかコミックススペシャル);
-    
-    const completeCollectionMatch =
-      completeCollection.length === 0 || completeCollection.includes(row.大全集);
-    
     return searchMatch && magazineMatch && tankobonMatch && bunkobonMatch && othertankoboMatch && pikkapikaMatch && completeCollectionMatch;
   });
 
-//  document.getElementById("mangalist").innerHTML =
-//    filtered.length ? html : "No Manga found.";
   currentList = filtered;
   currentPage = 1; // reset to first page when filtering
 
-  document.getElementById("resultCount").textContent =
-  `共 ${filtered.length} 本作品`;
+  document.getElementById("resultCount").textContent = `共 ${filtered.length} 本作品`;
   renderPage();
 }
 
