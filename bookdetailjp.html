@@ -293,7 +293,7 @@ function render(manga, rows) {
   `).join("");
 
   // Only show table if there is data
-  const tableSection = storyRows.length > 0 ? `
+  const tableSection = rows.length > 0 ? `
     <h2>收錄故事</h2>
     <table class="details-table">
       <thead>
