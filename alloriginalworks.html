@@ -456,53 +456,40 @@ let currentSortColumn = null;
 let currentSortDirection = "asc"; // "asc" or "desc"
 
 fetch(SHEET_URL)
-  .then(res => res.json())
-  .then(data => {
+  .then(res => {
+    console.log("Status:", res.status);
+    return res.text();
+  })
+  .then(text => {
+    console.log("Raw response:", text.substring(0, 300));
 
-    // Only keep Active = Yes
-    sheetData = data.filter(row => 
-      row.掲載番 != null && row.掲載番 !== ""
-    );
-    populateMagazine(); 
-    populateTankobon(); 
-    populateBunkobon();
-    populateOtherTankobon();
-    populatePikkapika();
-    populateCompleteCollection();
-    applyFilters();
+    try {
+      const data = JSON.parse(text);
+      console.log("Parsed JSON:", data);
+
+      sheetData = data.filter(row =>
+        row.掲載番 && row.掲載番.trim() !== ""
+      );
+
+      populateMagazine(); 
+      populateTankobon(); 
+      populateBunkobon();
+      populateOtherTankobon();
+      populatePikkapika();
+      populateCompleteCollection();
+      applyFilters();
+
+    } catch (err) {
+      console.error("JSON parse error:", err);
+      document.getElementById("mangalist").innerHTML =
+        "❌ Response is not valid JSON. Check console.";
+    }
   })
   .catch(error => {
-    document.getElementById("mangalist").innerHTML = "Failed to load data.";
-    console.error(error);
+    console.error("Fetch error:", error);
+    document.getElementById("mangalist").innerHTML =
+      "❌ Network error. Check console.";
   });
-
-function clearAllFilters() {
-  // Clear search input
-  const searchInput = document.getElementById("searchInput");
-  searchInput.value = "";
-
-  // Clear all dropdown filters
-  const dropdowns = [
-    'magazineFilter',
-    'tankobonFilter',
-    'othertankobonFilter',
-    'bunkobonFilter',
-    'pikkapikaFilter',
-    'completeCollectionFilter'
-  ];
-
-  dropdowns.forEach(id => {
-    const select = document.getElementById(id);
-    if (select) select.value = "";
-  });
-
-  // Hide the clear (×) button in search
-  const clearBtn = document.querySelector(".clear-btn");
-  if (clearBtn) clearBtn.style.display = "none";
-
-  // Re-apply filters
-  applyFilters();
-}
 
 function populateMagazine() {
   const container = document.getElementById("magazineFilter");
@@ -609,7 +596,7 @@ function openDetail(id) {
       <div class="detail-row"><strong>話: </strong> ${detail.話 || ""}</div>
       <div class="detail-row"><strong>判型: </strong> ${detail.判型 || ""}</div>
       <div class="detail-row date"><strong>初版発行日: </strong> ${detail.初版発行日 || ""}</div>
-      <div class="detail-row price"><strong>定価: </strong> $¥{detail.定価 || ""}</div>
+      <div class="detail-row price"><strong>定価: </strong> ¥${detail.定価 || ""}</div>
       <div class="detail-row"><strong>頁: </strong> ${detail.頁 || ""}</div>   
       <div class="detail-row"><strong>ISBN:</strong> ${detail.ISBN || ""}</div>
     </div>
