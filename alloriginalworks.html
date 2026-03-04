@@ -634,16 +634,26 @@ function clearAllFilters() {
   const searchInput = document.getElementById("searchInput");
   searchInput.value = "";
 
-  // Clear all checkboxes
-  document.querySelectorAll('.sidebar input[type="checkbox"]').forEach(cb => {
-    cb.checked = false;
+  // Clear all dropdown filters
+  const dropdowns = [
+    'magazineFilter',
+    'tankobonFilter',
+    'othertankobonFilter',
+    'bunkobonFilter',
+    'pikkapikaFilter',
+    'completeCollectionFilter'
+  ];
+
+  dropdowns.forEach(id => {
+    const select = document.getElementById(id);
+    if (select) select.value = "";
   });
 
-  // Hide the clear (×) button
+  // Hide the clear (×) button in search
   const clearBtn = document.querySelector(".clear-btn");
   if (clearBtn) clearBtn.style.display = "none";
 
-  // Apply filters again to refresh list
+  // Re-apply filters
   applyFilters();
 }
 
