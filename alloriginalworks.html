@@ -262,7 +262,98 @@ body {
     width: 100%;
   }
 }
+/* ===============================
+   DARK MODE
+================================= */
+body.dark {
+  background: #121212;
+  color: #e0e0e0;
+}
 
+body.dark .page-header {
+  border-bottom: 1px solid #333;
+}
+
+body.dark .header-link {
+  background: #1e1e1e;
+  color: #ddd;
+  border: 1px solid #333;
+}
+
+body.dark .header-link:hover {
+  background: #fff;
+  color: #000;
+}
+
+body.dark .top-filters,
+body.dark .data-table,
+body.dark .modal-box {
+  background: #1e1e1e;
+  color: #ddd;
+}
+
+body.dark .filter-dropdown select,
+body.dark .search-wrapper input,
+body.dark #clearFiltersBtn {
+  background: #2a2a2a;
+  color: #ddd;
+  border: 1px solid #444;
+}
+
+body.dark .data-table th {
+  background: #222;
+  border-bottom: 2px solid #444;
+}
+
+body.dark .data-table td {
+  border-bottom: 1px solid #333;
+}
+
+body.dark .data-table tr:hover td {
+  background: #2a2a2a;
+}
+
+body.dark #pagination button {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #ddd;
+}
+
+body.dark #pagination button:hover:not(:disabled) {
+  background: #fff;
+  color: #000;
+}
+
+.top-filters {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* ===============================
+   RESIZABLE COLUMNS
+================================= */
+.data-table th {
+  position: relative;
+}
+
+.resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+}
+
+.resizer:hover {
+  background: rgba(0,0,0,0.2);
+}
+
+body.dark .resizer:hover {
+  background: rgba(255,255,255,0.3);
+}
 </style>
 </head>
 
@@ -691,10 +782,28 @@ let html = `
 
   document.getElementById("mangalist").innerHTML =
     pageItems.length ? html : "No Manga found.";
-
+  makeColumnsResizable();
   renderPaginationControls();
 }
+function toggleDarkMode() {
+  document.body.classList.toggle("dark");
 
+  const btn = document.getElementById("darkModeToggle");
+  btn.textContent = document.body.classList.contains("dark")
+    ? "☀ Light"
+    : "🌙 Dark";
+
+  localStorage.setItem("darkMode",
+    document.body.classList.contains("dark"));
+}
+
+// Remember preference
+window.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("darkMode") === "true") {
+    document.body.classList.add("dark");
+    document.getElementById("darkModeToggle").textContent = "☀ Light";
+  }
+});
 function createSortableHeader(columnName) {
 
   let arrow = "";
