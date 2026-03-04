@@ -647,10 +647,10 @@ function clearSearch() {
   });
 
   // 4. Reset dropdown selects
-  const sortIssueDate = document.getElementById("sortIssueDate");
-  const sortPrice = document.getElementById("sortPrice");
-  if (sortIssueDate) sortIssueDate.selectedIndex = 0;
-  if (sortPrice) sortPrice.selectedIndex = 0;
+  const dropdowns = document.querySelectorAll('.sidebar select');
+  dropdowns.forEach(dd => {
+    dd.selectedIndex = 0;
+  });
 
   // 5. Reset currentList to all rows with 掲載番
   currentList = sheetData.filter(row => row.掲載番 && row.掲載番.trim() !== "");
