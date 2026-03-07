@@ -288,7 +288,7 @@ const tableRows = storyRows.map(d => `
     <td>${d.番 || ""}</td>
     <td>${d.巻 || ""}</td>
     <td>${d.話 || ""}</td>
-    <td>${d.全集副題香港譯名 || ""}</td>
+    <td>${d.副題香譯 || ""}</td>
     <td>${d.出版副題 || ""}</td>
     <td>${d.頁 || ""}</td>
     <td>${d.初出副題 || ""}</td>
@@ -296,7 +296,7 @@ const tableRows = storyRows.map(d => `
     <td>${d.初出掲載誌 || ""}</td>
     <td>${d.初出掲載号 || ""}</td>
     <td>${d.大全集 || ""}</td>
-    <td>${d.備考 || ""}</td>
+    <td>${d.出版備考 || ""}</td>
   </tr>
 `).join("");
 
@@ -317,7 +317,7 @@ const tableRows = storyRows.map(d => `
           <th>初出掲載誌</th>
           <th>初出掲載号</th>
           <th>大全集</th>
-          <th>備考</th>
+          <th>日本出版備考</th>
         </tr>
       </thead>
       <tbody>
