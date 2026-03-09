@@ -69,7 +69,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 18px;
-  align-items: center;
+  align-items: flex-start;   /* align to top */
 }
 
 .filter-row-top {
@@ -141,6 +141,7 @@ body {
   flex-direction: column;
   font-size: 12px;
   min-width: 170px;
+  align-items: flex-start;
 }
 
 .filter-dropdown label {
@@ -384,6 +385,12 @@ body.dark .resizer:hover {
     display: flex;
     gap: 10px; /* space between links */
     align-items: center;
+}
+
+.filter-row-bottom {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #eee;
 }
 </style>
 </head>
