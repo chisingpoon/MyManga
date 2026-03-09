@@ -581,7 +581,7 @@ function populatePikkapika() {
     const container = document.getElementById("pikkapikaFilter");
     if (!container) return;
     container.innerHTML = ""; // clear previous content
-    const pikkapikas = [...new Set(sheetData.map(row => row.ぴっかぴかコミックススペシャル).filter(Boolean))].sort();
+    const pikkapikas = [...new Set(sheetData.map(row => row.兒童版).filter(Boolean))].sort();
     pikkapikas.forEach(pkpk => {
         const id = `pkpk-${pkpk.replace(/\s+/g,'')}`;
         const label = document.createElement("label");
@@ -726,7 +726,7 @@ function applyFilters() {
         const completeCollectionMatch = !completeCollectionChecked.length || completeCollectionChecked.includes(row.大全集);
 
         return searchMatch && magazineMatch && tankobonMatch && bunkobonMatch &&
-               volZeroMatch && doramiChecked && pikkapikaMatch && completeCollectionMatch;
+               volZeroMatch && doramiMatch && pikkapikaMatch && completeCollectionMatch;
     });
 
     currentList = filtered;
