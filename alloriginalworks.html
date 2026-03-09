@@ -582,7 +582,7 @@ function populatePikkapika() {
     if (!container) return;
     container.innerHTML = ""; // clear previous content
     const pikkapikas = [...new Set(sheetData.map(row => row.ぴっかぴかコミックススペシャル).filter(Boolean))].sort();
-    pikkapikas.forEach(bkb => {
+    pikkapikas.forEach(pkpk => {
         const id = `pkpk-${pkpk.replace(/\s+/g,'')}`;
         const label = document.createElement("label");
         label.innerHTML = `<input type="checkbox" value="${pkpk}" onchange="applyFilters()"> ${pkpk}`;
@@ -726,7 +726,7 @@ function applyFilters() {
         const completeCollectionMatch = !completeCollectionChecked.length || completeCollectionChecked.includes(row.大全集);
 
         return searchMatch && magazineMatch && tankobonMatch && bunkobonMatch &&
-               volZeroChecked && doramiChecked && pikkapikaMatch && completeCollectionMatch;
+               volZeroMatch && doramiChecked && pikkapikaMatch && completeCollectionMatch;
     });
 
     currentList = filtered;
