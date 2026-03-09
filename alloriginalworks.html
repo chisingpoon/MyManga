@@ -434,8 +434,13 @@ body.dark .resizer:hover {
   </div>
 
   <div class="filter-dropdown">
-    <label>その他単行本</label>
-    <div class="checkbox-list" id="othertankobonFilter"></div>
+    <label>0巻</label>
+    <div class="checkbox-list" id="volZeroFilter"></div>
+  </div>
+
+  <div class="filter-dropdown">
+    <label>ドラミちゃん</label>
+    <div class="checkbox-list" id="doramiFilter"></div>
   </div>
 
   <div class="filter-dropdown">
@@ -489,7 +494,8 @@ fetch(SHEET_URL)
       populateMagazine(); 
       populateTankobon(); 
       populateBunkobon();
-      populateOtherTankobon();
+      populateVolZero();
+      populateDorami();
       populatePikkapika();
       populateCompleteCollection();
       applyFilters();
@@ -532,15 +538,28 @@ function populateTankobon() {
     });
 }
 
-function populateOtherTankobon() {
-    const container = document.getElementById("othertankobonFilter");
+function populateVolZero() {
+    const container = document.getElementById("volZeroFilter");
     if (!container) return;
     container.innerHTML = ""; // clear previous content
-    const othertankobons = [...new Set(sheetData.map(row => row.その他単行本).filter(Boolean))].sort();
-    othertankobons.forEach(otkb => {
-        const id = `otkb-${otkb.replace(/\s+/g,'')}`;
+    const volZeros = [...new Set(sheetData.map(row => row.0巻).filter(Boolean))].sort();
+    volZeros.forEach(vz => {
+        const id = `vz-${vz.replace(/\s+/g,'')}`;
         const label = document.createElement("label");
-        label.innerHTML = `<input type="checkbox" value="${otkb}" onchange="applyFilters()"> ${otkb}`;
+        label.innerHTML = `<input type="checkbox" value="${vz}" onchange="applyFilters()"> ${vz}`;
+        container.appendChild(label);
+    });
+}
+
+function populateDorami() {
+    const container = document.getElementById("doramiFilter");
+    if (!container) return;
+    container.innerHTML = ""; // clear previous content
+    const doramis = [...new Set(sheetData.map(row => row.ドラミちゃん).filter(Boolean))].sort();
+    doramis.forEach(drm => {
+        const id = `drm-${drm.replace(/\s+/g,'')}`;
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${drm}" onchange="applyFilters()"> ${drm}`;
         container.appendChild(label);
     });
 }
@@ -604,7 +623,8 @@ function clearSearch() {
     // 3️⃣ Repopulate all checkbox filters (all unchecked)
     populateMagazine();
     populateTankobon();
-    populateOtherTankobon();
+    populateVolZero();
+    populateDorami();
     populateBunkobon();
     populatePikkapika();
     populateCompleteCollection();
@@ -614,7 +634,7 @@ function clearSearch() {
     currentPage = 1;
 
     // 5️⃣ Update result count
-    document.getElementById("resultCount").textContent = `共 ${currentList.length} 本作品`;
+    document.getElementById("resultCount").textContent = `共 ${currentList.length} 部作品`;
 
     // 6️⃣ Render first page
     renderPage();
@@ -688,7 +708,8 @@ function applyFilters() {
 
     const magazineChecked = getCheckedValues("magazineFilter");
     const tankobonChecked = getCheckedValues("tankobonFilter");
-    const othertankoboChecked = getCheckedValues("othertankobonFilter");
+    const volZeroChecked = getCheckedValues("volZeroFilter");
+    const doramiChecked = getCheckedValues("doramiFilter");
     const bunkobonChecked = getCheckedValues("bunkobonFilter");
     const pikkapikaChecked = getCheckedValues("pikkapikaFilter");
     const completeCollectionChecked = getCheckedValues("completeCollectionFilter");
@@ -699,17 +720,18 @@ function applyFilters() {
         const magazineMatch = !magazineChecked.length || magazineChecked.includes(row.初出掲載誌);
         const tankobonMatch = !tankobonChecked.length || tankobonChecked.includes(row.単行本);
         const bunkobonMatch = !bunkobonChecked.length || bunkobonChecked.includes(row.文庫);
-        const othertankoboMatch = !othertankoboChecked.length || othertankoboChecked.includes(row.その他単行本);
+        const volZeroMatch = !volZeroChecked.length || volZeroMatch.includes(row.0巻);
+        const doramiChecked = !doramiChecked.length || doramiChecked.includes(row.ドラミちゃん);
         const pikkapikaMatch = !pikkapikaChecked.length || pikkapikaChecked.includes(row.兒童版);
         const completeCollectionMatch = !completeCollectionChecked.length || completeCollectionChecked.includes(row.大全集);
 
         return searchMatch && magazineMatch && tankobonMatch && bunkobonMatch &&
-               othertankoboMatch && pikkapikaMatch && completeCollectionMatch;
+               volZeroChecked && doramiChecked && pikkapikaMatch && completeCollectionMatch;
     });
 
     currentList = filtered;
     currentPage = 1;
-    document.getElementById("resultCount").textContent = `共 ${filtered.length} 本作品`;
+    document.getElementById("resultCount").textContent = `共 ${filtered.length} 部作品`;
     renderPage();
 }
 
@@ -730,7 +752,8 @@ let html = `
         ${createSortableHeader("全集副題")}
         ${createSortableHeader("全集副題香港譯名")}
         ${createSortableHeader("単行本")}
-        ${createSortableHeader("その他単行本")}
+        ${createSortableHeader("0巻")}
+        ${createSortableHeader("ドラミちゃん")}
         ${createSortableHeader("文庫")}
         ${createSortableHeader("兒童版")}
         ${createSortableHeader("大全集")}
@@ -749,7 +772,8 @@ let html = `
       <td>${row.全集副題 || ""}</td>
       <td>${row.全集副題香港譯名 || ""}</td>
       <td>${row.単行本 || ""}</td>
-      <td>${row.その他単行本 || ""}</td>
+      <td>${row.0巻 || ""}</td>
+      <td>${row.ドラミちゃん || ""}</td>
       <td>${row.文庫 || ""}</td>
       <td>${row.兒童版 || ""}</td>
       <td>${row.大全集 || ""}</td>
@@ -969,9 +993,14 @@ function populateTankobon() {
     populateCheckboxFilter("tankobonFilter", tankobons);
 }
 
-function populateOtherTankobon() {
-    const others = [...new Set(sheetData.map(r => r.その他単行本).filter(Boolean))].sort();
-    populateCheckboxFilter("othertankobonFilter", others);
+function populateVolZero() {
+    const volzs = [...new Set(sheetData.map(r => r.0巻).filter(Boolean))].sort();
+    populateCheckboxFilter("volZeroFilter", volzs);
+}
+
+function populateDorami() {
+    const doramis = [...new Set(sheetData.map(r => r.ドラミちゃん).filter(Boolean))].sort();
+    populateCheckboxFilter("doramiFilter", doramis);
 }
 
 function populateBunkobon() {
