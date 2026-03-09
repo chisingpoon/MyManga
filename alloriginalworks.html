@@ -140,8 +140,8 @@ body {
   display: flex;
   flex-direction: column;
   font-size: 12px;
-  min-width: 170px;
-  align-items: flex-start;
+  flex: 1;              /* auto distribute space */
+  min-width: 0;         /* allow shrinking */
 }
 
 .filter-dropdown label {
@@ -388,10 +388,25 @@ body.dark .resizer:hover {
 }
 
 .filter-row-bottom {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid #eee;
+  display: flex;
+  flex-wrap: nowrap;       /* keep everything in one row */
+  gap: 20px;
+  align-items: flex-start; /* align top */
+  margin-top: 20px;
 }
+
+.checkbox-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-size: 12px;
+}
+
+.filter-dropdown:nth-child(1) { flex: 1.4; } /* magazine wider */
+.filter-dropdown:nth-child(2) { flex: 1.2; }
+.filter-dropdown:nth-child(n+3) { flex: 1; }
 </style>
 </head>
 
