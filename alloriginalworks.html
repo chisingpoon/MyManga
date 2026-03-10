@@ -370,13 +370,6 @@ body.dark .resizer:hover {
   background: rgba(255,255,255,0.3);
 }
 
-.checkbox-list {
-  display: flex;
-  flex-direction: column;
-  max-height: 200px;
-  overflow-y: auto;
-  font-size: 12px;
-}
 .checkbox-list label {
   margin-bottom: 4px;
 }
@@ -402,6 +395,27 @@ body.dark .resizer:hover {
   overflow-y: auto;
   overflow-x: hidden;
   font-size: 12px;
+
+  padding-right: 6px;              /* space before scrollbar */
+  border-right: 2px solid #ddd;    /* visible separator */
+}
+
+/* Dark mode */
+body.dark .checkbox-list {
+  border-right: 2px solid #444;
+}
+
+.checkbox-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.checkbox-list::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 6px;
+}
+
+body.dark .checkbox-list::-webkit-scrollbar-thumb {
+  background: #666;
 }
 
 .filter-dropdown:nth-child(1) { flex: 1.4; } /* magazine wider */
