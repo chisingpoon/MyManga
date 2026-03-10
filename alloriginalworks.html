@@ -497,12 +497,12 @@ body.dark .dropdown-panel {
     </div>
 
     <div class="checkbox-dropdown">
-        <button class="dropdown-btn" onclick="toggleLengthTypeDropdown()">
-          作品類 ▼
-        </button>
+         <button id="lengthTypeBtn" class="dropdown-btn" onclick="toggleLengthTypeDropdown()">
+           作品類 ▼
+         </button>
 
         <div class="dropdown-panel" id="lengthTypeFilterPanel">
-          <div class="checkbox-list" id="lengthTypeFilterPanel"></div>
+          <div class="checkbox-list" id="lengthTypeFilter"></div>
         </div>
      </div>
 
@@ -625,7 +625,7 @@ function populateLengthTypeFilter() {
     const label = document.createElement("label");
 
     label.innerHTML =
-      `<input type="checkbox" value="${lent}" onchange="applyFilters()"> ${lent}`;
+      `<input type="checkbox" value="${lent}" onchange="applyFilters(); updateLengthTypeButton();"> ${lent}`;
 
     container.appendChild(label);
   });
@@ -730,6 +730,21 @@ function handleSearchInput() {
   clearBtn.style.display = input.value ? "block" : "none";
   applyFilters();
 }
+   
+function updateLengthTypeButton() {
+
+  const container = document.getElementById("lengthTypeFilter");
+  const btn = document.getElementById("lengthTypeBtn");
+
+  const checked = container.querySelectorAll("input[type=checkbox]:checked").length;
+
+  if (checked === 0) {
+    btn.textContent = "作品類 ▼";
+  } else {
+    btn.textContent = `作品類 (${checked}) ▼`;
+  }
+
+}
 
 function clearSearch() {
     // 1️⃣ Clear search input
@@ -819,11 +834,16 @@ function prevItem() {
 }
   
 function applyFilters() {
+    updateLengthTypeButton();
     const search = document.getElementById("searchInput").value.toLowerCase();
 
     const getCheckedValues = (containerId) => {
-        return Array.from(document.getElementById(containerId).querySelectorAll("input[type=checkbox]:checked"))
-                    .map(cb => cb.value);
+       const container = document.getElementById(containerId);
+      if (!container) return [];
+
+      return Array.from(
+          container.querySelectorAll("input[type=checkbox]:checked")
+      ).map(cb => cb.value);
     }
    
     const lengthTypeChecked = getCheckedValues("lengthTypeFilter");
