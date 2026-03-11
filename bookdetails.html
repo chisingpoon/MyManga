@@ -33,15 +33,16 @@
 
   /* Image wrapper ensures image height matches card height */
   .card .img-wrapper {
-    flex: 0 0 auto;
+    flex: 0 0 auto;      /* don’t grow automatically */
     display: flex;
-    align-items: stretch;   /* stretch image to match card height */
+    align-items: stretch; /* stretch image to match card height */
+    max-width: 150px;     /* limit image width */
   }
-
+  
   .card .img-wrapper img {
-    height: 100%;          /* fill card height */
-    width: auto;           /* keep aspect ratio */
-    object-fit: contain;   /* scale inside the box without cropping */
+    height: 100%;         /* match card height */
+    width: auto;          /* maintain aspect ratio */
+    object-fit: contain;  /* scale inside wrapper */
     border-radius: 4px;
     display: block;
   }
