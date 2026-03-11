@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book Data Viewer</title>
+<title>書籍詳細資訊r</title>
 <style>
   body { font-family: Arial, sans-serif; margin: 20px; }
 
@@ -94,12 +94,12 @@
 </head>
 <body>
 
-<h1>Book Data Viewer</h1>
+<h1>書籍詳細資訊</h1>
 
 <div id="cards-container" class="cards"></div>
 
 <div id="bottom-section" style="display:none;">
-  <h2>書籍收錄作品 / 作品完整列表</h2>
+  <h2>書籍收錄作品</h2>
   <div id="table-wrapper">
     <div id="table-container">
       <table id="works-table">
@@ -153,13 +153,13 @@ async function showBooks(ISBNHK=null, ISBNJP=null){
   if(ISBNHK){
     const HK = await fetchJSON(urlHK);
     const HKData = HK.filter(row => row.ISBN === ISBNHK);
-    HKData.forEach(d => cardsContainer.innerHTML += createCard(d,'出版目録HK'));
+    HKData.forEach(d => cardsContainer.innerHTML += createCard(d,'香港版'));
   }
 
   if(ISBNJP){
     const JP = await fetchJSON(urlJP);
     const JPData = JP.filter(row => row.ISBN === ISBNJP);
-    JPData.forEach(d => cardsContainer.innerHTML += createCard(d,'出版目録JP'));
+    JPData.forEach(d => cardsContainer.innerHTML += createCard(d,'日文版'));
   }
 
   const cards = document.querySelectorAll('.card');
