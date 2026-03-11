@@ -27,24 +27,24 @@
     flex-direction: row;
     gap: 16px;
     align-items: stretch;
-    flex: 1 1 300px;   /* auto-fit width */
+    flex: 1 1 300px;   
     min-width: 300px;
     max-width: 600px;
 
-    max-height: 50vh;  /* card max height = half viewport */
-    overflow: hidden;  /* clip if content too tall */
+    max-height: 50vh;
+    overflow: hidden;  
   }
 
   .card img {
     width: auto;
-    height: 100%;       /* match card height */
+    height: 100%;       
     max-height: 100%;
-    object-fit: contain; /* scale proportionally */
+    object-fit: contain; 
     border-radius: 4px;
 
-    -webkit-user-drag: none; /* prevent dragging in Chrome/Safari */
-    user-select: none;        /* prevent selection */
-    pointer-events: none;     /* prevent right-click on image */
+    -webkit-user-drag: none;
+    user-select: none;
+    pointer-events: none;
   }
 
   .card .card-data {
@@ -65,31 +65,28 @@
     text-overflow: ellipsis;
   }
   .card .card-data div.field strong {
-    flex-shrink: 0; /* header never shrinks */
+    flex-shrink: 0; 
   }
   .card .card-data div.field span {
-    flex: 1;           /* value takes remaining space */
+    flex: 1;           
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* Table scrollable */
+  /* Table wrapper */
   #table-wrapper { overflow-x: auto; border: 1px solid #ccc; position: relative; }
-  #table-container { max-height: 400px; overflow-y: auto; }
+  #table-container { overflow-y: visible; }  /* no vertical scrollbar */
 
   table { border-collapse: collapse; table-layout: auto; width: 100%; min-width: 1400px; }
   th, td { padding: 8px; text-align: left; border: 1px solid #ccc; white-space: normal; }
   th { position: sticky; top: 0; background-color: #f0f0f0; z-index: 5; }
 
-  /* Force single-line columns */
   .nowrap { white-space: nowrap; }
 
-  /* Alternating row colors */
   tbody tr:nth-child(odd) { background-color: #fafafa; }
   tbody tr:nth-child(even) { background-color: #f5f5f5; }
 
-  /* Hover effect */
   tbody tr:hover { background-color: #ffeeba; }
 
   h2 { margin-top: 40px; }
@@ -99,9 +96,7 @@
 
 <h1>Book Data Viewer</h1>
 
-<div id="cards-container" class="cards">
-  <!-- Cards injected here -->
-</div>
+<div id="cards-container" class="cards"></div>
 
 <div id="bottom-section" style="display:none;">
   <h2>書籍收錄作品 / 作品完整列表</h2>
@@ -109,13 +104,9 @@
     <div id="table-container">
       <table id="works-table">
         <thead>
-          <tr>
-            <!-- Header dynamically generated -->
-          </tr>
+          <tr></tr>
         </thead>
-        <tbody>
-          <!-- Rows dynamically generated -->
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   </div>
@@ -123,9 +114,7 @@
 
 <script>
 // Disable right-click globally
-document.addEventListener('contextmenu', function(e) {
-  e.preventDefault();
-});
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
 // OpenSheet JSON URLs
 const urlHK = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
@@ -133,14 +122,12 @@ const urlJP = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK
 const urlWorks = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
 const urlComplete = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 
-// Fetch JSON
 async function fetchJSON(url) {
   const res = await fetch(url);
   if(!res.ok) throw new Error("Failed to fetch: " + url);
   return await res.json();
 }
 
-// Create horizontal card with inline fields
 function createCard(data, sheetName){
   let html = `<div class="card">`;
   if(data.Image) html += `<img src="${data.Image}" alt="Book Image">`;
@@ -154,47 +141,37 @@ function createCard(data, sheetName){
   return html;
 }
 
-// URL query
 function getQueryParams(){
   const params = new URLSearchParams(window.location.search);
-  return {
-    ISBNHK: params.get('ISBNHK'),
-    ISBNJP: params.get('ISBNJP')
-  };
+  return { ISBNHK: params.get('ISBNHK'), ISBNJP: params.get('ISBNJP') };
 }
 
-// Main
 async function showBooks(ISBNHK=null, ISBNJP=null){
   const cardsContainer = document.getElementById('cards-container');
   cardsContainer.innerHTML = '';
 
-  let HKData=[], JPData=[], worksData=[];
-
   if(ISBNHK){
     const HK = await fetchJSON(urlHK);
-    HKData = HK.filter(row => row.ISBN === ISBNHK);
+    const HKData = HK.filter(row => row.ISBN === ISBNHK);
     HKData.forEach(d => cardsContainer.innerHTML += createCard(d,'出版目録HK'));
   }
 
   if(ISBNJP){
     const JP = await fetchJSON(urlJP);
-    JPData = JP.filter(row => row.ISBN === ISBNJP);
+    const JPData = JP.filter(row => row.ISBN === ISBNJP);
     JPData.forEach(d => cardsContainer.innerHTML += createCard(d,'出版目録JP'));
   }
 
-  // Equal card heights
   const cards = document.querySelectorAll('.card');
   let maxHeight = 0;
   cards.forEach(c=>{ c.style.height='auto'; if(c.offsetHeight>maxHeight) maxHeight=c.offsetHeight; });
   cards.forEach(c=>c.style.height = maxHeight+'px');
 
-  // Bottom table
   if(ISBNJP){
     const works = await fetchJSON(urlWorks);
     const completeList = await fetchJSON(urlComplete);
 
-    worksData = works.filter(row=>row.ISBN===ISBNJP);
-
+    let worksData = works.filter(row=>row.ISBN===ISBNJP);
     if(worksData.length>0){
       worksData = worksData.map(row=>{
         const match = completeList.find(c=>c['作品番']===row['作品番']);
@@ -207,7 +184,6 @@ async function showBooks(ISBNHK=null, ISBNJP=null){
       const originalCols = ['ISBN','作品番','類','番','巻','收錄話','收錄頁','出版副題','收錄初出掲載誌','收錄初出掲載号','出版備考','副題港譯','色'];
       const extraCols = completeList.length>0?Object.keys(completeList[0]).filter(k=>!originalCols.includes(k)):[];
       
-      // Header
       const theadRow = document.querySelector('#works-table thead tr');
       theadRow.innerHTML='';
       [...originalCols,...extraCols].forEach(col=>{
@@ -217,7 +193,6 @@ async function showBooks(ISBNHK=null, ISBNJP=null){
         theadRow.appendChild(th);
       });
 
-      // Body
       const tbody = document.querySelector('#works-table tbody');
       tbody.innerHTML='';
       worksData.sort((a,b)=>(a.收錄話||0)-(b.收錄話||0));
@@ -241,7 +216,6 @@ async function showBooks(ISBNHK=null, ISBNJP=null){
   }
 }
 
-// Load page
 window.addEventListener('DOMContentLoaded',()=>{
   const {ISBNHK,ISBNJP} = getQueryParams();
   showBooks(ISBNHK,ISBNJP);
