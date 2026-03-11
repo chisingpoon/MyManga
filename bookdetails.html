@@ -31,16 +31,20 @@
     min-width: 300px;
     max-width: 600px;
 
-    max-height: 50vh;  /* card max height = half of viewport */
+    max-height: 50vh;  /* card max height = half viewport */
     overflow: hidden;  /* clip if content too tall */
   }
 
   .card img {
     width: auto;
     height: 100%;       /* match card height */
-    max-height: 100%;   /* never exceed card height */
+    max-height: 100%;
     object-fit: contain; /* scale proportionally */
     border-radius: 4px;
+
+    -webkit-user-drag: none; /* prevent dragging in Chrome/Safari */
+    user-select: none;        /* prevent selection */
+    pointer-events: none;     /* prevent right-click on image */
   }
 
   .card .card-data {
@@ -99,6 +103,11 @@
 </div>
 
 <script>
+// Disable right-click globally
+document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+});
+
 // OpenSheet JSON URLs
 const urlHK = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
 const urlJP = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
