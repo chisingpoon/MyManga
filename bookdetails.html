@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -25,36 +26,23 @@ align-items:stretch;
 /* ---------- CARD ---------- */
 
 .card{
-
 background:white;
 border-radius:10px;
 padding:18px;
-
 box-shadow:0 3px 8px rgba(0,0,0,0.15);
-
 display:flex;
 gap:20px;
-
-height:100%;
 min-height:260px;
 }
 
-/* IMAGE SIDE */
-
 .card img{
-
 height:100%;
 width:auto;
-
 max-width:220px;
-
 object-fit:contain;
-
-user-select:none;
 pointer-events:none;
+user-select:none;
 }
-
-/* TEXT SIDE */
 
 .cardContent{
 flex:1;
@@ -75,11 +63,9 @@ margin:3px 0;
 
 #bottomSection{
 display:none;
-
 background:white;
 padding:20px;
 border-radius:10px;
-
 box-shadow:0 3px 8px rgba(0,0,0,0.15);
 }
 
@@ -115,6 +101,7 @@ max-height:250px;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -131,11 +118,15 @@ max-height:250px;
 
 <script>
 
-/* ---------- CONFIG ---------- */
+/* ---------- BACKEND CONFIG ---------- */
 
-const tableColumns=[
+/* control column order */
+
+const columnOrder=[
 
 "作品番",
+"作品名",
+"作者",
 "類",
 "番",
 "巻",
@@ -147,6 +138,14 @@ const tableColumns=[
 "出版備考",
 "副題港譯",
 "色"
+
+];
+
+/* columns hidden from user */
+
+const hiddenColumns=[
+
+"ISBN"
 
 ];
 
@@ -163,6 +162,12 @@ const hkURL="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3k
 const jpURL="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
 const worksURL="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
 const masterURL="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
+
+/* ---------- HELPER ---------- */
+
+function key(v){
+return String(v || "").trim();
+}
 
 /* ---------- CREATE CARD ---------- */
 
@@ -182,16 +187,15 @@ title.textContent=data[titleField]||"";
 
 content.appendChild(title);
 
-for(let key in data){
+for(let k in data){
 
-if(key===titleField || key==="Image") continue;
+if(k===titleField || k==="Image") continue;
 
-let field=document.createElement("div");
-field.className="field";
+let div=document.createElement("div");
+div.className="field";
+div.innerHTML="<b>"+k+"</b>: "+data[k];
 
-field.innerHTML="<b>"+key+"</b>: "+data[key];
-
-content.appendChild(field);
+content.appendChild(div);
 
 }
 
@@ -210,12 +214,11 @@ if(!ISBNHK) return;
 
 let data=await (await fetch(hkURL)).json();
 
-let row=data.find(r=>r.ISBN===ISBNHK);
+let row=data.find(r=>key(r.ISBN)===key(ISBNHK));
 
 if(row){
 
 let card=createCard(row,"Title");
-
 document.getElementById("hkCard").appendChild(card);
 
 }
@@ -230,12 +233,11 @@ if(!ISBNJP) return;
 
 let data=await (await fetch(jpURL)).json();
 
-let row=data.find(r=>r.ISBN===ISBNJP);
+let row=data.find(r=>key(r.ISBN)===key(ISBNJP));
 
 if(row){
 
 let card=createCard(row,"標題");
-
 document.getElementById("jpCard").appendChild(card);
 
 }
@@ -250,52 +252,76 @@ if(!ISBNJP) return;
 
 document.getElementById("bottomSection").style.display="block";
 
-let works=await (await fetch(worksURL)).json();
-let master=await (await fetch(masterURL)).json();
+const works=await (await fetch(worksURL)).json();
+const master=await (await fetch(masterURL)).json();
 
-/* build lookup */
+/* create lookup */
 
-let masterMap={};
+const masterMap={};
 
-master.forEach(m=>{
-masterMap[m["作品番"]]=m;
+master.forEach(r=>{
+masterMap[key(r["作品番"])]=r;
 });
 
-/* filter */
+/* filter rows */
 
-let filtered=works.filter(r=>r.ISBN===ISBNJP);
+let filtered=works.filter(r=>key(r.ISBN)===key(ISBNJP));
 
 /* join */
 
 filtered=filtered.map(w=>{
-let m=masterMap[w["作品番"]]||{};
+let m=masterMap[key(w["作品番"])] || {};
 return {...w,...m};
 });
 
 /* sort */
 
-filtered.sort((a,b)=>Number(a["收錄話"])-Number(b["收錄話"]));
+filtered.sort((a,b)=>Number(a["收錄話"]||0)-Number(b["收錄話"]||0));
+
+/* detect columns */
+
+let detected=new Set();
+
+filtered.forEach(r=>{
+Object.keys(r).forEach(c=>detected.add(c));
+});
+
+/* remove hidden */
+
+let columns=[...detected].filter(c=>!hiddenColumns.includes(c));
+
+/* apply order */
+
+columns.sort((a,b)=>{
+
+let ia=columnOrder.indexOf(a);
+let ib=columnOrder.indexOf(b);
+
+if(ia===-1) ia=999;
+if(ib===-1) ib=999;
+
+return ia-ib;
+
+});
+
+/* build table */
 
 let table=document.getElementById("worksTable");
 
-/* header */
-
 let html="<tr>";
 
-tableColumns.forEach(c=>{
+columns.forEach(c=>{
 html+="<th>"+c+"</th>";
 });
 
 html+="</tr>";
 
-/* rows */
-
 filtered.forEach(r=>{
 
 html+="<tr>";
 
-tableColumns.forEach(c=>{
-html+="<td>"+(r[c]||"")+"</td>";
+columns.forEach(c=>{
+html+="<td>"+(r[c]??"")+"</td>";
 });
 
 html+="</tr>";
