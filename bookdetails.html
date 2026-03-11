@@ -14,7 +14,7 @@
     flex-wrap: wrap;
     gap: 20px;
     margin-bottom: 40px;
-    align-items: flex-start; /* ensures all cards align at top */
+    align-items: flex-start;
   }
 
   .card {
@@ -28,20 +28,20 @@
     flex: 1 1 300px;
     min-width: 300px;
     max-width: 600px;
-    align-items: stretch; /* stretch text and image to match height */
+    align-items: stretch; /* make all children match card height */
   }
 
-  /* Image wrapper ensures image height matches text column */
+  /* Image wrapper ensures image height matches card height */
   .card .img-wrapper {
     flex: 0 0 auto;
     display: flex;
-    align-items: stretch;
+    align-items: stretch;   /* stretch image to match card height */
   }
 
   .card .img-wrapper img {
-    height: 100%;       /* scale to match card height */
-    width: auto;        /* maintain aspect ratio */
-    object-fit: contain;
+    height: 100%;          /* fill card height */
+    width: auto;           /* keep aspect ratio */
+    object-fit: contain;   /* scale inside the box without cropping */
     border-radius: 4px;
     display: block;
   }
