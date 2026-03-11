@@ -6,7 +6,7 @@
 <title>Book Data Viewer</title>
 <style>
   body { font-family: Arial, sans-serif; margin: 20px; }
-  
+
   /* Cards container auto-fit */
   .cards {
     display: flex;
@@ -16,27 +16,33 @@
     justify-content: flex-start;
   }
 
-  /* Horizontal card layout with stretched image */
+  /* Horizontal card layout with image auto-fit */
   .card {
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 16px;
     box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
-    
+
     display: flex;
     flex-direction: row;
     gap: 16px;
-    align-items: stretch;      /* stretch image to match data height */
-    flex: 1 1 300px;           /* auto fit, min width 300px */
+    align-items: stretch;
+    flex: 1 1 300px;   /* auto-fit width */
     min-width: 300px;
     max-width: 600px;
+
+    max-height: 50vh;  /* card max height = half of viewport */
+    overflow: hidden;  /* clip if content too tall */
   }
+
   .card img {
     width: auto;
-    height: 100%;             /* match height of text container */
-    object-fit: contain;       /* scale without distortion */
+    height: 100%;       /* match card height */
+    max-height: 100%;   /* never exceed card height */
+    object-fit: contain; /* scale proportionally */
     border-radius: 4px;
   }
+
   .card .card-data {
     flex: 1;
     display: flex;
