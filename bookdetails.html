@@ -133,46 +133,45 @@ const STORYDETAIL_SHEET =
 // 3️⃣ Load everything
 if (!isbnhk && !isbnjp) {
   document.getElementById("content").innerHTML = "Please provide a valid ISBN (isbnhk or isbnjp) in the URL.";
-  return;
-}
+} else {
+  Promise.all([
+    fetch(MANGALIST_SHEET).then(r => r.json()),
+    fetch(JPINFO_SHEET).then(r => r.json()),
+    fetch(BOOKSTORY_SHEET).then(r => r.json()),
+    fetch(STORYDETAIL_SHEET).then(r => r.json())
+  ])
+  .then(([hkbooks, jpbooks, bookStories, allStories]) => {
+    console.log('Loaded Sheets:', { hkbooks, jpbooks, bookStories, allStories });
 
-Promise.all([
-  fetch(MANGALIST_SHEET).then(r => r.json()),
-  fetch(JPINFO_SHEET).then(r => r.json()),
-  fetch(BOOKSTORY_SHEET).then(r => r.json()),
-  fetch(STORYDETAIL_SHEET).then(r => r.json())
-])
-.then(([hkbooks, jpbooks, bookStories, allStories]) => {
-  console.log('Loaded Sheets:', { hkbooks, jpbooks, bookStories, allStories });
+    // 1️⃣ Find HK book if isbnhk is provided
+    const manga = isbnhk ? hkbooks.find(b => b.ISBN?.trim() === isbnhk?.trim()) : null;
+    console.log('Found HK Book:', manga);
 
-  // 1️⃣ Find HK book if isbnhk is provided
-  const manga = isbnhk ? hkbooks.find(b => b.ISBN?.trim() === isbnhk?.trim()) : null;
-  console.log('Found HK Book:', manga);
+    // 2️⃣ Find JP book if isbnjp is provided
+    const jpinfo = isbnjp ? jpbooks.find(j => j.ISBN?.trim() === isbnjp?.trim()) : null;
+    console.log('Found JP Book:', jpinfo);
 
-  // 2️⃣ Find JP book if isbnjp is provided
-  const jpinfo = isbnjp ? jpbooks.find(j => j.ISBN?.trim() === isbnjp?.trim()) : null;
-  console.log('Found JP Book:', jpinfo);
+    if (!manga && !jpinfo) {
+      document.getElementById("content").innerHTML = "Book not found.";
+      return;
+    }
 
-  if (!manga && !jpinfo) {
-    document.getElementById("content").innerHTML = "Book not found.";
-    return;
-  }
+    const collectedWorks = jpinfo ? bookStories
+      .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
+      .sort((a, b) => Number(a.話) - Number(b.話)) : [];
 
-  const collectedWorks = jpinfo ? bookStories
-    .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
-    .sort((a, b) => Number(a.話) - Number(b.話)) : [];
+    const mergedRows = collectedWorks.map(r => {
+      const detail = allStories.find(s => s.作品番?.trim() === r.作品番?.trim());
+      return { ...r, ...detail };
+    });
 
-  const mergedRows = collectedWorks.map(r => {
-    const detail = allStories.find(s => s.作品番?.trim() === r.作品番?.trim());
-    return { ...r, ...detail };
+    render(manga, mergedRows, jpinfo);
+  })
+  .catch(err => {
+    console.error('Error fetching data:', err);
+    document.getElementById("content").innerHTML = "Failed to load data.";
   });
-
-  render(manga, mergedRows, jpinfo);
-})
-.catch(err => {
-  console.error('Error fetching data:', err);
-  document.getElementById("content").innerHTML = "Failed to load data.";
-});
+}
 
 // 7️⃣ Render page
 function render(manga, storyRows, jpinfo) {
@@ -194,7 +193,7 @@ function render(manga, storyRows, jpinfo) {
   `).join("");
 
   const tableSection = storyRows.length > 0 ? `
-    <h2>收錄話</h2>
+    <h2>収録話</h2>
     <table class="details-table">
       <thead>
         <tr>
