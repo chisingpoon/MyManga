@@ -1,237 +1,249 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Book Viewer</title>
-  <style>
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      margin: 20px;
-      background: #f3f3f3;
-    }
+<meta charset="UTF-8">
+<title>Book Detail</title>
+<style>
+body {
+  font-family: Arial;
+  padding: 40px;
+}
 
-    /* ---------- TOP SECTION ---------- */
-    #topSection {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-      gap: 40px;
-      margin-bottom: 40px;
-    }
+.top-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
 
-    /* ---------- CARD ---------- */
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      display: flex;
-      flex-direction: row;
-      gap: 20px;
-      align-items: stretch; /* ensure content stretches to fill */
-      height: auto;
-    }
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
 
-    /* IMAGE BOX */
-    .book-image {
-      flex: 0 0 160px; /* fixed width */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f5f5f5;
-      border-radius: 8px;
-      overflow: hidden;
-      height: 100%; /* Image box fills the full height of the card */
-    }
+.card-inner {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  gap: 20px;
+}
 
-    /* FIX: Auto-fit the image height while maintaining aspect ratio */
-    .book-image img {
-      height: 100%; /* Ensure the image fills the height of the card */
-      width: auto;  /* Keep aspect ratio intact */
-      object-fit: contain;  /* Ensure the image does not stretch */
-      display: block;
-    }
+.book-image {
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
 
-    /* TEXT */
-    .cardContent {
-      font-size: 14px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+.book-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
 
-    .field {
-      margin: 3px 0;
-    }
+.column-box {
+  font-size: 14px;
+}
 
-    /* ---------- TABLE ---------- */
-    #bottomSection {
-      display: none;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-    }
+.book-info {
+  width: 70%;
+}
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      table-layout: auto;
-    }
+.book-info h1 {
+  margin-top: 0;
+}
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 6px 10px;
-      vertical-align: top;
-      word-break: break-word;
-    }
+.info-row {
+  margin-bottom: 8px;
+}
 
-    th {
-      background: #eee;
-      white-space: nowrap;
-    }
+/* ===== Details Table ===== */
+.details-table {
+  width: 100%;              /* Fill browser width */
+  border-collapse: collapse;
+  table-layout: auto;       /* Natural sizing */
+}
 
-    /* MOBILE */
-    @media (max-width: 700px) {
-      .card {
-        flex-direction: column;
-        align-items: center;
-      }
+.details-table th,
+.details-table td {
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  word-break: break-word;   /* Prevent overflow */
+}
 
-      .book-image {
-        width: 100%;
-        height: auto;
-      }
+.details-table th {
+  background: #f2f2f2;
+  text-align: left;
+}
 
-      .book-image img {
-        width: auto;
-        max-height: 250px;
-      }
-    }
-  </style>
+.details-table tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* ===== Image Modal ===== */
+.image-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.image-modal.show {
+  display: flex;
+}
+
+.image-modal img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.image-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 40px;
+  color: white;
+  cursor: pointer;
+}
+
+.clickable-image {
+  cursor: zoom-in;
+}
+
+.jp-detail-button {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: #0077cc;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.jp-detail-button:hover {
+  background-color: #005fa3;
+}
+
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+</style>
 </head>
 <body>
-  <div id="topSection"></div>
 
-  <div id="bottomSection">
-    <h2>收錄作品</h2>
-    <table id="worksTable"></table>
-  </div>
+<div id="content">Loading...</div>
 
-  <script>
-    const hkCardFieldLabels = {
-      "Title": "書名",
-      "Volume": "卷數",
-      "Subtitle": "副標題",
-      "Author": "作者",
-      "Publisher": "出版社",
-      "Price": "定價",
-      "Page": "頁數",
-      "IssueDate": "發行日期",
-      "Size": "尺寸",
-      "RetailPoint": "零售點",
-      "ISBN": "ISBN",
-      "OriginalTitle": "原書名",
-      "OriginalSubtitle": "原副標題",
-      "OriginCountry": "原產地",
-      "ISBN_JP": "日本ISBN",
-      "Active": "是否上架",
-      "Sold": "已售數"
-    };
+<script>
+// 1️⃣ Get ISBN from URL
+const params = new URLSearchParams(window.location.search);
+const isbn = params.get("isbn");
 
-    const jpCardFieldLabels = {
-      "標題": "タイトル",
-      "巻": "巻数",
-      "副標題": "サブタイトル",
-      "著": "著者",
-      "出版社": "出版社",
-      "定価": "定価",
-      "頁": "ページ",
-      "初版発行日": "初版発行日",
-      "判型": "判型",
-      "ISBN": "ISBN",
-      "Active": "販売中",
-      "Image": "画像"
-    };
+// 2️⃣ Sheet URLs
+const MANGALIST_SHEET =
+  "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
+const JPINFO_SHEET =
+  "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
+const BOOKSTORY_SHEET =
+  "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
+const STORYDETAIL_SHEET =
+  "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 
-    const hkURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目錄HK";
-    const jpURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目錄JP";
+// 3️⃣ Load everything
+Promise.all([
+  fetch(MANGALIST_SHEET).then(r => r.json()),
+  fetch(JPINFO_SHEET).then(r => r.json()),
+  fetch(BOOKSTORY_SHEET).then(r => r.json()),
+  fetch(STORYDETAIL_SHEET).then(r => r.json())
+])
+.then(([hkbooks, jpbooks, bookStories, allStories]) => {
+  const manga = hkbooks.find(b => b.ISBN?.trim() === isbn?.trim());
+  if (!manga) {
+    document.getElementById("content").innerHTML = "Book not found.";
+    return;
+  }
 
-    async function fetchWithCache(url) {
-      let cache = localStorage.getItem(url);
-      if (cache) {
-        let obj = JSON.parse(cache);
-        if (Date.now() - obj.time < 600000) {  // 10 min cache time
-          return obj.data;
-        }
-      }
-      const data = await (await fetch(url)).json();
-      localStorage.setItem(url, JSON.stringify({ time: Date.now(), data: data }));
-      return data;
-    }
+  const jpinfo = jpbooks.find(j => j.ISBN?.trim() === manga.ISBN_JP?.trim());
 
-    async function loadHK() {
-      const ISBNHK = new URLSearchParams(location.search).get("ISBNHK");
-      if (!ISBNHK) return;
+  if (!jpinfo) {
+    render(manga, [], null);
+    return;
+  }
 
-      const data = await fetchWithCache(hkURL);
-      const row = data.find(r => r.ISBN === ISBNHK);
-      if (row) {
-        const card = createCard(row, "Title", hkCardFieldLabels);
-        document.getElementById("topSection").appendChild(card);
-      }
-    }
+  const collectedWorks = bookStories
+    .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
+    .sort((a, b) => Number(a.話) - Number(b.話));
 
-    async function loadJP() {
-      const ISBNJP = new URLSearchParams(location.search).get("ISBNJP");
-      if (!ISBNJP) return;
+  const mergedRows = collectedWorks.map(r => {
+    const detail = allStories.find(s => s.作品番?.trim() === r.作品番?.trim());
+    return { ...r, ...detail };
+  });
 
-      const data = await fetchWithCache(jpURL);
-      const row = data.find(r => r.ISBN === ISBNJP);
-      if (row) {
-        const card = createCard(row, "標題", jpCardFieldLabels);
-        document.getElementById("topSection").appendChild(card);
-      }
-    }
+  render(manga, mergedRows, jpinfo);
+})
+.catch(err => {
+  document.getElementById("content").innerHTML = "Failed to load data.";
+  console.error(err);
+});
 
-    function createCard(data, titleField, labelMap) {
-      const card = document.createElement("div");
-      card.className = "card";
+// 7️⃣ Render page
+function render(manga, storyRows, jpinfo) {
+  const tableRows = storyRows.map(d => `
+    <tr>
+      <td>${d.番 || ""}</td>
+      <td>${d.巻 || ""}</td>
+      <td>${d.收錄話 || ""}</td>
+      <td>${d.全集副題香港譯名 || ""}</td>
+      <td>${d.出版副題 || ""}</td>
+      <td>${d.頁 || ""}</td>
+      <td>${d.初出副題 || ""}</td>
+      <td>${d.全集副題 || ""}</td>
+      <td>${d.初出掲載誌 || ""}</td>
+      <td>${d.初出掲載号 || ""}</td>
+      <td>${d.大全集 || ""}</td>
+      <td>${d.出版備考 || ""}</td>
+    </tr>
+  `).join("");
 
-      const imageBox = document.createElement("div");
-      imageBox.className = "book-image";
-      const img = document.createElement("img");
-      img.src = data.Image || "";
-      imageBox.appendChild(img);
+  const tableSection = storyRows.length > 0 ? `
+    <h2>收錄故事</h2>
+    <table class="details-table">
+      <thead>
+        <tr>
+          <th>番</th>
+          <th>巻</th>
+          <th>收錄話</th>
+          <th>香港譯名</th>
+          <th>日本副題</th>
+          <th>頁</th>
+          <th>初出副題</th>
+          <th>全集副題</th>
+          <th>初出掲載誌</th>
+          <th>初出掲載号</th>
+          <th>大全集</th>
+          <th>日本出版備考</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tableRows}
+      </tbody>
+    </table>
+  ` : "";
 
-      const content = document.createElement("div");
-      content.className = "cardContent";
-
-      const title = document.createElement("h2");
-      title.textContent = data[titleField] || "";
-      content.appendChild(title);
-
-      for (let k in data) {
-        if (k === titleField || k === "Image") continue;
-
-        const div = document.createElement("div");
-        div.className = "field";
-        div.innerHTML = "<b>" + (labelMap[k] || k) + "</b>: " + (data[k] || "");
-        content.appendChild(div);
-      }
-
-      card.appendChild(imageBox);
-      card.appendChild(content);
-
-      return card;
-    }
-
-    async function init() {
-      await loadHK();
-      await loadJP();
-    }
-
-    init();
-  </script>
-</body>
-</html>
+  const jpCard = jpinfo ? `
+    <div class="card">
+      <div class="card-inner">
+        <div class="book-image">
+          <img src="${jpinfo.Image || ""}" alt="${jpinfo.標題} ${jpinfo.巻}" class="clickable-image" onclick="openImageModal('${jpinfo.Image || ""}')">
+        </
