@@ -124,6 +124,11 @@ th{
 </div>
 
 <script>
+// Debugging helper function
+function log(message) {
+  console.log(message);
+}
+
 /* ---------- BACKEND CONFIG ---------- */
 const hiddenColumns = ["ISBN"]; 
 
@@ -192,8 +197,65 @@ const params = new URLSearchParams(location.search);
 const ISBNHK = params.get("ISBNHK");
 const ISBNJP = params.get("ISBNJP");
 
+log('ISBNHK: ' + ISBNHK + ', ISBNJP: ' + ISBNJP);  // Debugging the URL params
+
 /* ---------- DATA SOURCES ---------- */
 const hkURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
 const jpURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
 const worksURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
-const masterURL = "https://opensheet.elk.sh/1Ker
+const masterURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
+
+/* ---------- HELPERS ---------- */
+function key(v){ return String(v||"").trim(); }
+
+function createCard(data, titleField, labelMap){
+  let card = document.createElement("div");
+  card.className = "card";
+
+  let img = document.createElement("img");
+  img.src = data.Image||"";
+
+  let content = document.createElement("div");
+  content.className = "cardContent";
+  let title = document.createElement("h2");
+  title.textContent = data[titleField] || "";
+  content.appendChild(title);
+
+  for(let k in data){
+    if(k === titleField || k === "Image") continue;
+    let div = document.createElement("div");
+    div.className = "field";
+    div.innerHTML = "<b>"+labelMap[k]+"</b>: " + data[k];
+    content.appendChild(div);
+  }
+
+  card.appendChild(img);
+  card.appendChild(content);
+
+  return card;
+}
+
+/* ---------- LOAD HK CARD ---------- */
+async function loadHK() {
+  if(!ISBNHK) return;
+  let data = await fetchWithCache(hkURL);
+  let row = data.find(r => key(r.ISBN) === key(ISBNHK));
+  if (row) {
+    let card = createCard(row, "Title", hkCardFieldLabels);
+    document.getElementById("hkCard").appendChild(card);
+  }
+}
+
+/* ---------- LOAD JP CARD ---------- */
+async function loadJP() {
+  if(!ISBNJP) return;
+  let data = await fetchWithCache(jpURL);
+  let row = data.find(r => key(r.ISBN) === key(ISBNJP));
+  if (row) {
+    let card = createCard(row, "標題", jpCardFieldLabels);
+    document.getElementById("jpCard").appendChild(card);
+  }
+}
+
+/* ---------- CONDITIONAL RENDERING ---------- */
+async
