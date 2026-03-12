@@ -24,30 +24,26 @@ body {
   display: grid;
   grid-template-columns: 40% 60%;
   gap: 20px;
-  height: 100%; /* allow image to take full column height */
+  height: 100%;
 }
-
 .book-image {
   position: relative;
   width: 100%;
-  height: 100%;       /* fill the column height */
+  height: 100%;
   border-radius: 8px;
   overflow: hidden;
 }
-
 .book-image img {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain; /* keep aspect ratio but fill container */
+  object-fit: contain;
+  border-radius: 8px;
 }
 .column-box {
   font-size: 14px;
-}
-.book-info h1 {
-  margin-top: 0;
 }
 .details-table {
   width: 100%;
@@ -106,17 +102,21 @@ img {
 <div id="content">Loading...</div>
 
 <script>
-// Get URL parameters
+// ===== Config: Hide columns if desired =====
+const hideColumns = []; // Add column names to hide
+
+// ===== Get URL parameters =====
 const params = new URLSearchParams(window.location.search);
 const isbnhk = (params.get("isbnhk") || params.get("isbn") || "").trim();
 const isbnjp = (params.get("isbnjp") || params.get("isbn") || "").trim();
 
-// Sheet URLs
+// ===== Sheet URLs =====
 const MANGALIST_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
 const JPINFO_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
 const BOOKSTORY_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
 const STORYDETAIL_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 
+// ===== Check URL parameters =====
 if (!isbnhk && !isbnjp) {
   document.getElementById("content").innerHTML = "Please provide a valid ISBN (isbnhk or isbnjp) in the URL.";
 } else {
@@ -128,10 +128,7 @@ if (!isbnhk && !isbnjp) {
   ])
   .then(([hkbooks, jpbooks, bookStories, allStories]) => {
 
-    // Find HK book
     const manga = isbnhk ? hkbooks.find(b => b.ISBN?.trim() === isbnhk) : null;
-
-    // Find JP book
     const jpinfo = isbnjp ? jpbooks.find(j => j.ISBN?.trim() === isbnjp) : null;
 
     if (!manga && !jpinfo) {
@@ -139,7 +136,6 @@ if (!isbnhk && !isbnjp) {
       return;
     }
 
-    // Bottom section: collected works
     const collectedWorks = jpinfo ? bookStories
       .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
       .sort((a, b) => Number(a.話 || a.收錄話 || 0) - Number(b.話 || b.收錄話 || 0))
@@ -159,48 +155,8 @@ if (!isbnhk && !isbnjp) {
   });
 }
 
-// Render the page
+// ===== Render page =====
 function renderPage(manga, jpinfo, storyRows) {
-  const tableRows = storyRows.map(d => `
-    <tr>
-      <td>${d.番 || ""}</td>
-      <td>${d.巻 || ""}</td>
-      <td>${d.收錄話 || d.話 || ""}</td>
-      <td>${d.全集副題香港譯名 || ""}</td>
-      <td>${d.出版副題 || ""}</td>
-      <td>${d.頁 || ""}</td>
-      <td>${d.初出副題 || ""}</td>
-      <td>${d.全集副題 || ""}</td>
-      <td>${d.初出掲載誌 || ""}</td>
-      <td>${d.初出掲載号 || ""}</td>
-      <td>${d.大全集 || ""}</td>
-      <td>${d.出版備考 || ""}</td>
-    </tr>
-  `).join("");
-
-  const tableSection = storyRows.length > 0 ? `
-    <h2>收錄故事</h2>
-    <table class="details-table">
-      <thead>
-        <tr>
-          <th>番</th>
-          <th>巻</th>
-          <th>收錄話</th>
-          <th>香港譯名</th>
-          <th>出版副題</th>
-          <th>頁</th>
-          <th>初出副題</th>
-          <th>全集副題</th>
-          <th>初出掲載誌</th>
-          <th>初出掲載号</th>
-          <th>大全集</th>
-          <th>出版備考</th>
-        </tr>
-      </thead>
-      <tbody>${tableRows}</tbody>
-    </table>
-  ` : "";
-
   const hkCard = manga ? `
     <div class="card">
       <div class="card-inner">
@@ -251,11 +207,32 @@ function renderPage(manga, jpinfo, storyRows) {
     <div class="top-section">
       ${hkCard}${jpCard}
     </div>
-    ${tableSection}
   `;
+
+  // ===== Bottom table with all columns =====
+  if (storyRows.length > 0) {
+    // Collect all column names dynamically
+    const allColumns = Array.from(new Set(storyRows.flatMap(row => Object.keys(row))))
+      .filter(c => !hideColumns.includes(c));
+
+    const thead = `<tr>${allColumns.map(c => `<th>${c}</th>`).join('')}</tr>`;
+    const tbody = storyRows.map(row => `
+      <tr>${allColumns.map(c => `<td>${row[c] || ""}</td>`).join('')}</tr>
+    `).join("");
+
+    const tableSection = `
+      <h2>收錄故事</h2>
+      <table class="details-table">
+        <thead>${thead}</thead>
+        <tbody>${tbody}</tbody>
+      </table>
+    `;
+
+    document.getElementById("content").insertAdjacentHTML('beforeend', tableSection);
+  }
 }
 
-// Image modal
+// ===== Image modal =====
 function openImageModal(src) {
   const modal = document.getElementById("imageModal");
   const modalImg = document.getElementById("modalImage");
@@ -267,11 +244,10 @@ function closeImageModal() {
   modal.classList.remove("show");
 }
 
-// ESC key close
+// ===== Key and interaction events =====
 document.addEventListener("keydown", e => { if(e.key==="Escape") closeImageModal(); });
-// Disable right click & dragging
-window.addEventListener("contextmenu", e=>e.preventDefault(), true);
-window.addEventListener("dragstart", e=>e.preventDefault());
+window.addEventListener("contextmenu", e => e.preventDefault(), true);
+window.addEventListener("dragstart", e => e.preventDefault());
 </script>
 
 <div id="imageModal" class="image-modal">
