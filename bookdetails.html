@@ -1,145 +1,145 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Book Detail</title>
-<style>
-body {
-  font-family: Arial;
-  padding: 40px;
-}
+  <meta charset="UTF-8">
+  <title>Book Detail</title>
+  <style>
+    body {
+      font-family: Arial;
+      padding: 40px;
+    }
 
-.top-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  margin-bottom: 40px;
-}
+    .top-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
 
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-}
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
 
-.card-inner {
-  display: grid;
-  grid-template-columns: 40% 60%;
-  gap: 20px;
-}
+    .card-inner {
+      display: grid;
+      grid-template-columns: 40% 60%;
+      gap: 20px;
+    }
 
-.book-image {
-  aspect-ratio: 3 / 4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f5f5f5;
-  border-radius: 8px;
-  overflow: hidden;
-}
+    .book-image {
+      aspect-ratio: 3 / 4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f5f5;
+      border-radius: 8px;
+      overflow: hidden;
+    }
 
-.book-image img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
+    .book-image img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
 
-.column-box {
-  font-size: 14px;
-}
+    .column-box {
+      font-size: 14px;
+    }
 
-.book-info {
-  width: 70%;
-}
+    .book-info {
+      width: 70%;
+    }
 
-.book-info h1 {
-  margin-top: 0;
-}
+    .book-info h1 {
+      margin-top: 0;
+    }
 
-.info-row {
-  margin-bottom: 8px;
-}
+    .info-row {
+      margin-bottom: 8px;
+    }
 
-/* ===== Details Table ===== */
-.details-table {
-  width: 100%;              /* Fill browser width */
-  border-collapse: collapse;
-  table-layout: auto;       /* Natural sizing */
-}
+    /* ===== Details Table ===== */
+    .details-table {
+      width: 100%;              /* Fill browser width */
+      border-collapse: collapse;
+      table-layout: auto;       /* Natural sizing */
+    }
 
-.details-table th,
-.details-table td {
-  border: 1px solid #ccc;
-  padding: 6px 10px;
-  word-break: break-word;   /* Prevent overflow */
-}
+    .details-table th,
+    .details-table td {
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      word-break: break-word;   /* Prevent overflow */
+    }
 
-.details-table th {
-  background: #f2f2f2;
-  text-align: left;
-}
+    .details-table th {
+      background: #f2f2f2;
+      text-align: left;
+    }
 
-.details-table tr:nth-child(even) {
-  background: #fafafa;
-}
+    .details-table tr:nth-child(even) {
+      background: #fafafa;
+    }
 
-/* ===== Image Modal ===== */
-.image-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
+    /* ===== Image Modal ===== */
+    .image-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
 
-.image-modal.show {
-  display: flex;
-}
+    .image-modal.show {
+      display: flex;
+    }
 
-.image-modal img {
-  max-width: 90%;
-  max-height: 90%;
-  object-fit: contain;
-  border-radius: 8px;
-}
+    .image-modal img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
 
-.image-close {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  font-size: 40px;
-  color: white;
-  cursor: pointer;
-}
+    .image-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 40px;
+      color: white;
+      cursor: pointer;
+    }
 
-.clickable-image {
-  cursor: zoom-in;
-}
+    .clickable-image {
+      cursor: zoom-in;
+    }
 
-.jp-detail-button {
-  display: inline-block;
-  margin-top: 15px;
-  padding: 8px 16px;
-  background-color: #0077cc;
-  color: white;
-  text-decoration: none;
-  border-radius: 6px;
-  font-weight: bold;
-  transition: background-color 0.3s;
-}
+    .jp-detail-button {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 8px 16px;
+      background-color: #0077cc;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
 
-.jp-detail-button:hover {
-  background-color: #005fa3;
-}
+    .jp-detail-button:hover {
+      background-color: #005fa3;
+    }
 
-img {
-  user-select: none;
-  -webkit-user-drag: none;
-}
-</style>
+    img {
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+  </style>
 </head>
 <body>
 
@@ -148,7 +148,11 @@ img {
 <script>
 // 1️⃣ Get ISBN from URL
 const params = new URLSearchParams(window.location.search);
-const isbn = params.get("isbn");
+const isbnhk = params.get("isbnhk");  // HK ISBN
+const isbnjp = params.get("isbnjp");  // JP ISBN
+
+console.log('HK ISBN from URL:', isbnhk);  // Debugging HK ISBN value
+console.log('JP ISBN from URL:', isbnjp);  // Debugging JP ISBN value
 
 // 2️⃣ Sheet URLs
 const MANGALIST_SHEET =
@@ -168,23 +172,25 @@ Promise.all([
   fetch(STORYDETAIL_SHEET).then(r => r.json())
 ])
 .then(([hkbooks, jpbooks, bookStories, allStories]) => {
-  const manga = hkbooks.find(b => b.ISBN?.trim() === isbn?.trim());
-  if (!manga) {
+  console.log(hkbooks, jpbooks, bookStories, allStories);  // Debugging fetched data
+  
+  // 1️⃣ Find HK book if isbnhk is provided
+  const manga = isbnhk ? hkbooks.find(b => b.ISBN?.trim() === isbnhk?.trim()) : null;
+  console.log('Found HK Book:', manga);  // Debugging found HK book
+  
+  // 2️⃣ Find JP book if isbnjp is provided
+  const jpinfo = isbnjp ? jpbooks.find(j => j.ISBN?.trim() === isbnjp?.trim()) : null;
+  console.log('Found JP Book:', jpinfo);  // Debugging found JP book
+  
+  if (!manga && !jpinfo) {
     document.getElementById("content").innerHTML = "Book not found.";
     return;
   }
-
-  const jpinfo = jpbooks.find(j => j.ISBN?.trim() === manga.ISBN_JP?.trim());
-
-  if (!jpinfo) {
-    render(manga, [], null);
-    return;
-  }
-
-  const collectedWorks = bookStories
+  
+  const collectedWorks = jpinfo ? bookStories
     .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
-    .sort((a, b) => Number(a.話) - Number(b.話));
-
+    .sort((a, b) => Number(a.話) - Number(b.話)) : [];
+  
   const mergedRows = collectedWorks.map(r => {
     const detail = allStories.find(s => s.作品番?.trim() === r.作品番?.trim());
     return { ...r, ...detail };
@@ -193,8 +199,8 @@ Promise.all([
   render(manga, mergedRows, jpinfo);
 })
 .catch(err => {
+  console.error('Error fetching data:', err);
   document.getElementById("content").innerHTML = "Failed to load data.";
-  console.error(err);
 });
 
 // 7️⃣ Render page
@@ -203,7 +209,7 @@ function render(manga, storyRows, jpinfo) {
     <tr>
       <td>${d.番 || ""}</td>
       <td>${d.巻 || ""}</td>
-      <td>${d.收錄話 || ""}</td>
+      <td>${d.収録話 || ""}</td>
       <td>${d.全集副題香港譯名 || ""}</td>
       <td>${d.出版副題 || ""}</td>
       <td>${d.頁 || ""}</td>
@@ -217,13 +223,13 @@ function render(manga, storyRows, jpinfo) {
   `).join("");
 
   const tableSection = storyRows.length > 0 ? `
-    <h2>收錄故事</h2>
+    <h2>収録話</h2>
     <table class="details-table">
       <thead>
         <tr>
           <th>番</th>
           <th>巻</th>
-          <th>收錄話</th>
+          <th>収録話</th>
           <th>香港譯名</th>
           <th>日本副題</th>
           <th>頁</th>
@@ -246,4 +252,7 @@ function render(manga, storyRows, jpinfo) {
       <div class="card-inner">
         <div class="book-image">
           <img src="${jpinfo.Image || ""}" alt="${jpinfo.標題} ${jpinfo.巻}" class="clickable-image" onclick="openImageModal('${jpinfo.Image || ""}')">
-        </
+        </div>
+        <div class="column-box">
+          <h3>日文原版資料</h3>
+          <h1>${jpinfo.標題 || ""} ${jpinfo.巻 || ""}</h
