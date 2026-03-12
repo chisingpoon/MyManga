@@ -226,11 +226,4 @@
       let data = await fetchWithCache(hkURL);
       let row = data.find(r => key(r.ISBN) === key(ISBNHK));
       if (row) {
-        document.getElementById("hkCard").appendChild(createCard(row, "Title", hkCardFieldLabels));
-      }
-    }
-
-    async function loadJP() {
-      if (!ISBNJP) return;
-      let data = await fetchWithCache(jpURL);
-      let row
+        document.getElementById("hkCard").appendChild(createCard(row, "
