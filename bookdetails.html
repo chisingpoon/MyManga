@@ -17,7 +17,7 @@ body{
   grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
   gap:20px;
   margin-bottom:30px;
-  align-items:stretch;   /* important */
+  align-items:stretch;
 }
 
 /* ---------- CARD ---------- */
@@ -229,7 +229,7 @@ async function loadJP(){
   let data = await fetchWithCache(jpURL);
   let row = data.find(r=>key(r.ISBN)===key(ISBNJP));
   if(row){
-    document.getElementById("jpCard").appendChild(createCard(row, "標題", jpCardFieldLabels));
+    document.getElementById("topSection").appendChild(createCard(row, "標題", jpCardFieldLabels));
   }
 }
 
@@ -272,7 +272,13 @@ document.addEventListener("dragstart",e=>{
 });
 
 /* ---------- RUN ---------- */
-Promise.all([loadHK(),loadJP(),loadTable()]);
+init();
+
+async function init(){
+  await loadHK();
+  await loadJP();
+  await loadTable();
+}
 </script>
 </body>
 </html>
