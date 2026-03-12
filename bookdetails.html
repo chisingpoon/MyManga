@@ -120,7 +120,26 @@ const columnOrder = [
   "初出副題","単行本","第0巻","ドラミちゃん","文庫","兒童版",
   "藤子不二雄ランド","大全集","頁","全集副題","備考","全集副題香港譯名","作品類"
 ];
-
+  
+const cardFieldLabels = {
+  "Title": "書名",           // for HK card
+  "Volume": "卷數",
+  "Subtitle": "副標題",
+  "Author": "作者",
+  "Publisher": "出版社",
+  "Price": "定價",
+  "Page": "頁數",
+  "IssueDate": "發行日期",
+  "Size": "尺寸",
+  "RetailPoint": "零售點",
+  "ISBN": "ISBN",
+  "OriginalTitle": "原書名",
+  "OriginalSubtitle": "原副標題",
+  "OriginCountry": "原產地",
+  "ISBN_JP": "日本ISBN",
+  "Active": "是否上架",
+  "Sold": "已售數"
+};
 /* ---------- CACHE ---------- */
 const CACHE_TIME = 10 * 60 * 1000;
 async function fetchWithCache(url){
@@ -163,7 +182,7 @@ function createCard(data,titleField){
     if(k===titleField || k==="Image") continue;
     let div = document.createElement("div");
     div.className="field";
-    div.innerHTML = "<b>"+k+"</b>: "+data[k];
+    div.innerHTML = "<b>"+(cardFieldLabels[k] || k)+"</b>: "+data[k];
     content.appendChild(div);
   }
   card.appendChild(img);
