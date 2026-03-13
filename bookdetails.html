@@ -172,66 +172,83 @@ function renderCards(manga, jpinfo) {
 
 // ===== Optimized bottom table rendering =====
 function renderBottomTable(jpinfo, bookStories, allStories) {
+
+  // 1️⃣ Only keep rows belonging to this ISBN
   const collectedWorks = bookStories
     .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
     .sort((a,b)=>Number(a.收錄話 || 0) - Number(b.收錄話 || 0));
-  
-  const storyMap = new Map(
-    allStories.map(s => [s.作品番?.trim(), s])
+
+  if (!collectedWorks.length) return;
+
+  // 2️⃣ Build set of required 作品番
+  const neededIDs = new Set(
+    collectedWorks.map(r => r.作品番?.trim()).filter(Boolean)
   );
-  
-  // SAFE MERGE (no random mapping)
+
+  // 3️⃣ Filter story list BEFORE mapping
+  const filteredStories = allStories.filter(s =>
+    neededIDs.has(s.作品番?.trim())
+  );
+
+  // 4️⃣ Build map only for required stories
+  const storyMap = new Map(
+    filteredStories.map(s => [s.作品番?.trim(), s])
+  );
+
+  // 5️⃣ Merge safely
   const mergedRows = collectedWorks.map(r => {
-    const key = r.作品番?.trim();
-    const story = key ? storyMap.get(key) : null;
-  
-    if (!story) {
-      // No match → return original row only
-      return { ...r };
-    }
-  
-    return { ...r, ...story };
+    const story = storyMap.get(r.作品番?.trim());
+    return story ? {...r, ...story} : {...r};
   });
 
-  if (!mergedRows.length) return;
+  // ===== Build visible columns =====
+  const allColumns = Array.from(
+    new Set(mergedRows.flatMap(r => Object.keys(r).map(k => k?.trim())))
+  ).filter(c => !hideColumns.includes(c));
 
-  // Build column list dynamically (visible only)
-  const allColumns = Array.from(new Set(mergedRows.flatMap(r => Object.keys(r).map(k => k?.trim()))))
-    .filter(c => !hideColumns.includes(c));
-  const finalColumns = columnOrderTable.filter(c => allColumns.includes(c))
+  const finalColumns = columnOrderTable
+    .filter(c => allColumns.includes(c))
     .concat(allColumns.filter(c => !columnOrderTable.includes(c)));
 
-  // Build table using DocumentFragment for performance
+  // ===== Table rendering =====
   const table = document.createElement("table");
   table.className = "details-table";
+
   const thead = document.createElement("thead");
   const trHead = document.createElement("tr");
-  finalColumns.forEach(c => {
-    const th = document.createElement("th");
-    th.textContent = c;
-    if (nowrapColumns.includes(c)) th.classList.add("nowrap");
+
+  finalColumns.forEach(c=>{
+    const th=document.createElement("th");
+    th.textContent=c;
+    if(nowrapColumns.includes(c)) th.classList.add("nowrap");
     trHead.appendChild(th);
   });
+
   thead.appendChild(trHead);
   table.appendChild(thead);
 
-  const tbody = document.createElement("tbody");
-  const fragment = document.createDocumentFragment();
-  mergedRows.forEach(r => {
-    const tr = document.createElement("tr");
-    finalColumns.forEach(c => {
-      const td = document.createElement("td");
-      td.textContent = r[c]?.trim() || "";
-      if (nowrapColumns.includes(c)) td.classList.add("nowrap");
+  const tbody=document.createElement("tbody");
+  const fragment=document.createDocumentFragment();
+
+  mergedRows.forEach(r=>{
+    const tr=document.createElement("tr");
+
+    finalColumns.forEach(c=>{
+      const td=document.createElement("td");
+      td.textContent=r[c]?.trim() || "";
+      if(nowrapColumns.includes(c)) td.classList.add("nowrap");
       tr.appendChild(td);
     });
+
     fragment.appendChild(tr);
   });
+
   tbody.appendChild(fragment);
   table.appendChild(tbody);
 
-  const h2 = document.createElement("h2");
-  h2.textContent = "收錄故事";
+  const h2=document.createElement("h2");
+  h2.textContent="收錄故事";
+
   document.getElementById("content").appendChild(h2);
   document.getElementById("content").appendChild(table);
 }
