@@ -34,38 +34,18 @@ img { user-select: none; -webkit-user-drag: none; }
 
 <script>
 // ===== Configuration =====
-const hideColumns = ["全集副題香港譯名", "作品類"]; // Columns to hide
+const hideColumns = ["ISBN", "作品番", "類", "全集副題香港譯名", "作品類"]; // Columns to hide
 const nowrapColumns = ["ISBN", "作品番", "巻"]; // Columns to keep single-line
-const columnOrder = [ // Backend-style order configuration
-  "ISBN",
-  "作品番",
-  "巻",
-  "Title",
-  "Subtitle",
-  "Author",
-  "Publisher",
-  "Price",
-  "Page",
-  "IssueDate",
-  "Size",
-  "RetailPoint",
-  "OriginalTitle",
-  "OriginalSubtitle",
-  "Image",
-  "OriginCountry",
-  "定価",
-  "初版発行日",
-  "系列",
-  "著",
-  "話",
-  "頁"
-  // add all other columns you want in desired order
+const columnOrder = [
+  "ISBN","作品番","巻","話","收錄話","Title","Subtitle","Author","Publisher",
+  "Price","Page","IssueDate","Size","RetailPoint","OriginalTitle","OriginalSubtitle",
+  "Image","OriginCountry","定価","初版発行日","系列","著","頁"
 ];
 
 // ===== URL parameters =====
 const params = new URLSearchParams(window.location.search);
-const isbnhk = (params.get("isbnhk") || params.get("isbn") || "").trim();
-const isbnjp = (params.get("isbnjp") || params.get("isbn") || "").trim();
+const isbnhk = (params.get("isbnhk") || "").trim();
+const isbnjp = (params.get("isbnjp") || "").trim();
 
 // ===== Sheet URLs =====
 const MANGALIST_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
@@ -77,13 +57,31 @@ const STORYDETAIL_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b
 if (!isbnhk && !isbnjp) {
   document.getElementById("content").innerHTML = "Please provide a valid ISBN (isbnhk or isbnjp) in the URL.";
 } else {
-  Promise.all([
-    fetch(MANGALIST_SHEET).then(r => r.json()),
-    fetch(JPINFO_SHEET).then(r => r.json()),
-    fetch(BOOKSTORY_SHEET).then(r => r.json()),
-    fetch(STORYDETAIL_SHEET).then(r => r.json())
-  ])
-  .then(([hkbooks, jpbooks, bookStories, allStories]) => {
+  loadSheets();
+}
+
+// ===== Load sheets conditionally =====
+async function loadSheets() {
+  let hkbooks = [], jpbooks = [], bookStories = [], allStories = [];
+
+  const promises = [];
+  if (isbnhk) promises.push(fetch(MANGALIST_SHEET).then(r=>r.json()));
+  if (isbnjp) {
+    promises.push(fetch(JPINFO_SHEET).then(r=>r.json()));
+    promises.push(fetch(BOOKSTORY_SHEET).then(r=>r.json()));
+    promises.push(fetch(STORYDETAIL_SHEET).then(r=>r.json()));
+  }
+
+  try {
+    const results = await Promise.all(promises);
+    let idx = 0;
+    if (isbnhk) hkbooks = results[idx++];
+    if (isbnjp) {
+      jpbooks = results[idx++];
+      bookStories = results[idx++];
+      allStories = results[idx++];
+    }
+
     const manga = isbnhk ? hkbooks.find(b => b.ISBN?.trim() === isbnhk) : null;
     const jpinfo = isbnjp ? jpbooks.find(j => j.ISBN?.trim() === isbnjp) : null;
 
@@ -92,27 +90,20 @@ if (!isbnhk && !isbnjp) {
       return;
     }
 
-    const collectedWorks = jpinfo ? bookStories
-      .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
-      .sort((a, b) => Number(a.話 || a.收錄話 || 0) - Number(b.話 || b.收錄話 || 0))
-      : [];
+    renderCards(manga, jpinfo);
 
-    const mergedRows = collectedWorks.map(r => {
-      const detail = allStories.find(s => s.作品番?.trim() === r.作品番?.trim());
-      return {...r, ...detail};
-    });
+    if (jpinfo) {
+      renderBottomTable(jpinfo, bookStories, allStories);
+    }
 
-    renderPage(manga, jpinfo, mergedRows);
-
-  })
-  .catch(err => {
-    console.error(err);
+  } catch(e) {
+    console.error(e);
     document.getElementById("content").innerHTML = "Failed to load data.";
-  });
+  }
 }
 
-// ===== Render Page =====
-function renderPage(manga, jpinfo, storyRows) {
+// ===== Render top cards =====
+function renderCards(manga, jpinfo) {
   const hkCard = manga ? `
     <div class="card">
       <div class="card-inner">
@@ -133,8 +124,7 @@ function renderPage(manga, jpinfo, storyRows) {
           <div><strong>ISBN:</strong> ${manga.ISBN || ""}</div>
         </div>
       </div>
-    </div>
-  ` : "";
+    </div>` : "";
 
   const jpCard = jpinfo ? `
     <div class="card">
@@ -156,50 +146,55 @@ function renderPage(manga, jpinfo, storyRows) {
           <div><strong>ISBN:</strong> ${jpinfo.ISBN || ""}</div>
         </div>
       </div>
-    </div>
-  ` : "";
+    </div>` : "";
 
   document.getElementById("content").innerHTML = `<div class="top-section">${hkCard}${jpCard}</div>`;
+}
 
-  if (storyRows.length > 0) {
-    const allColumns = Array.from(new Set(storyRows.flatMap(row => Object.keys(row).map(k => k?.trim()))))
-      .filter(c => !hideColumns.includes(c));
+// ===== Render bottom table =====
+function renderBottomTable(jpinfo, bookStories, allStories) {
+  const collectedWorks = bookStories
+    .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
+    .sort((a,b)=>Number(a.話 || a.收錄話||0)-Number(b.話 || b.收錄話||0));
 
-    // Arrange columns by configuration
-    const finalColumns = columnOrder.filter(c => allColumns.includes(c))
-      .concat(allColumns.filter(c => !columnOrder.includes(c))); // append remaining columns at end
+  const storyMap = new Map(allStories.map(s => [s.作品番?.trim(), s]));
+  const mergedRows = collectedWorks.map(r => ({...r, ...storyMap.get(r.作品番?.trim())}));
 
-    const thead = `<tr>${finalColumns.map(c => `<th class="${nowrapColumns.includes(c) ? 'nowrap' : ''}">${c}</th>`).join('')}</tr>`;
-    const tbody = storyRows.map(row => `
-      <tr>${finalColumns.map(c => `<td class="${nowrapColumns.includes(c) ? 'nowrap' : ''}">${row[c]?.trim() || ""}</td>`).join('')}</tr>
-    `).join("");
+  if (!mergedRows.length) return;
 
-    const tableSection = `
-      <h2>收錄故事</h2>
-      <table class="details-table">
-        <thead>${thead}</thead>
-        <tbody>${tbody}</tbody>
-      </table>
-    `;
-    document.getElementById("content").insertAdjacentHTML('beforeend', tableSection);
-  }
+  const allColumns = Array.from(new Set(mergedRows.flatMap(r => Object.keys(r).map(k=>k?.trim()))))
+    .filter(c => !hideColumns.includes(c));
+  const finalColumns = columnOrder.filter(c=>allColumns.includes(c))
+    .concat(allColumns.filter(c=>!columnOrder.includes(c)));
+
+  const thead = `<tr>${finalColumns.map(c=>`<th class="${nowrapColumns.includes(c)?'nowrap':''}">${c}</th>`).join('')}</tr>`;
+  const tbody = mergedRows.map(r=>`<tr>${finalColumns.map(c=>`<td class="${nowrapColumns.includes(c)?'nowrap':''}">${r[c]?.trim()||""}</td>`).join('')}</tr>`).join('');
+
+  const tableHTML = `
+    <h2>收錄故事</h2>
+    <table class="details-table">
+      <thead>${thead}</thead>
+      <tbody>${tbody}</tbody>
+    </table>
+  `;
+  document.getElementById("content").insertAdjacentHTML('beforeend', tableHTML);
 }
 
 // ===== Image modal =====
-function openImageModal(src) {
-  const modal = document.getElementById("imageModal");
-  const modalImg = document.getElementById("modalImage");
-  modalImg.src = src;
+function openImageModal(src){
+  const modal=document.getElementById("imageModal");
+  const modalImg=document.getElementById("modalImage");
+  modalImg.src=src;
   modal.classList.add("show");
 }
-function closeImageModal() {
-  const modal = document.getElementById("imageModal");
-  modal.classList.remove("show");
+function closeImageModal(){
+  document.getElementById("imageModal").classList.remove("show");
 }
 
-document.addEventListener("keydown", e => { if(e.key==="Escape") closeImageModal(); });
-window.addEventListener("contextmenu", e => e.preventDefault(), true);
-window.addEventListener("dragstart", e => e.preventDefault());
+// ===== Events =====
+document.addEventListener("keydown", e=>{if(e.key==="Escape")closeImageModal();});
+window.addEventListener("contextmenu", e=>e.preventDefault(), true);
+window.addEventListener("dragstart", e=>e.preventDefault());
 </script>
 
 <div id="imageModal" class="image-modal">
