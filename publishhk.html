@@ -488,34 +488,25 @@ function applyUrlFilters() {
     document.getElementById("sortIssueDate").value = params.sortIssueDate;
   }
 
-  // Checkboxes (comma-separated)
-  if (params.title) {
-    params.title.split(",").forEach(val => {
-      const checkbox = document.querySelector(`#titleFilter input[value="${val}"]`);
-      if (checkbox) checkbox.checked = true;
+  // Helper to check checkboxes and open parent <details>
+  function checkAndOpen(containerId, values) {
+    if (!values) return;
+    const items = values.split(",");
+    items.forEach(val => {
+      const checkbox = document.querySelector(`#${containerId} input[value="${val}"]`);
+      if (checkbox) {
+        checkbox.checked = true;
+        // Open the parent <details>
+        const details = checkbox.closest("details");
+        if (details) details.open = true;
+      }
     });
   }
 
-  if (params.publisher) {
-    params.publisher.split(",").forEach(val => {
-      const checkbox = document.querySelector(`#publisherFilter input[value="${val}"]`);
-      if (checkbox) checkbox.checked = true;
-    });
-  }
-
-  if (params.author) {
-    params.author.split(",").forEach(val => {
-      const checkbox = document.querySelector(`#authorFilter input[value="${val}"]`);
-      if (checkbox) checkbox.checked = true;
-    });
-  }
-
-  if (params.originCountry) {
-    params.originCountry.split(",").forEach(val => {
-      const checkbox = document.querySelector(`#originCountryFilter input[value="${val}"]`);
-      if (checkbox) checkbox.checked = true;
-    });
-  }
+  checkAndOpen("titleFilter", params.title);
+  checkAndOpen("publisherFilter", params.publisher);
+  checkAndOpen("authorFilter", params.author);
+  checkAndOpen("originCountryFilter", params.originCountry);
 }
 
 function clearAllFilters() {
