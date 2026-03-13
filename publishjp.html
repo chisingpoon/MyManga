@@ -462,7 +462,11 @@ function getUrlParams() {
   pairs.forEach(pair => {
     const [key, value] = pair.split("=");
     if (key && value) {
-      params[key] = decodeURIComponent(value);
+      try {
+        params[key] = decodeURIComponent(decodeURIComponent(value));
+      } catch {
+        params[key] = value;
+      }
     }
   });
   return params;
