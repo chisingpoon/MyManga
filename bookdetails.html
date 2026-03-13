@@ -174,7 +174,7 @@ function renderCards(manga, jpinfo) {
 function renderBottomTable(jpinfo, bookStories, allStories) {
   const collectedWorks = bookStories
     .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
-    .sort((a,b)=>Number(a.番 || 0) - Number(b.番 || 0));
+    .sort((a,b)=>Number(a.收錄話 || 0) - Number(b.收錄話 || 0));
 
   const storyMap = new Map(allStories.map(s => [s.作品番?.trim(), s]));
   const mergedRows = collectedWorks.map(r => ({...r, ...storyMap.get(r.作品番?.trim())}));
