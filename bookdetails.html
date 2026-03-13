@@ -48,12 +48,15 @@ body {
 .details-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: auto;
+  table-layout: auto; /* natural sizing based on content */
 }
-.details-table th, .details-table td {
+
+.details-table th,
+.details-table td {
   border: 1px solid #ccc;
   padding: 6px 10px;
-  word-break: break-word;
+  word-break: break-word; /* allow line breaks */
+  white-space: normal;    /* let text wrap and column auto-size */
 }
 .details-table th {
   background: #f2f2f2;
