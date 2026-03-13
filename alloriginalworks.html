@@ -3,57 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <title>日本原作目録</title>
-
 <style>
 /* ===============================
    BASE
 ================================= */
 body {
   font-family: "Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",Arial,sans-serif;
-  padding: 30px;
-  background: #f4f5f7;
-  color: #222;
-  transition: background 0.3s, color 0.3s;
+  padding: 30px; background: #f4f5f7; color: #222; transition: background 0.3s, color 0.3s;
 }
-
 a { text-decoration: none; }
 button { cursor: pointer; transition: all 0.2s; }
 
 /* ===============================
    HEADER
 ================================= */
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 35px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #ddd;
-}
-
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; padding-bottom: 12px; border-bottom: 1px solid #ddd; }
 .site-title { font-size: 26px; font-weight: 700; margin:0; }
-
 .header-right { display: flex; gap: 10px; align-items: center; }
 .header-link {
-  padding: 7px 14px; border-radius: 6px; background:#fff;
-  color:#333; border:1px solid #ddd; font-size:13px;
+  padding: 7px 14px; border-radius: 6px; background:#fff; color:#333; border:1px solid #ddd; font-size:13px;
 }
 .header-link:hover { background:#222; color:#fff; border-color:#222; }
-
-#darkModeToggle {
-  padding:5px 10px; font-size:13px; border-radius:6px; border:1px solid #ccc; background:#fff;
-}
+#darkModeToggle { padding:5px 10px; font-size:13px; border-radius:6px; border:1px solid #ccc; background:#fff; }
 #darkModeToggle:hover { background:#222; color:#fff; border-color:#222; }
 
 /* ===============================
    TOP FILTERS
 ================================= */
-.top-filters {
-  background:#fff; padding:18px 20px; border-radius:10px; margin-bottom:25px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.05);
-  position: sticky; top:0; z-index:1000;
-}
-
+.top-filters { background:#fff; padding:18px 20px; border-radius:10px; margin-bottom:25px; box-shadow:0 3px 10px rgba(0,0,0,0.05); position: sticky; top:0; z-index:1000; }
 .filter-row { display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start; }
 .filter-row-top { display:flex; align-items:center; gap:15px; }
 .filter-row-bottom { display:flex; flex-wrap:nowrap; gap:20px; align-items:flex-start; margin-top:20px; }
@@ -62,9 +39,7 @@ button { cursor: pointer; transition: all 0.2s; }
 #clearFiltersBtn:hover { background:#222; color:#fff; }
 
 .search-wrapper { position:relative; flex:1 1 280px; max-width:420px; margin-left:10px; margin-right:auto; }
-.search-wrapper input {
-  width:100%; padding:7px 30px 7px 12px; border-radius:20px; border:1px solid #ccc;
-}
+.search-wrapper input { width:100%; padding:7px 30px 7px 12px; border-radius:20px; border:1px solid #ccc; }
 .clear-btn {
   position:absolute; right:12px; top:50%; transform:translateY(-50%);
   cursor:pointer; color:#aaa; display:none;
@@ -78,8 +53,7 @@ button { cursor: pointer; transition: all 0.2s; }
 .filter-dropdown select { padding:6px 10px; border-radius:6px; border:1px solid #ccc; }
 
 .checkbox-list {
-  display:flex; flex-direction:column; max-height:200px; overflow-y:auto; overflow-x:hidden; font-size:12px;
-  padding-right:6px; border-right:2px solid #ddd;
+  display:flex; flex-direction:column; max-height:200px; overflow-y:auto; overflow-x:hidden; font-size:12px; padding-right:6px; border-right:2px solid #ddd;
 }
 .checkbox-list label { margin-bottom:4px; }
 .checkbox-list::-webkit-scrollbar { width:6px; }
@@ -149,14 +123,9 @@ body.dark .resizer:hover { background: rgba(255,255,255,0.3); }
 .checkbox-dropdown { position:relative; }
 .dropdown-btn { padding:7px 12px; border-radius:6px; border:1px solid #ccc; background:#fff; cursor:pointer; font-size:12px; }
 .dropdown-btn:hover { background:#f2f2f2; }
-.dropdown-panel {
-  display:none; position:absolute; top:36px; left:0; background:#fff; border:1px solid #ddd;
-  border-radius:8px; padding:10px; width:160px; box-shadow:0 5px 15px rgba(0,0,0,0.15); z-index:2000; transition:opacity 0.2s;
-  opacity:0;
-}
+.dropdown-panel { display:none; position:absolute; top:36px; left:0; background:#fff; border:1px solid #ddd; border-radius:8px; padding:10px; width:160px; box-shadow:0 5px 15px rgba(0,0,0,0.15); z-index:2000; transition:opacity 0.2s; opacity:0; }
 .dropdown-panel.show { display:block; opacity:1; }
 body.dark .dropdown-panel { background:#1e1e1e; border:1px solid #444; }
-
 </style>
 </head>
 
@@ -172,22 +141,18 @@ body.dark .dropdown-panel { background:#1e1e1e; border:1px solid #444; }
 </header>
 
 <div class="top-filters">
-
   <div class="filter-row filter-row-top">
     <button id="clearFiltersBtn" onclick="clearSearch()">清除所有篩選</button>
-
     <div class="search-wrapper">
       <input type="text" id="searchInput" placeholder="任何文字搜尋..." aria-label="搜索作品" oninput="handleSearchInput()">
       <span class="clear-btn" onclick="clearSearch()">×</span>
     </div>
-
     <div class="checkbox-dropdown">
       <button id="lengthTypeBtn" class="dropdown-btn" onclick="toggleDropdown('lengthTypeFilterPanel')">作品類 ▼</button>
       <div class="dropdown-panel" id="lengthTypeFilterPanel">
         <div class="checkbox-list" id="lengthTypeFilter"></div>
       </div>
     </div>
-
     <div id="resultCount" class="result-count"></div>
   </div>
 
@@ -200,7 +165,6 @@ body.dark .dropdown-panel { background:#1e1e1e; border:1px solid #444; }
     <div class="filter-dropdown"><label>兒童版</label><div class="checkbox-list" id="pikkapikaFilter"></div></div>
     <div class="filter-dropdown"><label>大全集</label><div class="checkbox-list" id="completeCollectionFilter"></div></div>
   </div>
-
 </div>
 
 <main class="content">
@@ -208,7 +172,6 @@ body.dark .dropdown-panel { background:#1e1e1e; border:1px solid #444; }
   <div class="grid" id="mangalist">Loading...</div>
 </main>
 
-<!-- MODALS -->
 <div id="detailModal" role="dialog" aria-modal="true">
   <div class="modal-box">
     <button onclick="closeModal()" style="position:absolute; right:10px; top:10px;">X</button>
@@ -221,19 +184,6 @@ body.dark .dropdown-panel { background:#1e1e1e; border:1px solid #444; }
 </div>
 
 <script>
-/* ===============================
-   DATA & FILTERS
-================================= */
-const urlParamToFilterId = {
-  "作品類": "lengthTypeFilter",
-  "初出掲載誌": "magazineFilter",
-  "単行本": "tankobonFilter",
-  "第0巻": "volZeroFilter",
-  "ドラミちゃん": "doramiFilter",
-  "文庫": "bunkobonFilter",
-  "兒童版": "pikkapikaFilter",
-  "大全集": "completeCollectionFilter"
-};
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 let sheetData = [], currentList = [], currentPage = 1, itemsPerPage = 50;
 let currentSortColumn = null, currentSortDirection = "asc";
@@ -246,7 +196,7 @@ fetch(SHEET_URL)
       const data = JSON.parse(text);
       sheetData = data.filter(r => r.作品番 && r.作品番.trim()!=="");
       initializeFilters();
-      applyFilters();
+      applyUrlFilters();
     } catch(e){ console.error("JSON parse error", e); document.getElementById("mangalist").innerHTML="❌ Invalid JSON";}
   })
   .catch(e=>{console.error("Fetch error",e); document.getElementById("mangalist").innerHTML="❌ Network error";});
@@ -262,7 +212,7 @@ function initializeFilters(){
     {id:"completeCollectionFilter", col:"大全集"},
     {id:"lengthTypeFilter", col:"作品類"}
   ];
-  filters.forEach(f => populateCheckboxFilter(f.id,[...new Set(sheetData.map(r=>r[f.col]).filter(Boolean))].sort()));
+  filters.forEach(f => populateCheckboxFilter(f.id,[...new Set(sheetData.map(r=>r[f.col]).filter(Boolean))]));
 }
 
 function populateCheckboxFilter(id, values){
@@ -270,34 +220,21 @@ function populateCheckboxFilter(id, values){
   if(!container) return;
   container.innerHTML = "";
 
-  // Natural sort: numbers within strings sorted numerically
-  values.sort((a, b) => {
-    const regex = /(\d+)|(\D+)/g; // splits numbers and non-numbers
-    const aParts = a.match(regex);
-    const bParts = b.match(regex);
-
-    const len = Math.min(aParts.length, bParts.length);
-
-    for(let i = 0; i < len; i++){
-      const aPart = aParts[i];
-      const bPart = bParts[i];
-
-      const aNum = parseInt(aPart, 10);
-      const bNum = parseInt(bPart, 10);
-
-      if(!isNaN(aNum) && !isNaN(bNum)){
-        if(aNum !== bNum) return aNum - bNum;
-      } else {
-        if(aPart !== bPart) return aPart.localeCompare(bPart, 'ja');
-      }
+  values.sort((a,b)=>{
+    const regex=/(\d+)|(\D+)/g;
+    const aParts=a.match(regex), bParts=b.match(regex);
+    const len=Math.min(aParts.length,bParts.length);
+    for(let i=0;i<len;i++){
+      const aNum=parseInt(aParts[i],10), bNum=parseInt(bParts[i],10);
+      if(!isNaN(aNum) && !isNaN(bNum) && aNum!==bNum) return aNum-bNum;
+      if(aParts[i]!==bParts[i]) return aParts[i].localeCompare(bParts[i],'ja');
     }
-
-    return aParts.length - bParts.length; // shorter comes first if equal so far
+    return aParts.length-bParts.length;
   });
 
   values.forEach(v=>{
-    const label = document.createElement("label");
-    label.innerHTML = `<input type="checkbox" value="${v}" onchange="applyFilters()"> ${v}`;
+    const label=document.createElement("label");
+    label.innerHTML=`<input type="checkbox" value="${v}" onchange="applyFilters()"> ${v}`;
     container.appendChild(label);
   });
 }
@@ -307,53 +244,11 @@ function getCheckedValues(id){
   return c?Array.from(c.querySelectorAll("input[type=checkbox]:checked")).map(i=>i.value):[];
 }
 
-/* ===============================
-   SEARCH & FILTER LOGIC
-================================= */
 function handleSearchInput(){
   const input=document.getElementById("searchInput");
   document.querySelector(".clear-btn").style.display=input.value?"block":"none";
   clearTimeout(searchTimeout); searchTimeout=setTimeout(applyFilters,300);
 }
-
-// Utility: get decoded URL parameters as object
-function getUrlParams() {
-  const search = window.location.search.substring(1);
-  const params = {};
-  if (!search) return params;
-
-  search.split("&").forEach(pair => {
-    let [key, value] = pair.split("=");
-    if (!key) return;
-    key = decodeURIComponent(key);
-    value = decodeURIComponent(value || "");
-    params[key] = value;
-  });
-  return params;
-}
-
-// Read URL parameters and apply them
-function applyUrlFilters() {
-  const params = new URLSearchParams(window.location.search);
-
-  for (const [key, value] of params.entries()) {
-    const filterId = urlParamToFilterId[key];
-    if (!filterId) continue;
-
-    const values = decodeURIComponent(value).split(",").map(v => v.trim()).filter(Boolean);
-    if (!values.length) continue;
-
-    const container = document.getElementById(filterId);
-    if (!container) continue;
-
-    container.querySelectorAll("input[type=checkbox]").forEach(cb => {
-      cb.checked = values.includes(cb.value);
-    });
-  }
-
-  applyFilters(); // Apply the filtered results
-}
-
 
 function applyFilters(){
   const search=document.getElementById("searchInput").value.toLowerCase();
@@ -387,13 +282,9 @@ function clearSearch(){
   document.getElementById("searchInput").value="";
   document.querySelector(".clear-btn").style.display="none";
   initializeFilters();
-  applyUrlFilters();
   applyFilters();
 }
 
-/* ===============================
-   TABLE RENDERING
-================================= */
 function renderPage(){
   const start=(currentPage-1)*itemsPerPage, end=start+itemsPerPage;
   const pageItems=currentList.slice(start,end);
@@ -427,18 +318,20 @@ function sortBy(col){
   if(currentSortColumn===col) currentSortDirection=currentSortDirection==="asc"?"desc":"asc";
   else {currentSortColumn=col; currentSortDirection="asc";}
   currentList.sort((a,b)=>{
-    const valA=(a[col]||"").toString().toLowerCase();
-    const valB=(b[col]||"").toString().toLowerCase();
-    if(valA<valB) return currentSortDirection==="asc"?-1:1;
-    if(valA>valB) return currentSortDirection==="asc"?1:-1;
-    return 0;
+    const regex=/(\d+)|(\D+)/g;
+    const aParts=(a[col]||"").toString().match(regex)||[];
+    const bParts=(b[col]||"").toString().match(regex)||[];
+    const len=Math.min(aParts.length,bParts.length);
+    for(let i=0;i<len;i++){
+      const aNum=parseInt(aParts[i],10), bNum=parseInt(bParts[i],10);
+      if(!isNaN(aNum) && !isNaN(bNum) && aNum!==bNum) return currentSortDirection==="asc"?aNum-bNum:bNum-aNum;
+      if(aParts[i]!==bParts[i]) return currentSortDirection==="asc"?aParts[i].localeCompare(bParts[i],'ja'):bParts[i].localeCompare(aParts[i],'ja');
+    }
+    return currentSortDirection==="asc"?aParts.length-bParts.length:bParts.length-aParts.length;
   });
   renderPage();
 }
 
-/* ===============================
-   PAGINATION
-================================= */
 function renderPaginationControls(){
   const totalPages=Math.ceil(currentList.length/itemsPerPage);
   let html="";
@@ -446,11 +339,9 @@ function renderPaginationControls(){
 
   html+=`<button onclick="changePage(1)" ${currentPage===1?"disabled":""}>« First</button>`;
   html+=`<button onclick="changePage(${currentPage-1})" ${currentPage===1?"disabled":""}>‹ Prev</button>`;
-
   for(let i=1;i<=totalPages;i++){
     html+=`<button class="${i===currentPage?'active-page':''}" onclick="changePage(${i})">${i}</button>`;
   }
-
   html+=`<button onclick="changePage(${currentPage+1})" ${currentPage===totalPages?"disabled":""}>Next ›</button>`;
   html+=`<button onclick="changePage(${totalPages})" ${currentPage===totalPages?"disabled":""}>Last »</button>`;
   document.getElementById("pagination").innerHTML=html;
@@ -458,9 +349,6 @@ function renderPaginationControls(){
 
 function changePage(page){ currentPage=page; renderPage(); }
 
-/* ===============================
-   RESIZABLE COLUMNS
-================================= */
 function makeColumnsResizable(){
   const table = document.querySelector(".data-table");
   if(!table) return;
@@ -480,9 +368,6 @@ function makeColumnsResizable(){
   });
 }
 
-/* ===============================
-   DROPDOWN UTILS
-================================= */
 function toggleDropdown(id){
   const panel=document.getElementById(id);
   panel.classList.toggle("show");
@@ -493,31 +378,52 @@ document.addEventListener("click", e=>{
   });
 });
 
-/* ===============================
-   DARK MODE
-================================= */
 function toggleDarkMode(){
   document.body.classList.toggle("dark");
   const btn=document.getElementById("darkModeToggle");
   btn.textContent=document.body.classList.contains("dark")?"☀ Light":"🌙 Dark";
 }
 
-/* ===============================
-   MODALS
-================================= */
 function closeModal(){ document.getElementById("detailModal").style.display="none"; }
 function openModal(content){
   document.getElementById("detailContent").innerHTML=content;
   document.getElementById("detailModal").style.display="block";
 }
-
 function openLightbox(src){
   document.getElementById("imageLightbox").style.display="flex";
   document.getElementById("lightboxImg").src=src;
 }
 function closeLightbox(){ document.getElementById("imageLightbox").style.display="none"; }
 
-</script>
+/* ===============================
+   URL FILTER SUPPORT
+================================= */
+const urlParamToFilterId = {
+  "単行本": "tankobonFilter",
+  "初出掲載誌": "magazineFilter",
+  "第0巻": "volZeroFilter",
+  "ドラミちゃん": "doramiFilter",
+  "文庫": "bunkobonFilter",
+  "兒童版": "pikkapikaFilter",
+  "大全集": "completeCollectionFilter",
+  "作品類": "lengthTypeFilter"
+};
 
+function applyUrlFilters(){
+  const params = new URLSearchParams(window.location.search);
+  for(const [key, value] of params.entries()){
+    const filterId = urlParamToFilterId[key];
+    if(!filterId) continue;
+    const values = decodeURIComponent(value).split(",").map(v=>v.trim()).filter(Boolean);
+    if(!values.length) continue;
+    const container=document.getElementById(filterId);
+    if(!container) continue;
+    container.querySelectorAll("input[type=checkbox]").forEach(cb=>{
+      cb.checked = values.includes(cb.value);
+    });
+  }
+  applyFilters();
+}
+</script>
 </body>
 </html>
