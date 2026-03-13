@@ -12,22 +12,20 @@ body { font-family: Arial; padding: 40px; }
 .book-image img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:8px; }
 .column-box { font-size: 14px; }
 
-/* Table styling */
 .details-table { width: 100%; border-collapse: collapse; table-layout: auto; }
 .details-table th, .details-table td {
   border: 1px solid #ccc;
   padding: 6px 10px;
-  word-break: break-word; 
-  white-space: normal; /* wrap by default */
+  word-break: break-word;
+  white-space: normal;
 }
 .details-table th.nowrap, .details-table td.nowrap {
-  white-space: nowrap; /* keep single-line */
+  white-space: nowrap;
   width: 1%;
 }
 .details-table th { background: #f2f2f2; text-align: left; }
 .details-table tr:nth-child(even) { background: #fafafa; }
 
-/* Image modal */
 .image-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999; }
 .image-modal.show { display: flex; }
 .image-modal img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; }
@@ -36,26 +34,28 @@ body { font-family: Arial; padding: 40px; }
 img { user-select: none; -webkit-user-drag: none; }
 </style>
 </head>
+
 <body>
+
 <header class="page-header">
-  <div class="header-left"><h1 class="site-title">書籍資料</h1></div>
+<div class="header-left"><h1 class="site-title">書籍資料</h1></div>
 </header>
+
 <div id="content">Loading...</div>
 
 <script>
+
 // ===== Configuration =====
-const hideColumns = ["ISBN", "作品番", "類", "番",  "頁", "收錄初出掲載誌", "收錄初出掲載号", "掲載番", "初出掲載頁", "単行本", "第0巻", "ドラミちゃん", "文庫", "兒童版", "藤子不二雄ランド", "全集副題", "備考", "全集副題香港譯名", "作品類"];
-const nowrapColumns = ["巻", "番", "收錄話", "副題港譯", "收錄頁", "初出掲載誌", "初出掲載号", "大全集"];
-const columnOrderBooks = [
-  "Title","Volume","Subtitle","Author","Publisher","Price","Page","IssueDate","Size","RetailPoint","ISBN","OriginalTitle","OriginalSubtitle","Image","OriginCountry","ISBN_JP","Active","Sold",
-  "系列","記号","巻","話","頁","類","標題","副標題","著","初版発行日","定価","判型","Image"
-]; // for top cards
+const hideColumns = ["ISBN","作品番","類","番","頁","收錄初出掲載誌","收錄初出掲載号","掲載番","初出掲載頁","単行本","第0巻","ドラミちゃん","文庫","兒童版","藤子不二雄ランド","全集副題","備考","全集副題香港譯名","作品類"];
+
+const nowrapColumns = ["巻","番","收錄話","副題港譯","收錄頁","初出掲載誌","初出掲載号","大全集"];
+
 const columnOrderTable = [
-  "ISBN","作品番","類","番","巻","話","收錄話","收錄頁","出版副題","副題港譯","收錄初出掲載誌","收錄初出掲載号",
-  "色","初出掲載誌","掲載番","初出掲載号","初出掲載頁","初出副題",
-  "単行本","第0巻","ドラミちゃん","文庫","兒童版","藤子不二雄ランド","大全集","頁","全集副題",
-  "出版備考","備考","全集副題香港譯名","作品類"
-]; // for bottom table
+"ISBN","作品番","類","番","巻","話","收錄話","收錄頁","出版副題","副題港譯","收錄初出掲載誌","收錄初出掲載号",
+"色","初出掲載誌","掲載番","初出掲載号","初出掲載頁","初出副題",
+"単行本","第0巻","ドラミちゃん","文庫","兒童版","藤子不二雄ランド","大全集","頁","全集副題",
+"出版備考","備考","全集副題香港譯名","作品類"
+];
 
 // ===== URL parameters =====
 const params = new URLSearchParams(window.location.search);
@@ -63,216 +63,250 @@ const isbnhk = (params.get("isbnhk") || "").trim();
 const isbnjp = (params.get("isbnjp") || "").trim();
 
 // ===== Sheet URLs =====
-const MANGALIST_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
-const JPINFO_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
-const BOOKSTORY_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
-const STORYDETAIL_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
+const MANGALIST_SHEET="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
+const JPINFO_SHEET="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
+const BOOKSTORY_SHEET="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
+const STORYDETAIL_SHEET="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
+
+
+// ===== Global cache =====
+let storyCache={
+loaded:false,
+bookStories:null,
+storyIndex:null
+};
+
+// ===== Load story data once =====
+async function loadStoryData(){
+
+if(storyCache.loaded) return storyCache;
+
+const [bookStories,allStories]=await Promise.all([
+fetch(BOOKSTORY_SHEET).then(r=>r.json()),
+fetch(STORYDETAIL_SHEET).then(r=>r.json())
+]);
+
+const storyIndex=new Map();
+
+allStories.forEach(row=>{
+const key=row.作品番?.trim();
+if(key) storyIndex.set(key,row);
+});
+
+storyCache.loaded=true;
+storyCache.bookStories=bookStories;
+storyCache.storyIndex=storyIndex;
+
+return storyCache;
+}
+
 
 // ===== Validate ISBN =====
-if (!isbnhk && !isbnjp) {
-  document.getElementById("content").innerHTML = "Please provide a valid ISBN (isbnhk or isbnjp) in the URL.";
-} else {
-  loadSheets();
+if(!isbnhk && !isbnjp){
+document.getElementById("content").innerHTML="Please provide a valid ISBN.";
+}else{
+loadSheets();
 }
 
-// ===== Load sheets progressively =====
-async function loadSheets() {
-  let hkbooks = [], jpbooks = [];
 
-  const topPromises = [];
-  if (isbnhk) topPromises.push(fetch(MANGALIST_SHEET).then(r => r.json()));
-  if (isbnjp) topPromises.push(fetch(JPINFO_SHEET).then(r => r.json()));
+// ===== Load sheets =====
+async function loadSheets(){
 
-  try {
-    const results = await Promise.all(topPromises);
-    let idx = 0;
-    if (isbnhk) hkbooks = results[idx++];
-    if (isbnjp) jpbooks = results[idx++];
+let hkbooks=[],jpbooks=[];
 
-    const manga = isbnhk ? hkbooks.find(b => b.ISBN?.trim() === isbnhk) : null;
-    const jpinfo = isbnjp ? jpbooks.find(j => j.ISBN?.trim() === isbnjp) : null;
+const promises=[];
+if(isbnhk) promises.push(fetch(MANGALIST_SHEET).then(r=>r.json()));
+if(isbnjp) promises.push(fetch(JPINFO_SHEET).then(r=>r.json()));
 
-    if (!manga && !jpinfo) {
-      document.getElementById("content").innerHTML = "Book not found.";
-      return;
-    }
+try{
 
-    renderCards(manga, jpinfo);
+const results=await Promise.all(promises);
 
-    // Load bottom table asynchronously
-    if (jpinfo) {
-      const loadingMsg = document.createElement("div");
-      loadingMsg.id = "loadingTable";
-      loadingMsg.innerText = "Loading bottom table...";
-      document.getElementById("content").appendChild(loadingMsg);
+let i=0;
+if(isbnhk) hkbooks=results[i++];
+if(isbnjp) jpbooks=results[i++];
 
-      const [bookStories, allStories] = await Promise.all([
-        fetch(BOOKSTORY_SHEET).then(r => r.json()),
-        fetch(STORYDETAIL_SHEET).then(r => r.json())
-      ]);
+const manga=isbnhk?hkbooks.find(b=>b.ISBN?.trim()===isbnhk):null;
+const jpinfo=isbnjp?jpbooks.find(j=>j.ISBN?.trim()===isbnjp):null;
 
-      document.getElementById("loadingTable")?.remove();
-      renderBottomTable(jpinfo, bookStories, allStories);
-    }
-
-  } catch(e) {
-    console.error(e);
-    document.getElementById("content").innerHTML = "Failed to load data.";
-  }
+if(!manga && !jpinfo){
+document.getElementById("content").innerHTML="Book not found.";
+return;
 }
+
+renderCards(manga,jpinfo);
+
+if(jpinfo){
+
+const loading=document.createElement("div");
+loading.id="loadingTable";
+loading.innerText="Loading bottom table...";
+document.getElementById("content").appendChild(loading);
+
+const {bookStories,storyIndex}=await loadStoryData();
+
+document.getElementById("loadingTable")?.remove();
+
+renderBottomTable(jpinfo,bookStories,storyIndex);
+}
+
+}catch(e){
+console.error(e);
+document.getElementById("content").innerHTML="Failed to load data.";
+}
+}
+
 
 // ===== Render top cards =====
-function renderCards(manga, jpinfo) {
-  const hkCard = manga ? `
-    <div class="card">
-      <div class="card-inner">
-        <div class="book-image">
-          <img src="${manga.Image || ""}" alt="${manga.Title || ""}" class="clickable-image" onclick="openImageModal('${manga.Image || ""}')">
-        </div>
-        <div class="column-box">
-          <h3>${manga.OriginCountry || ""}版資料</h3>
-          <h1>${manga.Title || ""} ${manga.Volume || ""}</h1>
-          <h2>${manga.Subtitle || ""}</h2>
-          <div><strong>作者:</strong> ${manga.Author || ""}</div>
-          <div><strong>出版社:</strong> ${manga.Publisher || ""}</div>
-          <div><strong>尺碼:</strong> ${manga.Size || ""}</div>
-          <div><strong>出版日期:</strong> ${manga.IssueDate || ""}</div>
-          <div><strong>售價:</strong> $${manga.Price || ""}</div>
-          <div><strong>頁數:</strong> ${manga.Page || ""}</div>
-          <div><strong>出版地區:</strong> ${manga.OriginCountry || ""}</div>
-          <div><strong>ISBN:</strong> ${manga.ISBN || ""}</div>
-        </div>
-      </div>
-    </div>` : "";
+function renderCards(manga,jpinfo){
 
-  const jpCard = jpinfo ? `
-    <div class="card">
-      <div class="card-inner">
-        <div class="book-image">
-          <img src="${jpinfo.Image || ""}" alt="${jpinfo.標題 || ""}" class="clickable-image" onclick="openImageModal('${jpinfo.Image || ""}')">
-        </div>
-        <div class="column-box">
-          <h3>日文原版資料</h3>
-          <h1>${jpinfo.標題 || ""} ${jpinfo.巻 || ""}</h1>
-          <h2>${jpinfo.副標題 || ""}</h2>
-          <div><strong>系列:</strong> ${jpinfo.系列 || ""}</div>
-          <div><strong>著:</strong> ${jpinfo.著 || ""}</div>
-          <div><strong>判型:</strong> ${jpinfo.判型 || ""}</div>
-          <div><strong>頁:</strong> ${jpinfo.頁 || ""}</div>
-          <div><strong>話:</strong> ${jpinfo.話 || ""}</div>
-          <div><strong>初版発行日:</strong> ${jpinfo.初版発行日 || ""}</div>
-          <div><strong>定価:</strong> ${jpinfo.定価 || ""}</div>
-          <div><strong>ISBN:</strong> ${jpinfo.ISBN || ""}</div>
-        </div>
-      </div>
-    </div>` : "";
+const hkCard=manga?`
+<div class="card">
+<div class="card-inner">
 
-  document.getElementById("content").innerHTML = `<div class="top-section">${hkCard}${jpCard}</div>`;
+<div class="book-image">
+<img src="${manga.Image||""}" class="clickable-image" onclick="openImageModal('${manga.Image||""}')">
+</div>
+
+<div class="column-box">
+<h3>${manga.OriginCountry||""}版資料</h3>
+<h1>${manga.Title||""} ${manga.Volume||""}</h1>
+<h2>${manga.Subtitle||""}</h2>
+<div><strong>作者:</strong> ${manga.Author||""}</div>
+<div><strong>出版社:</strong> ${manga.Publisher||""}</div>
+<div><strong>尺碼:</strong> ${manga.Size||""}</div>
+<div><strong>出版日期:</strong> ${manga.IssueDate||""}</div>
+<div><strong>售價:</strong> $${manga.Price||""}</div>
+<div><strong>頁數:</strong> ${manga.Page||""}</div>
+<div><strong>ISBN:</strong> ${manga.ISBN||""}</div>
+</div>
+
+</div>
+</div>`:"";
+
+
+const jpCard=jpinfo?`
+<div class="card">
+<div class="card-inner">
+
+<div class="book-image">
+<img src="${jpinfo.Image||""}" class="clickable-image" onclick="openImageModal('${jpinfo.Image||""}')">
+</div>
+
+<div class="column-box">
+<h3>日文原版資料</h3>
+<h1>${jpinfo.標題||""} ${jpinfo.巻||""}</h1>
+<h2>${jpinfo.副標題||""}</h2>
+<div><strong>系列:</strong> ${jpinfo.系列||""}</div>
+<div><strong>著:</strong> ${jpinfo.著||""}</div>
+<div><strong>判型:</strong> ${jpinfo.判型||""}</div>
+<div><strong>頁:</strong> ${jpinfo.頁||""}</div>
+<div><strong>話:</strong> ${jpinfo.話||""}</div>
+<div><strong>初版発行日:</strong> ${jpinfo.初版発行日||""}</div>
+<div><strong>定価:</strong> ${jpinfo.定価||""}</div>
+<div><strong>ISBN:</strong> ${jpinfo.ISBN||""}</div>
+</div>
+
+</div>
+</div>`:"";
+
+document.getElementById("content").innerHTML=`<div class="top-section">${hkCard}${jpCard}</div>`;
 }
 
-// ===== Optimized bottom table rendering =====
-function renderBottomTable(jpinfo, bookStories, allStories) {
 
-  // 1️⃣ Only keep rows belonging to this ISBN
-  const collectedWorks = bookStories
-    .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
-    .sort((a,b)=>Number(a.收錄話 || 0) - Number(b.收錄話 || 0));
+// ===== Render bottom table =====
+function renderBottomTable(jpinfo,bookStories,storyIndex){
 
-  if (!collectedWorks.length) return;
+const collectedWorks=bookStories
+.filter(r=>r.ISBN?.trim()===jpinfo.ISBN?.trim())
+.sort((a,b)=>Number(a.收錄話||0)-Number(b.收錄話||0));
 
-  // 2️⃣ Build set of required 作品番
-  const neededIDs = new Set(
-    collectedWorks.map(r => r.作品番?.trim()).filter(Boolean)
-  );
+if(!collectedWorks.length) return;
 
-  // 3️⃣ Filter story list BEFORE mapping
-  const filteredStories = allStories.filter(s =>
-    neededIDs.has(s.作品番?.trim())
-  );
+const mergedRows=collectedWorks.map(r=>{
 
-  // 4️⃣ Build map only for required stories
-  const storyMap = new Map(
-    filteredStories.map(s => [s.作品番?.trim(), s])
-  );
+const key=r.作品番?.trim();
+const story=key?storyIndex.get(key):null;
 
-  // 5️⃣ Merge safely
-  const mergedRows = collectedWorks.map(r => {
-    const story = storyMap.get(r.作品番?.trim());
-    return story ? {...r, ...story} : {...r};
-  });
+return story?{...r,...story}:{...r};
 
-  // ===== Build visible columns =====
-  const allColumns = Array.from(
-    new Set(mergedRows.flatMap(r => Object.keys(r).map(k => k?.trim())))
-  ).filter(c => !hideColumns.includes(c));
+});
 
-  const finalColumns = columnOrderTable
-    .filter(c => allColumns.includes(c))
-    .concat(allColumns.filter(c => !columnOrderTable.includes(c)));
+const allColumns=Array.from(new Set(
+mergedRows.flatMap(r=>Object.keys(r).map(k=>k?.trim()))
+)).filter(c=>!hideColumns.includes(c));
 
-  // ===== Table rendering =====
-  const table = document.createElement("table");
-  table.className = "details-table";
+const finalColumns=columnOrderTable
+.filter(c=>allColumns.includes(c))
+.concat(allColumns.filter(c=>!columnOrderTable.includes(c)));
 
-  const thead = document.createElement("thead");
-  const trHead = document.createElement("tr");
+const table=document.createElement("table");
+table.className="details-table";
 
-  finalColumns.forEach(c=>{
-    const th=document.createElement("th");
-    th.textContent=c;
-    if(nowrapColumns.includes(c)) th.classList.add("nowrap");
-    trHead.appendChild(th);
-  });
+const thead=document.createElement("thead");
+const tr=document.createElement("tr");
 
-  thead.appendChild(trHead);
-  table.appendChild(thead);
+finalColumns.forEach(c=>{
+const th=document.createElement("th");
+th.textContent=c;
+if(nowrapColumns.includes(c)) th.classList.add("nowrap");
+tr.appendChild(th);
+});
 
-  const tbody=document.createElement("tbody");
-  const fragment=document.createDocumentFragment();
+thead.appendChild(tr);
+table.appendChild(thead);
 
-  mergedRows.forEach(r=>{
-    const tr=document.createElement("tr");
+const tbody=document.createElement("tbody");
+const frag=document.createDocumentFragment();
 
-    finalColumns.forEach(c=>{
-      const td=document.createElement("td");
-      td.textContent=r[c]?.trim() || "";
-      if(nowrapColumns.includes(c)) td.classList.add("nowrap");
-      tr.appendChild(td);
-    });
+mergedRows.forEach(r=>{
+const tr=document.createElement("tr");
 
-    fragment.appendChild(tr);
-  });
+finalColumns.forEach(c=>{
+const td=document.createElement("td");
+td.textContent=r[c]?.trim()||"";
+if(nowrapColumns.includes(c)) td.classList.add("nowrap");
+tr.appendChild(td);
+});
 
-  tbody.appendChild(fragment);
-  table.appendChild(tbody);
+frag.appendChild(tr);
+});
 
-  const h2=document.createElement("h2");
-  h2.textContent="收錄故事";
+tbody.appendChild(frag);
+table.appendChild(tbody);
 
-  document.getElementById("content").appendChild(h2);
-  document.getElementById("content").appendChild(table);
+const h2=document.createElement("h2");
+h2.textContent="收錄故事";
+
+document.getElementById("content").appendChild(h2);
+document.getElementById("content").appendChild(table);
+
 }
+
 
 // ===== Image modal =====
 function openImageModal(src){
-  const modal=document.getElementById("imageModal");
-  const modalImg=document.getElementById("modalImage");
-  modalImg.src=src;
-  modal.classList.add("show");
-}
-function closeImageModal(){
-  document.getElementById("imageModal").classList.remove("show");
+const modal=document.getElementById("imageModal");
+document.getElementById("modalImage").src=src;
+modal.classList.add("show");
 }
 
-// ===== Events =====
-document.addEventListener("keydown", e=>{if(e.key==="Escape")closeImageModal();});
-window.addEventListener("contextmenu", e=>e.preventDefault(), true);
-window.addEventListener("dragstart", e=>e.preventDefault());
+function closeImageModal(){
+document.getElementById("imageModal").classList.remove("show");
+}
+
+document.addEventListener("keydown",e=>{
+if(e.key==="Escape") closeImageModal();
+});
+
+window.addEventListener("contextmenu",e=>e.preventDefault(),true);
+window.addEventListener("dragstart",e=>e.preventDefault());
+
 </script>
 
 <div id="imageModal" class="image-modal">
-  <span class="image-close" onclick="closeImageModal()">&times;</span>
-  <img id="modalImage">
+<span class="image-close" onclick="closeImageModal()">&times;</span>
+<img id="modalImage">
 </div>
 
 </body>
