@@ -332,31 +332,28 @@ function getUrlParams() {
   return params;
 }
 
+// Read URL parameters and apply them
 function applyUrlFilters() {
-  const params = getUrlParams();
+  const params = new URLSearchParams(window.location.search);
 
-  // Apply search keyword if present
-  if (params.search) {
-    const searchInput = document.getElementById("searchInput");
-    searchInput.value = params.search;
-    document.querySelector(".clear-btn").style.display = params.search ? "block" : "none";
-  }
-
-  // Loop through all parameters
-  for (const key in params) {
+  for (const [key, value] of params.entries()) {
     const filterId = urlParamToFilterId[key];
-    if (!filterId) continue; // skip unknown params
+    if (!filterId) continue;
 
-    const values = params[key].split(","); // multi-select support
+    const values = decodeURIComponent(value).split(",").map(v => v.trim()).filter(Boolean);
+    if (!values.length) continue;
+
     const container = document.getElementById(filterId);
     if (!container) continue;
 
-    // Check the checkboxes that match URL values
     container.querySelectorAll("input[type=checkbox]").forEach(cb => {
-      if (values.includes(cb.value)) cb.checked = true;
+      cb.checked = values.includes(cb.value);
     });
   }
+
+  applyFilters(); // Apply the filtered results
 }
+
 
 function applyFilters(){
   const search=document.getElementById("searchInput").value.toLowerCase();
