@@ -18,11 +18,11 @@ body { font-family: Arial; padding: 40px; }
   border: 1px solid #ccc;
   padding: 6px 10px;
   word-break: break-word; 
-  white-space: normal;   /* default wraps */
+  white-space: normal; /* wrap by default */
 }
 .details-table th.nowrap, .details-table td.nowrap {
-  white-space: nowrap;  /* keep single line */
-  width: 1%;            /* auto-fit to text */
+  white-space: nowrap; /* keep single-line */
+  width: 1%;           /* auto-fit text */
 }
 .details-table th { background: #f2f2f2; text-align: left; }
 .details-table tr:nth-child(even) { background: #fafafa; }
@@ -44,11 +44,16 @@ img { user-select: none; -webkit-user-drag: none; }
 // ===== Configuration =====
 const hideColumns = ["ISBN", "作品番", "類", "番", "頁", "收錄初出掲載誌", "收錄初出掲載号", "掲載番", "初出掲載頁", "単行本", "第0巻", "ドラミちゃん", "文庫", "兒童版", "藤子不二雄ランド", "全集副題", "備考", "全集副題香港譯名", "作品類"];
 const nowrapColumns = ["巻", "收錄話", "副題港譯", "收錄頁", "初出掲載誌", "初出掲載号", "大全集"];
-const columnOrder = [
-  "ISBN","作品番","巻","話","收錄話","Title","Subtitle","Author","Publisher",
-  "Price","Page","IssueDate","Size","RetailPoint","OriginalTitle","OriginalSubtitle",
-  "Image","OriginCountry","定価","初版発行日","系列","著","頁"
-];
+const columnOrderBooks = [
+  "Title","Volume","Subtitle","Author","Publisher","Price","Page","IssueDate","Size","RetailPoint","ISBN","OriginalTitle","OriginalSubtitle","Image","OriginCountry","ISBN_JP","Active","Sold",
+  "系列","記号","巻","話","頁","類","標題","副標題","著","初版発行日","定価","判型","Image"
+]; // for top cards
+const columnOrderTable = [
+  "ISBN","作品番","類","番","巻","收錄話","收錄頁","出版副題","收錄初出掲載誌","收錄初出掲載号",
+  "出版備考","副題港譯","色","初出掲載誌","掲載番","初出掲載号","初出掲載頁","初出副題",
+  "単行本","第0巻","ドラミちゃん","文庫","兒童版","藤子不二雄ランド","大全集","頁","全集副題",
+  "備考","全集副題香港譯名","作品類"
+]; // for bottom table
 
 // ===== URL parameters =====
 const params = new URLSearchParams(window.location.search);
@@ -178,8 +183,8 @@ function renderBottomTable(jpinfo, bookStories, allStories) {
 
   const allColumns = Array.from(new Set(mergedRows.flatMap(r => Object.keys(r).map(k=>k?.trim()))))
     .filter(c => !hideColumns.includes(c));
-  const finalColumns = columnOrder.filter(c=>allColumns.includes(c))
-    .concat(allColumns.filter(c=>!columnOrder.includes(c)));
+  const finalColumns = columnOrderTable.filter(c => allColumns.includes(c))
+    .concat(allColumns.filter(c=>!columnOrderTable.includes(c)));
 
   const thead = `<tr>${finalColumns.map(c=>`<th class="${nowrapColumns.includes(c)?'nowrap':''}">${c}</th>`).join('')}</tr>`;
   const tbody = mergedRows.map(r=>`<tr>${finalColumns.map(c=>`<td class="${nowrapColumns.includes(c)?'nowrap':''}">${r[c]?.trim()||""}</td>`).join('')}</tr>`).join('');
