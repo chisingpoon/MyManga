@@ -34,8 +34,8 @@ img { user-select: none; -webkit-user-drag: none; }
 
 <script>
 // ===== Configuration =====
-const hideColumns = ["ISBN", "作品番", "類", "全集副題香港譯名", "作品類"]; // Columns to hide
-const nowrapColumns = ["ISBN", "作品番", "巻"]; // Columns to keep single-line
+const hideColumns = ["ISBN", "作品番", "類", "全集副題香港譯名", "作品類"];
+const nowrapColumns = ["ISBN", "作品番", "巻"];
 const columnOrder = [
   "ISBN","作品番","巻","話","收錄話","Title","Subtitle","Author","Publisher",
   "Price","Page","IssueDate","Size","RetailPoint","OriginalTitle","OriginalSubtitle",
@@ -60,27 +60,19 @@ if (!isbnhk && !isbnjp) {
   loadSheets();
 }
 
-// ===== Load sheets conditionally =====
+// ===== Load sheets progressively =====
 async function loadSheets() {
-  let hkbooks = [], jpbooks = [], bookStories = [], allStories = [];
+  let hkbooks = [], jpbooks = [];
 
-  const promises = [];
-  if (isbnhk) promises.push(fetch(MANGALIST_SHEET).then(r=>r.json()));
-  if (isbnjp) {
-    promises.push(fetch(JPINFO_SHEET).then(r=>r.json()));
-    promises.push(fetch(BOOKSTORY_SHEET).then(r=>r.json()));
-    promises.push(fetch(STORYDETAIL_SHEET).then(r=>r.json()));
-  }
+  const topPromises = [];
+  if (isbnhk) topPromises.push(fetch(MANGALIST_SHEET).then(r => r.json()));
+  if (isbnjp) topPromises.push(fetch(JPINFO_SHEET).then(r => r.json()));
 
   try {
-    const results = await Promise.all(promises);
+    const results = await Promise.all(topPromises);
     let idx = 0;
     if (isbnhk) hkbooks = results[idx++];
-    if (isbnjp) {
-      jpbooks = results[idx++];
-      bookStories = results[idx++];
-      allStories = results[idx++];
-    }
+    if (isbnjp) jpbooks = results[idx++];
 
     const manga = isbnhk ? hkbooks.find(b => b.ISBN?.trim() === isbnhk) : null;
     const jpinfo = isbnjp ? jpbooks.find(j => j.ISBN?.trim() === isbnjp) : null;
@@ -90,9 +82,23 @@ async function loadSheets() {
       return;
     }
 
+    // Render top cards immediately
     renderCards(manga, jpinfo);
 
+    // Load bottom table asynchronously if JP ISBN exists
     if (jpinfo) {
+      const contentDiv = document.getElementById("content");
+      const loadingMsg = document.createElement("div");
+      loadingMsg.id = "loadingTable";
+      loadingMsg.innerText = "Loading bottom table...";
+      contentDiv.appendChild(loadingMsg);
+
+      const [bookStories, allStories] = await Promise.all([
+        fetch(BOOKSTORY_SHEET).then(r => r.json()),
+        fetch(STORYDETAIL_SHEET).then(r => r.json())
+      ]);
+
+      document.getElementById("loadingTable")?.remove();
       renderBottomTable(jpinfo, bookStories, allStories);
     }
 
