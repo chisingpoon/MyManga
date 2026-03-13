@@ -14,8 +14,16 @@ body { font-family: Arial; padding: 40px; }
 
 /* Table styling */
 .details-table { width: 100%; border-collapse: collapse; table-layout: auto; }
-.details-table th, .details-table td { border: 1px solid #ccc; padding: 6px 10px; word-break: break-word; white-space: normal; }
-.details-table th.nowrap, .details-table td.nowrap { white-space: nowrap; }
+.details-table th, .details-table td {
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  word-break: break-word; 
+  white-space: normal;   /* default wraps */
+}
+.details-table th.nowrap, .details-table td.nowrap {
+  white-space: nowrap;  /* keep single line */
+  width: 1%;            /* auto-fit to text */
+}
 .details-table th { background: #f2f2f2; text-align: left; }
 .details-table tr:nth-child(even) { background: #fafafa; }
 
