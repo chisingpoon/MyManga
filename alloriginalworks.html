@@ -306,6 +306,42 @@ function handleSearchInput(){
   clearTimeout(searchTimeout); searchTimeout=setTimeout(applyFilters,300);
 }
 
+function getUrlParams() {
+  const params = {};
+  location.search.slice(1).split("&").forEach(pair => {
+    if(!pair) return;
+    const [key, value] = pair.split("=");
+    params[key] = decodeURIComponent(value || "");
+  });
+  return params;
+}
+
+function applyUrlFilters() {
+  const params = getUrlParams();
+  const multiCheck = (containerId, valStr) => {
+    if(!valStr) return;
+    const values = valStr.split(",");
+    const container = document.getElementById(containerId);
+    container.querySelectorAll("input[type=checkbox]").forEach(cb => {
+      if(values.includes(cb.value)) cb.checked = true;
+    });
+  };
+
+  if(params.search) {
+    document.getElementById("searchInput").value = params.search;
+    document.querySelector(".clear-btn").style.display = params.search ? "block" : "none";
+  }
+
+  multiCheck("lengthTypeFilter", params.type);
+  multiCheck("magazineFilter", params.magazine);
+  multiCheck("tankobonFilter", params.tankobon);
+  multiCheck("volZeroFilter", params.vol0);
+  multiCheck("doramiFilter", params.dorami);
+  multiCheck("bunkobonFilter", params.bunko);
+  multiCheck("pikkapikaFilter", params.pikkapika);
+  multiCheck("completeCollectionFilter", params.complete);
+}
+
 function applyFilters(){
   const search=document.getElementById("searchInput").value.toLowerCase();
   const lengthType=getCheckedValues("lengthTypeFilter"),
@@ -338,6 +374,7 @@ function clearSearch(){
   document.getElementById("searchInput").value="";
   document.querySelector(".clear-btn").style.display="none";
   initializeFilters();
+  applyUrlFilters();
   applyFilters();
 }
 
