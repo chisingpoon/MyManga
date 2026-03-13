@@ -257,10 +257,37 @@ function initializeFilters(){
 
 function populateCheckboxFilter(id, values){
   const container = document.getElementById(id);
-  if(!container) return; container.innerHTML="";
+  if(!container) return;
+  container.innerHTML = "";
+
+  // Natural sort: numbers within strings sorted numerically
+  values.sort((a, b) => {
+    const regex = /(\d+)|(\D+)/g; // splits numbers and non-numbers
+    const aParts = a.match(regex);
+    const bParts = b.match(regex);
+
+    const len = Math.min(aParts.length, bParts.length);
+
+    for(let i = 0; i < len; i++){
+      const aPart = aParts[i];
+      const bPart = bParts[i];
+
+      const aNum = parseInt(aPart, 10);
+      const bNum = parseInt(bPart, 10);
+
+      if(!isNaN(aNum) && !isNaN(bNum)){
+        if(aNum !== bNum) return aNum - bNum;
+      } else {
+        if(aPart !== bPart) return aPart.localeCompare(bPart, 'ja');
+      }
+    }
+
+    return aParts.length - bParts.length; // shorter comes first if equal so far
+  });
+
   values.forEach(v=>{
     const label = document.createElement("label");
-    label.innerHTML=`<input type="checkbox" value="${v}" onchange="applyFilters()"> ${v}`;
+    label.innerHTML = `<input type="checkbox" value="${v}" onchange="applyFilters()"> ${v}`;
     container.appendChild(label);
   });
 }
