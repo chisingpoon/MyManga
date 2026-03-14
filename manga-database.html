@@ -42,9 +42,9 @@
         <main class="max-w-7xl mx-auto px-4 py-8">
             
             <div v-if="view === 'series'" class="animate-in fade-in duration-500">
-                <div class="mb-8">
+                <div class="mb-8 text-center sm:text-left">
                     <h2 class="text-2xl font-black text-slate-800">{{ region === 'HK' ? '香港版系列' : '日本版系列' }}</h2>
-                    <p class="text-slate-500">Browse by series category</p>
+                    <p class="text-slate-500">Only displaying active publications</p>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     <div v-for="s in filteredSeries" @click="selectSeries(s)" 
@@ -52,6 +52,9 @@
                         <div class="text-slate-300 mb-2 uppercase text-[10px] font-bold tracking-widest">Collection</div>
                         <h3 class="font-black text-slate-700 leading-tight break-words">{{ s }}</h3>
                     </div>
+                </div>
+                <div v-if="filteredSeries.length === 0" class="text-center py-20 text-slate-400">
+                    No active series found.
                 </div>
             </div>
 
@@ -67,7 +70,7 @@
                          class="book-card bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer group">
                         <div class="aspect-[3/4] bg-slate-200 relative overflow-hidden">
                             <img v-if="book.Image" :src="book.Image" class="w-full h-full object-cover transition-all duration-500">
-                            <div v-else class="w-full h-full flex items-center justify-center text-slate-400 italic">No Cover</div>
+                            <div v-else class="w-full h-full flex items-center justify-center text-slate-400 italic text-xs">No Cover</div>
                             <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                                 <span class="text-white font-black text-sm tracking-tighter italic">VOL. {{ book.Volume || book.巻 }}</span>
                             </div>
@@ -88,25 +91,23 @@
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     <div class="lg:col-span-4 space-y-6">
                         <div v-if="region === 'HK'" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                            <div class="bg-blue-600 px-4 py-2 text-[10px] font-black text-white uppercase tracking-widest">HK Edition Edition</div>
+                            <div class="bg-blue-600 px-4 py-2 text-[10px] font-black text-white uppercase tracking-widest">HK Publication</div>
                             <div class="p-6">
                                 <h2 class="text-2xl font-black text-slate-800 mb-4">{{ selectedBook.Title }}</h2>
                                 <div class="grid grid-cols-2 gap-y-4 text-sm">
                                     <div class="text-slate-400">ISBN</div><div class="font-mono font-bold">{{ selectedBook.ISBN }}</div>
                                     <div class="text-slate-400">Price</div><div class="font-bold">{{ selectedBook.Price }}</div>
-                                    <div class="text-slate-400">Issue Date</div><div class="font-bold">{{ selectedBook.IssueDate }}</div>
-                                    <div class="text-slate-400">Pages</div><div class="font-bold">{{ selectedBook.Page }}</div>
+                                    <div class="text-slate-400">Date</div><div class="font-bold">{{ selectedBook.IssueDate }}</div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                            <div class="bg-red-600 px-4 py-2 text-[10px] font-black text-white uppercase tracking-widest">Japanese Edition Info</div>
+                            <div class="bg-red-600 px-4 py-2 text-[10px] font-black text-white uppercase tracking-widest">Japan Specs</div>
                             <div class="p-6">
                                 <h2 class="text-2xl font-black text-slate-800 mb-4">{{ jpDetail.標題 || 'N/A' }}</h2>
                                 <div class="grid grid-cols-2 gap-y-4 text-sm">
-                                    <div class="text-slate-400">Original ISBN</div><div class="font-mono font-bold">{{ jpDetail.ISBN || 'N/A' }}</div>
-                                    <div class="text-slate-400">Released</div><div class="font-bold">{{ jpDetail.初版発行日 }}</div>
+                                    <div class="text-slate-400">ISBN</div><div class="font-mono font-bold">{{ jpDetail.ISBN || 'N/A' }}</div>
                                     <div class="text-slate-400">Format</div><div class="font-bold">{{ jpDetail.判型 }}</div>
                                 </div>
                             </div>
@@ -116,28 +117,28 @@
                     <div class="lg:col-span-8">
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                             <div class="px-6 py-4 bg-slate-50 border-b flex justify-between items-center">
-                                <h3 class="font-black text-slate-700 uppercase tracking-tight">Included Stories (收錄作品)</h3>
-                                <span class="bg-slate-200 px-2 py-1 rounded text-[10px] font-black text-slate-500">{{ currentStories.length }} ITEMS</span>
+                                <h3 class="font-black text-slate-700 uppercase tracking-tight text-sm">Contents (收錄作品)</h3>
+                                <span class="bg-slate-200 px-2 py-1 rounded text-[10px] font-black text-slate-500">{{ currentStories.length }} STORIES</span>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse">
                                     <thead>
                                         <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
                                             <th class="px-6 py-4 w-16">No</th>
-                                            <th class="px-6 py-4">Title (JP / HK)</th>
-                                            <th class="px-6 py-4">Source / Magazine</th>
+                                            <th class="px-6 py-4">Title</th>
+                                            <th class="px-6 py-4">Source</th>
                                         </tr>
                                     </thead>
                                     <tbody class="text-sm divide-y divide-slate-100">
                                         <tr v-for="story in currentStories" :key="story.作品番" class="hover:bg-slate-50 transition-colors">
                                             <td class="px-6 py-4 font-mono text-slate-400">{{ story.收錄話 }}</td>
                                             <td class="px-6 py-4">
-                                                <div class="font-bold text-slate-900">{{ story.出版副題 }}</div>
-                                                <div class="text-xs text-blue-600 font-bold mt-1">{{ story.副題港譯 }}</div>
+                                                <div class="font-bold text-slate-900 leading-tight">{{ story.出版副題 }}</div>
+                                                <div class="text-[11px] text-blue-600 font-bold mt-1">{{ story.副題港譯 }}</div>
                                             </td>
                                             <td class="px-6 py-4">
-                                                <div class="text-slate-600 font-medium">{{ story.master?.初出掲載誌 }}</div>
-                                                <div class="text-[10px] text-slate-400 uppercase tracking-tighter">{{ story.master?.初出掲載号 }}</div>
+                                                <div class="text-slate-600 font-medium text-xs">{{ story.master?.初出掲載誌 }}</div>
+                                                <div class="text-[9px] text-slate-400 uppercase tracking-tighter">{{ story.master?.初出掲載号 }}</div>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -161,28 +162,31 @@
                     loading: true,
                     selectedSeries: null,
                     selectedBook: null,
-                    db: { 
-                        hk: [],      // 出版目録HK
-                        jp: [],      // 出版目録JP
-                        contents: [],// 書籍收錄作品
-                        master: []   // 作品完整列表
-                    }
+                    db: { hk: [], jp: [], contents: [], master: [] }
                 }
             },
             computed: {
+                // Computed property to only deal with ACTIVE records
+                activeHK() {
+                    return this.db.hk.filter(item => item.Active === 'Yes');
+                },
+                activeJP() {
+                    return this.db.jp.filter(item => item.Active === 'Yes');
+                },
                 filteredSeries() {
-                    const data = this.region === 'HK' ? this.db.hk : this.db.jp;
+                    const data = this.region === 'HK' ? this.activeHK : this.activeJP;
                     const key = this.region === 'HK' ? 'Title' : '系列';
                     return [...new Set(data.map(item => item[key]))].filter(Boolean).sort();
                 },
                 filteredBooks() {
-                    const data = this.region === 'HK' ? this.db.hk : this.db.jp;
+                    const data = this.region === 'HK' ? this.activeHK : this.activeJP;
                     const key = this.region === 'HK' ? 'Title' : '系列';
                     return data.filter(b => b[key] === this.selectedSeries);
                 },
                 jpDetail() {
                     if (!this.selectedBook) return {};
                     const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
+                    // We search the WHOLE JP list for the cross-reference, though active filter usually applies
                     return this.db.jp.find(j => j.ISBN == targetISBN) || {};
                 },
                 currentStories() {
