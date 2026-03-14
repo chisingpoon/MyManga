@@ -1,213 +1,246 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<title>漫畫資料庫完整版</title>
-<style>
-body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; margin:0; }
-header { margin-bottom: 10px; }
-.nav-bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:20px; }
-.nav-bar button { border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-weight:bold; transition:0.2s; }
-.nav-bar button:hover { opacity:0.85; }
-.nav-bar .mode-btn { background:#e5e7eb; color:#1f2937; }
-.nav-bar .mode-btn.active { background:#3b82f6; color:white; }
-.nav-bar .link-btn { background:#f97316; color:white; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:15px; }
-.card { background:white; border-radius:8px; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1); cursor:pointer; }
-.card img { width:100%; border-radius:6px; }
-.editions { display:flex; gap:40px; flex-wrap:wrap; margin-bottom:25px; justify-content:flex-start; }
-.edition-card { background:white; padding:15px; border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.1); flex:1; min-width:200px; display:flex; gap:15px; align-items:flex-start; }
-.edition-card img { width:140px; border-radius:6px; }
-.edition-info p { margin:6px 0; font-size:14px; }
-.table-wrapper { overflow-x:auto; margin-top:20px; background:white; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
-table { width:100%; border-collapse:collapse; min-width:700px; font-size:14px; }
-thead th { position:sticky; top:0; background:#1f2937; color:white; padding:12px; text-align:left; border-bottom:2px solid #e5e7eb; }
-td { padding:12px; border-bottom:1px solid #eee; }
-tbody tr:nth-child(even) { background:#fafafa; }
-tbody tr:hover { background:#f1f5f9; }
-.pagination { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
-.page-btn { padding:6px 12px; border-radius:5px; background:#3b82f6; color:white; cursor:pointer; font-size:13px; user-select:none; }
-.page-btn.disabled { background:#ccc; cursor:default; }
-@media (max-width: 768px) {
-    .editions { flex-direction: column; gap:20px; }
-    .edition-card { flex-direction: row; align-items:flex-start; }
-    .table-wrapper { overflow-x:scroll; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Archive Database</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [v-cloak] { display: none; }
+        .series-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
+        .book-card:hover img { transform: scale(1.05); }
+        .transition-all { transition: all 0.3s ease; }
+    </style>
 </head>
-<body>
-<header>
-<h1>漫畫資料庫完整版</h1>
-<div class="nav-bar" id="mode-nav"></div>
-</header>
-
-<div id="content"></div>
-
-<script>
-const content = document.getElementById("content");
-const BASE = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8";
-const URLS = {
-    hk: BASE + "/出版目録HK",
-    jp: BASE + "/出版目録JP",
-    volumeStories: BASE + "/書籍收錄作品",
-    stories: BASE + "/作品完整列表"
-};
-
-const params = new URLSearchParams(window.location.search);
-let MODE = params.get("mode") || "hk";
-let OPEN_ISBN = params.get("isbn") || null;
-let CURRENT_SERIES = null;
-
-const DB = {};
-const PAGE_SIZE = 10;
-let CURRENT_PAGE = 1;
-let CURRENT_ROWS = [];
-
-function updateNavLinks() {
-    const nav = document.getElementById("mode-nav");
-    let html = '';
-    html += `<button class="mode-btn ${MODE==='hk'?'active':''}" onclick="switchMode('hk')">Hong Kong View</button>`;
-    html += `<button class="mode-btn ${MODE==='jp'?'active':''}" onclick="switchMode('jp')">Japanese View</button>`;
-
-    if (OPEN_ISBN && CURRENT_SERIES) {
-        html += `<button class="link-btn" onclick="goBackVolumes()">Back to Volumes List</button>`;
-    }
-
-    if (OPEN_ISBN || (!OPEN_ISBN && CURRENT_SERIES)) {
-        html += `<button class="link-btn" onclick="renderSeries()">Back to Series List</button>`;
-    }
-    nav.innerHTML = html;
-}
-
-function switchMode(mode) {
-    MODE = mode;
-    OPEN_ISBN = null;
-    updateNavLinks();
-    renderSeries();
-}
-
-function goBackVolumes() { 
-    if (CURRENT_SERIES) {
-        renderSeriesVolumes(CURRENT_SERIES); 
-    }
-}
-
-async function loadDatabase() {
-    try {
-        const [hk, jp, volStories, stories] = await Promise.all([
-            fetch(URLS.hk).then(r => r.json()),
-            fetch(URLS.jp).then(r => r.json()),
-            fetch(URLS.volumeStories).then(r => r.json()),
-            fetch(URLS.stories).then(r => r.json())
-        ]);
-        DB.hkBooks = hk.filter(b => b.Active === "Yes");
-        DB.jpBooks = jp.filter(b => b.Active === "Yes");
-        DB.volumeStories = volStories;
-        DB.stories = stories;
-        buildIndex();
-        updateNavLinks();
-        if (OPEN_ISBN) { renderVolume(OPEN_ISBN); } else { renderSeries(); }
-    } catch (e) {
-        content.innerHTML = "<p style='color:red'>Error loading data. Please check network or OpenSheet URL.</p>";
-        console.error(e);
-    }
-}
-
-function buildIndex() {
-    DB.hkByISBN = {}; DB.jpByISBN = {}; DB.storiesByISBN = {}; DB.storyMeta = {};
-    DB.hkBooks.forEach(b => DB.hkByISBN[b.ISBN] = b);
-    DB.jpBooks.forEach(b => DB.jpByISBN[b.ISBN] = b);
-    DB.volumeStories.forEach(v => {
-        if (!DB.storiesByISBN[v.ISBN]) DB.storiesByISBN[v.ISBN] = [];
-        DB.storiesByISBN[v.ISBN].push(v);
-    });
-    DB.stories.forEach(s => DB.storyMeta[s.作品番] = s);
-}
-
-function renderSeries() {
-    OPEN_ISBN = null;
-    CURRENT_SERIES = null;
-    updateNavLinks();
-    let titles;
-    if (MODE === "jp") {
-        titles = [...new Set(DB.jpBooks.map(b => b.系列))];
-        content.innerHTML = `<div class="grid">${titles.map(t => `<div class="card" onclick="renderSeriesVolumes('${t}')"><h3>${t}</h3><div>${DB.jpBooks.filter(b=>b.系列===t).length} volumes</div></div>`).join("")}</div>`;
-    } else {
-        titles = [...new Set(DB.hkBooks.map(b => b.Title))];
-        content.innerHTML = `<div class="grid">${titles.map(t => `<div class="card" onclick="renderSeriesVolumes('${t}')"><h3>${t}</h3><div>${DB.hkBooks.filter(b=>b.Title===t).length} volumes</div></div>`).join("")}</div>`;
-    }
-}
-
-function renderSeriesVolumes(title) {
-    CURRENT_SERIES = title;
-    let html = '';
-    if (MODE === "jp") {
-        const vols = DB.jpBooks.filter(b => b.系列 === title).sort((a, b) => a.巻 - b.巻);
-        html = vols.map(v => `<div class="card" onclick="renderVolume('${v.ISBN}')"><img src="${v.Image}"><h3>${v.系列} ${v.巻}</h3></div>`).join("");
-    } else {
-        const vols = DB.hkBooks.filter(b => b.Title === title).sort((a, b) => a.Volume - b.Volume);
-        html = vols.map(v => `<div class="card" onclick="renderVolume('${v.ISBN}')"><img src="${v.Image}"><h3>${v.Title} ${v.Volume}</h3></div>`).join("");
-    }
-    content.innerHTML = `<h2>${title}</h2><div class="grid">${html}</div>`;
-}
-
-function renderVolume(isbn) {
-    OPEN_ISBN = isbn;
-    const hk = DB.hkByISBN[isbn];
-    const jp = DB.jpByISBN[hk.ISBN_JP];
-    const stories = DB.storiesByISBN[jp.ISBN] || [];
-
-    const storyHTML = stories.length ? `<div class="table-wrapper">
-        <div class="card">
-            <table>
-                <thead>
-                    <tr><th>巻</th><th>收錄話</th><th>收錄頁</th><th>出版副題</th><th>副題港譯</th></tr>
-                </thead>
-                <tbody>
-                    ${stories.map(s => `
-                    <tr>
-                        <td>${s.巻}</td>
-                        <td>${s.收錄話}</td>
-                        <td>${s.收錄頁}</td>
-                        <td>${s.出版副題}</td>
-                        <td>${s.副題港譯 || "-"}</td>
-                    </tr>`).join('')}
-                </tbody>
-            </table>
+<body class="bg-slate-50 text-slate-900 font-sans">
+    <div id="app" v-cloak class="min-h-screen">
+        
+        <div v-if="loading" class="fixed inset-0 bg-white/90 z-50 flex flex-col items-center justify-center">
+            <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-slate-500 font-bold animate-pulse">Syncing Database...</p>
         </div>
-    </div>` : '';
 
-    content.innerHTML = `
-        <div class="editions">
-            ${hk ? `<div class="edition-card">
-                <img src="${hk.Image}" alt="HK Cover">
-                <div class="edition-info">
-                    <h3>${hk.Title} ${hk.Volume}</h3>
-                    <p>Author: ${hk.Author}</p>
-                    <p>Publisher: ${hk.Publisher}</p>
-                    <p>Publication Date: ${hk.IssueDate}</p>
+        <header class="bg-white border-b sticky top-0 z-40 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-2 cursor-pointer" @click="resetToSeries">
+                    <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-black italic">M</div>
+                    <span class="font-bold text-lg tracking-tight hidden sm:inline">MANGA DB</span>
                 </div>
-            </div>` : ''}
-            ${jp ? `<div class="edition-card">
-                <img src="${jp.Image}" alt="JP Cover">
-                <div class="edition-info">
-                    <h3>${jp.系列} ${jp.巻}</h3>
-                    <p>Author: ${jp.著}</p>
-                    <p>Publisher: ${jp.出版社}</p>
-                    <p>Publication Date: ${jp.初版発行日}</p>
+                
+                <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                    <button @click="toggleRegion('HK')" 
+                            :class="region === 'HK' ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:text-slate-700'"
+                            class="px-4 py-1.5 rounded-md text-sm font-bold transition-all">HK Edition</button>
+                    <button @click="toggleRegion('JP')" 
+                            :class="region === 'JP' ? 'bg-white shadow text-red-600' : 'text-slate-500 hover:text-slate-700'"
+                            class="px-4 py-1.5 rounded-md text-sm font-bold transition-all">JP Edition</button>
                 </div>
-            </div>` : ''}
-        </div>
-        <h3>Stories in Volume</h3>
-        ${storyHTML}
-        <div>
-            <button class="link-btn" onclick="goBackVolumes()">Back to Volumes List</button>
-            <button class="link-btn" onclick="renderSeries()">Back to Series List</button>
-        </div>
-    `;
-}
+            </div>
+        </header>
 
-loadDatabase();
-</script>
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            
+            <div v-if="view === 'series'" class="animate-in fade-in duration-500">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-black text-slate-800">{{ region === 'HK' ? '香港版系列' : '日本版系列' }}</h2>
+                    <p class="text-slate-500">Browse by series category</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <div v-for="s in filteredSeries" @click="selectSeries(s)" 
+                         class="series-card bg-white p-6 rounded-2xl border border-slate-200 cursor-pointer transition-all text-center">
+                        <div class="text-slate-300 mb-2 uppercase text-[10px] font-bold tracking-widest">Collection</div>
+                        <h3 class="font-black text-slate-700 leading-tight break-words">{{ s }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="view === 'books'" class="animate-in slide-in-from-bottom-4 duration-500">
+                <nav class="flex items-center gap-2 mb-6 text-sm font-bold">
+                    <span class="text-blue-600 cursor-pointer hover:underline" @click="view = 'series'">Series</span>
+                    <span class="text-slate-300">/</span>
+                    <span class="text-slate-800">{{ selectedSeries }}</span>
+                </nav>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                    <div v-for="book in filteredBooks" @click="selectBook(book)" 
+                         class="book-card bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer group">
+                        <div class="aspect-[3/4] bg-slate-200 relative overflow-hidden">
+                            <img v-if="book.Image" :src="book.Image" class="w-full h-full object-cover transition-all duration-500">
+                            <div v-else class="w-full h-full flex items-center justify-center text-slate-400 italic">No Cover</div>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                                <span class="text-white font-black text-sm tracking-tighter italic">VOL. {{ book.Volume || book.巻 }}</span>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-slate-800 line-clamp-2 leading-tight group-hover:text-blue-600">{{ book.Title || book.標題 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="view === 'detail' && selectedBook" class="space-y-8 animate-in zoom-in-95 duration-300">
+                <button @click="view = 'books'" class="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-width="2"></path></svg>
+                    Back to Volume List
+                </button>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-4 space-y-6">
+                        <div v-if="region === 'HK'" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="bg-blue-600 px-4 py-2 text-[10px] font-black text-white uppercase tracking-widest">HK Edition Edition</div>
+                            <div class="p-6">
+                                <h2 class="text-2xl font-black text-slate-800 mb-4">{{ selectedBook.Title }}</h2>
+                                <div class="grid grid-cols-2 gap-y-4 text-sm">
+                                    <div class="text-slate-400">ISBN</div><div class="font-mono font-bold">{{ selectedBook.ISBN }}</div>
+                                    <div class="text-slate-400">Price</div><div class="font-bold">{{ selectedBook.Price }}</div>
+                                    <div class="text-slate-400">Issue Date</div><div class="font-bold">{{ selectedBook.IssueDate }}</div>
+                                    <div class="text-slate-400">Pages</div><div class="font-bold">{{ selectedBook.Page }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="bg-red-600 px-4 py-2 text-[10px] font-black text-white uppercase tracking-widest">Japanese Edition Info</div>
+                            <div class="p-6">
+                                <h2 class="text-2xl font-black text-slate-800 mb-4">{{ jpDetail.標題 || 'N/A' }}</h2>
+                                <div class="grid grid-cols-2 gap-y-4 text-sm">
+                                    <div class="text-slate-400">Original ISBN</div><div class="font-mono font-bold">{{ jpDetail.ISBN || 'N/A' }}</div>
+                                    <div class="text-slate-400">Released</div><div class="font-bold">{{ jpDetail.初版発行日 }}</div>
+                                    <div class="text-slate-400">Format</div><div class="font-bold">{{ jpDetail.判型 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-8">
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="px-6 py-4 bg-slate-50 border-b flex justify-between items-center">
+                                <h3 class="font-black text-slate-700 uppercase tracking-tight">Included Stories (收錄作品)</h3>
+                                <span class="bg-slate-200 px-2 py-1 rounded text-[10px] font-black text-slate-500">{{ currentStories.length }} ITEMS</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
+                                            <th class="px-6 py-4 w-16">No</th>
+                                            <th class="px-6 py-4">Title (JP / HK)</th>
+                                            <th class="px-6 py-4">Source / Magazine</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-sm divide-y divide-slate-100">
+                                        <tr v-for="story in currentStories" :key="story.作品番" class="hover:bg-slate-50 transition-colors">
+                                            <td class="px-6 py-4 font-mono text-slate-400">{{ story.收錄話 }}</td>
+                                            <td class="px-6 py-4">
+                                                <div class="font-bold text-slate-900">{{ story.出版副題 }}</div>
+                                                <div class="text-xs text-blue-600 font-bold mt-1">{{ story.副題港譯 }}</div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="text-slate-600 font-medium">{{ story.master?.初出掲載誌 }}</div>
+                                                <div class="text-[10px] text-slate-400 uppercase tracking-tighter">{{ story.master?.初出掲載号 }}</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    region: 'HK',
+                    view: 'series',
+                    loading: true,
+                    selectedSeries: null,
+                    selectedBook: null,
+                    db: { 
+                        hk: [],      // 出版目録HK
+                        jp: [],      // 出版目録JP
+                        contents: [],// 書籍收錄作品
+                        master: []   // 作品完整列表
+                    }
+                }
+            },
+            computed: {
+                filteredSeries() {
+                    const data = this.region === 'HK' ? this.db.hk : this.db.jp;
+                    const key = this.region === 'HK' ? 'Title' : '系列';
+                    return [...new Set(data.map(item => item[key]))].filter(Boolean).sort();
+                },
+                filteredBooks() {
+                    const data = this.region === 'HK' ? this.db.hk : this.db.jp;
+                    const key = this.region === 'HK' ? 'Title' : '系列';
+                    return data.filter(b => b[key] === this.selectedSeries);
+                },
+                jpDetail() {
+                    if (!this.selectedBook) return {};
+                    const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
+                    return this.db.jp.find(j => j.ISBN == targetISBN) || {};
+                },
+                currentStories() {
+                    if (!this.selectedBook) return [];
+                    const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
+                    return this.db.contents
+                        .filter(c => c.ISBN == targetISBN)
+                        .map(c => ({
+                            ...c,
+                            master: this.db.master.find(m => m.作品番 == c.作品番)
+                        }))
+                        .sort((a, b) => parseInt(a.收錄話) - parseInt(b.收錄話));
+                }
+            },
+            methods: {
+                async init() {
+                    try {
+                        const [hk, jp, contents, master] = await Promise.all([
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
+                        ]);
+                        this.db.hk = hk;
+                        this.db.jp = jp;
+                        this.db.contents = contents;
+                        this.db.master = master;
+                    } catch (e) {
+                        console.error("Fetch Error:", e);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                toggleRegion(r) {
+                    this.region = r;
+                    this.view = 'series';
+                    this.selectedSeries = null;
+                },
+                selectSeries(name) {
+                    this.selectedSeries = name;
+                    this.view = 'books';
+                },
+                selectBook(book) {
+                    this.selectedBook = book;
+                    this.view = 'detail';
+                },
+                resetToSeries() {
+                    this.view = 'series';
+                    this.selectedSeries = null;
+                    this.selectedBook = null;
+                }
+            },
+            mounted() {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('region')?.toUpperCase() === 'JP') this.region = 'JP';
+                this.init();
+            }
+        }).mount('#app')
+    </script>
 </body>
 </html>
