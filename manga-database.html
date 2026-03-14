@@ -72,6 +72,7 @@ function updateNavLinks() {
     if (OPEN_ISBN && CURRENT_SERIES) {
         html += `<button class="link-btn" onclick="goBackVolumes()">Back to Volumes List</button>`;
     }
+
     if (OPEN_ISBN || (!OPEN_ISBN && CURRENT_SERIES)) {
         html += `<button class="link-btn" onclick="renderSeries()">Back to Series List</button>`;
     }
@@ -153,12 +154,29 @@ function renderSeriesVolumes(title) {
 function renderVolume(isbn) {
     OPEN_ISBN = isbn;
     const hk = DB.hkByISBN[isbn];
-    const jp = DB.jpByISBN[hk?.ISBN_JP];
-    const stories = DB.storiesByISBN[hk?.ISBN_JP] || [];
-    let storyHTML = '';
-    if (stories.length > 0) {
-        storyHTML = stories.map(s => `<div class="card">${s.巻} - ${s.収錄話} - ${s.収錄頁} - ${s.出版副題} - ${s.副題港譯}</div>`).join("");
-    }
+    const jp = DB.jpByISBN[hk.ISBN_JP];
+    const stories = DB.storiesByISBN[jp.ISBN] || [];
+
+    const storyHTML = stories.length ? `<div class="table-wrapper">
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>巻</th><th>收錄話</th><th>收錄頁</th><th>出版副題</th><th>副題港譯</th></tr>
+                </thead>
+                <tbody>
+                    ${stories.map(s => `
+                    <tr>
+                        <td>${s.巻}</td>
+                        <td>${s.收錄話}</td>
+                        <td>${s.收錄頁}</td>
+                        <td>${s.出版副題}</td>
+                        <td>${s.副題港譯 || "-"}</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>` : '';
+
     content.innerHTML = `
         <div class="editions">
             ${hk ? `<div class="edition-card">
@@ -181,9 +199,7 @@ function renderVolume(isbn) {
             </div>` : ''}
         </div>
         <h3>Stories in Volume</h3>
-        <div class="table-wrapper">
-            <div class="grid">${storyHTML}</div>
-        </div>
+        ${storyHTML}
         <div>
             <button class="link-btn" onclick="goBackVolumes()">Back to Volumes List</button>
             <button class="link-btn" onclick="renderSeries()">Back to Series List</button>
