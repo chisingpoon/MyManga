@@ -85,7 +85,11 @@ function switchMode(mode) {
     renderSeries();
 }
 
-function goBackVolumes() { if (CURRENT_SERIES) renderSeriesVolumes(CURRENT_SERIES); }
+function goBackVolumes() { 
+    if (CURRENT_SERIES) {
+        renderSeriesVolumes(CURRENT_SERIES); 
+    }
+}
 
 async function loadDatabase() {
     try {
@@ -153,7 +157,7 @@ function renderVolume(isbn) {
     const stories = DB.storiesByISBN[hk?.ISBN_JP] || [];
     let storyHTML = '';
     if (stories.length > 0) {
-        storyHTML = stories.map(s => `<div class="card">${s.巻} - ${s.収錄話} - ${s.收錄頁} - ${s.出版副題} - ${s.副題港譯}</div>`).join("");
+        storyHTML = stories.map(s => `<div class="card">${s.巻} - ${s.収錄話} - ${s.収錄頁} - ${s.出版副題} - ${s.副題港譯}</div>`).join("");
     }
     content.innerHTML = `
         <div class="editions">
@@ -179,6 +183,10 @@ function renderVolume(isbn) {
         <h3>Stories in Volume</h3>
         <div class="table-wrapper">
             <div class="grid">${storyHTML}</div>
+        </div>
+        <div>
+            <button class="link-btn" onclick="goBackVolumes()">Back to Volumes List</button>
+            <button class="link-btn" onclick="renderSeries()">Back to Series List</button>
         </div>
     `;
 }
