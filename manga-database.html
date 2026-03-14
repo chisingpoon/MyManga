@@ -45,16 +45,22 @@ const URLS={ hk:BASE+"/出版目録HK", jp:BASE+"/出版目録JP", volumeStories
 const params=new URLSearchParams(window.location.search);
 let MODE=params.get("mode")||"hk";
 let OPEN_ISBN=params.get("isbn");
-let CURRENT_SERIES=null; // store series/title when viewing volumes
+let CURRENT_SERIES=null;
 const DB={};
 
 function updateNavLinks(){
     const nav = document.getElementById("mode-nav");
     let html = '';
+    // HK/JP toggle
     if(MODE==='jp'){ html += `<a onclick="switchMode('hk')">Hong Kong View</a>`; }
     else { html += `<a onclick="switchMode('jp')">Japanese View</a>`; }
+    // Back to Volumes List if a volume is open
     if(OPEN_ISBN && CURRENT_SERIES){ 
         html += `<a class="back-link" onclick="goBackVolumes()">Back to Volumes List</a>`; 
+    }
+    // Back to Series List always available when not viewing series list
+    if(OPEN_ISBN || CURRENT_SERIES){ 
+        html += `<a class="back-link" onclick="renderSeries()">Back to Series List</a>`; 
     }
     nav.innerHTML = html;
 }
@@ -127,7 +133,6 @@ function renderVolume(isbn){
     }
 }
 
-// Edition cards and stories table remain same as previous version
 function renderHKVolume(hk,jp,stories){
     let editionHTML = '';
     const cards=[];
