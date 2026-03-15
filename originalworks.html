@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Archive | Optimized View</title>
+    <title>Master Archive | HK Mapping Version</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -37,19 +37,19 @@
             
             <div v-if="loading" class="flex flex-col items-center justify-center py-40">
                 <div class="w-16 h-16 border-8 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                <p class="mt-6 text-xl font-black text-slate-400 uppercase tracking-widest">Matching Data...</p>
+                <p class="mt-6 text-xl font-black text-slate-400 uppercase tracking-widest">正在對照港版資料...</p>
             </div>
 
             <div v-else>
                 <div class="bg-white rounded-[2.5rem] shadow-lg border border-slate-200 p-8 mb-6">
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-10">
                         <div class="space-y-4">
-                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">Search</label>
+                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">搜尋</label>
                             <input type="text" v-model="searchQuery" placeholder="搜尋..." 
                                 class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-4 px-6 font-bold outline-none focus:ring-4 focus:ring-indigo-500/10">
                         </div>
                         <div class="lg:col-span-3 space-y-4">
-                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">Magazine</label>
+                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">初出掲載誌</label>
                             <div class="flex flex-wrap gap-3 max-h-48 overflow-y-auto filter-scroll p-1">
                                 <button v-for="(count, mag) in magazineStats" :key="mag" 
                                     @click="toggleMagazine(mag)"
@@ -72,7 +72,7 @@
                                     <th class="px-8 py-6">初出掲載誌</th>
                                     <th class="px-8 py-6">初出掲載號</th>
                                     <th class="px-8 py-6">初出掲載頁</th>
-                                    <th class="px-8 py-6 text-center bg-indigo-50 text-indigo-600">大全集</th>
+                                    <th class="px-8 py-6 text-center bg-indigo-50 text-indigo-600">大全集 (港版連結)</th>
                                     <th class="px-8 py-6">備考</th>
                                 </tr>
                             </thead>
@@ -85,10 +85,10 @@
                                     <td class="px-8 py-6 text-slate-500">{{ row.初出掲載頁 }}</td>
                                     
                                     <td class="px-8 py-6 text-center">
-                                        <template v-if="getDQSMapping(row.作品番)">
-                                            <a :href="'publishjp.html?isbn=' + getDQSMapping(row.作品番).isbn" 
-                                               class="inline-flex items-center justify-center bg-indigo-600 text-white px-6 py-2 rounded-2xl text-sm font-black hover:bg-indigo-700 shadow-lg">
-                                                Vol. {{ getDQSMapping(row.作品番).vol }}
+                                        <template v-if="getHKMapping(row.作品番)">
+                                            <a :href="'publish.html?isbn=' + getHKMapping(row.作品番).hkIsbn" 
+                                               class="inline-flex items-center justify-center bg-indigo-600 text-white px-6 py-2 rounded-2xl text-sm font-black hover:bg-indigo-700 shadow-lg transition-transform hover:scale-105">
+                                                Vol. {{ getHKMapping(row.作品番).vol }}
                                             </a>
                                         </template>
                                         <span v-else class="text-slate-200">——</span>
@@ -118,7 +118,7 @@
                     loading: true,
                     searchQuery: '', activeMagazines: [],
                     currentPage: 1, itemsPerPage: 50,
-                    master: [], contents: []
+                    master: [], contents: [], publishHk: []
                 }
             },
             computed: {
@@ -150,40 +150,48 @@
             methods: {
                 async init() {
                     try {
-                        const [m, c] = await Promise.all([
+                        const [m, c, h] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json())
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
                         
-                        // Filter out empty IDs immediately
                         this.master = m.filter(r => r.作品番 && r.作品番.toString().trim() !== "");
                         this.contents = c;
+                        this.publishHk = h;
                     } catch (e) { 
                         console.error("Fetch Error:", e); 
                     } finally { 
                         this.loading = false; 
                     }
                 },
-                getDQSMapping(workId) {
+                getHKMapping(workId) {
                     if (!workId || !this.contents.length) return null;
-                    
                     const cleanWorkId = workId.toString().trim();
                     
-                    // Look for the match in "書籍收錄作品"
-                    const match = this.contents.find(c => {
+                    // 1. 在「書籍收錄作品」尋找對應作品番且類別為大全集的記錄
+                    const contentMatch = this.contents.find(c => {
                         const cid = c.作品番 ? c.作品番.toString().trim() : '';
                         const type = c.類 ? c.類.toString().trim() : '';
                         return cid === cleanWorkId && (type === "大全集" || type === "大長編大全集");
                     });
 
-                    if (match) {
-                        // Use multiple fallback property names for "巻" and "ISBN" 
-                        // in case the API returns slightly different headers
-                        const volume = match.卷 || match.巻 || match['巻'] || match['卷'];
-                        const isbn = match.ISBN || match.isbn;
-                        
-                        if (volume) {
-                            return { vol: volume, isbn: isbn };
+                    if (contentMatch) {
+                        const jpIsbn = contentMatch.ISBN ? contentMatch.ISBN.toString().trim() : '';
+                        const volume = contentMatch.卷 || contentMatch.巻;
+
+                        // 2. 使用該 ISBN 去「出版目録HK」比對 ISBN_JP 欄位
+                        const hkMatch = this.publishHk.find(h => {
+                            const target = h.ISBN_JP ? h.ISBN_JP.toString().trim() : '';
+                            return target === jpIsbn;
+                        });
+
+                        // 3. 如果找到港版記錄，則返回港版 ISBN 供連結，卷數維持顯示
+                        if (hkMatch) {
+                            return { 
+                                vol: volume, 
+                                hkIsbn: hkMatch.ISBN 
+                            };
                         }
                     }
                     return null;
