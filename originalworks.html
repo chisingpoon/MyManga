@@ -17,14 +17,8 @@
             background-size: 50px 50px;
         }
 
-        /* Tighten padding for link-heavy tables */
-        td, th { padding: 0.75rem 1rem !important; }
-        
-        .col-wrap {
-            white-space: normal !important;
-            word-break: break-word;
-            line-height: 1.4;
-        }
+        td, th { padding: 0.8rem 1rem !important; }
+        .col-wrap { white-space: normal !important; word-break: break-word; line-height: 1.4; }
 
         .filter-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
         .filter-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
@@ -35,23 +29,21 @@
             border-bottom: 1px solid #e2e8f0;
         }
 
-        /* Link Button Styling */
         .vol-btn {
             display: inline-flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 0.4rem 0.5rem;
+            padding: 0.4rem 0.6rem;
             border-radius: 0.75rem;
             font-size: 10px;
             font-weight: 900;
             transition: all 0.2s;
-            min-width: 75px;
+            min-width: 80px;
             color: white;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .vol-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
-        .vol-btn span:first-child { font-size: 8px; opacity: 0.8; text-transform: uppercase; letter-spacing: -0.02em; }
+        .vol-btn span:first-child { font-size: 8px; opacity: 0.8; text-transform: uppercase; }
 
         .back-to-top {
             position: fixed; bottom: 2rem; right: 2rem; z-index: 50;
@@ -103,6 +95,7 @@
                                 <option :value="20">20</option>
                                 <option :value="50">50</option>
                                 <option :value="100">100</option>
+                                <option :value="filteredData.length">All</option>
                             </select>
                         </div>
                     </div>
@@ -113,35 +106,34 @@
         <main class="max-w-[99%] mx-auto py-6 px-4">
             <div v-if="loading" class="flex flex-col items-center justify-center py-40">
                 <div class="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
-                <p class="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Loading</p>
             </div>
 
             <div v-else>
                 <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left table-auto border-collapse">
-                            <thead class="text-[11px] font-black text-slate-900 uppercase tracking-wider border-b bg-slate-50">
+                            <thead class="text-[12px] font-black text-slate-900 uppercase tracking-wider border-b bg-slate-50">
                                 <tr>
                                     <th class="whitespace-nowrap">掲載番</th>
                                     <th>初出副題</th>
                                     <th class="bg-indigo-50/30">大全集收錄副題 / 港譯</th>
                                     <th>掲載誌 / 初出枚數</th>
-                                    <th class="text-center bg-emerald-50">單行本</th>
-                                    <th class="text-center bg-indigo-50">大全集</th>
-                                    <th class="text-center bg-slate-100">第0卷</th>
-                                    <th class="text-center bg-amber-50">ドラミ</th>
-                                    <th class="text-center bg-blue-50">文庫</th>
-                                    <th class="text-center bg-pink-50">兒童版</th>
-                                    <th class="text-center bg-rose-50">特選珍藏</th>
+                                    <th class="text-center bg-emerald-50/50">單行本</th>
+                                    <th class="text-center bg-indigo-50/50">大全集</th>
+                                    <th class="text-center bg-slate-100/50">第0卷</th>
+                                    <th class="text-center bg-amber-50/50">ドラミ</th>
+                                    <th class="text-center bg-blue-50/50">文庫</th>
+                                    <th class="text-center bg-pink-50/50">兒童版</th>
+                                    <th class="text-center bg-rose-50/50">特選珍藏</th>
                                     <th>備考</th>
                                 </tr>
                             </thead>
                             <tbody class="text-[14px] divide-y divide-slate-100">
-                                <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50/80 transition-colors">
+                                <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50 transition-colors">
                                     <td class="font-bold text-slate-300 text-xs">{{ row.掲載番 }}</td>
-                                    <td class="font-black text-slate-800 col-wrap min-w-[140px]">{{ row.初出副題 }}</td>
+                                    <td class="font-black text-slate-800 col-wrap min-w-[150px]">{{ row.初出副題 }}</td>
                                     
-                                    <td class="bg-indigo-50/5 min-w-[180px] col-wrap border-x border-slate-50">
+                                    <td class="bg-indigo-50/5 min-w-[200px] col-wrap border-x border-slate-50">
                                         <div class="text-slate-800 font-bold leading-tight">{{ getSubtitleInfo(row.作品番).pubSub || '——' }}</div>
                                         <div v-if="getSubtitleInfo(row.作品番).hkSub" class="text-slate-400 text-[11px] mt-0.5 font-medium">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
                                     </td>
@@ -153,13 +145,41 @@
                                         </div>
                                     </td>
                                     
-                                    <td class="text-center"><LinkBtn v-if="m = getHKMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" :data="m" color="bg-emerald-600" /></td>
-                                    <td class="text-center"><LinkBtn v-if="m = getHKMapping(row.作品番, ['大全集', '大長編大全集'])" :data="m" color="bg-indigo-600" /></td>
-                                    <td class="text-center"><LinkBtn v-if="m = getHKMapping(row.作品番, ['0卷'])" :data="m" color="bg-slate-600" /></td>
-                                    <td class="text-center"><LinkBtn v-if="m = getHKMapping(row.作品番, ['ドラミちゃん'])" :data="m" color="bg-amber-500" /></td>
-                                    <td class="text-center"><LinkBtn v-if="m = getHKMapping(row.作品番, ['文庫版', '大長編文庫版'])" :data="m" color="bg-blue-600" /></td>
-                                    <td class="text-center"><LinkBtn v-if="m = getHKMapping(row.作品番, 'ぴっかぴか')" :data="m" color="bg-pink-500" /></td>
-                                    <td class="text-center"><LinkBtn v-if="m = getHKMapping(row.作品番, 'とっておき')" :data="m" color="bg-rose-500" /></td>
+                                    <td class="text-center">
+                                        <div v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" class="flex justify-center">
+                                            <a :href="'publish.html?isbn=' + m.hkIsbn" class="vol-btn bg-emerald-600"><span>{{m.type}}</span><span>Vol. {{m.vol}}</span></a>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" class="flex justify-center">
+                                            <a :href="'publish.html?isbn=' + m.hkIsbn" class="vol-btn bg-indigo-600"><span>大全集</span><span>Vol. {{m.vol}}</span></a>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div v-if="m = getMapping(row.作品番, ['0卷'])" class="flex justify-center">
+                                            <a :href="'publish.html?isbn=' + m.hkIsbn" class="vol-btn bg-slate-600"><span>第0卷</span><span>Vol. {{m.vol}}</span></a>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" class="flex justify-center">
+                                            <a :href="'publish.html?isbn=' + m.hkIsbn" class="vol-btn bg-amber-500"><span>ドラミ</span><span>Vol. {{m.vol}}</span></a>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div v-if="m = getMapping(row.作品番, ['文庫版', '大長編文庫版'])" class="flex justify-center">
+                                            <a :href="'publish.html?isbn=' + m.hkIsbn" class="vol-btn bg-blue-600"><span>文庫</span><span>Vol. {{m.vol}}</span></a>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div v-if="m = getMappingPrefix(row.作品番, 'ぴっかぴかコミックス')" class="flex justify-center">
+                                            <a :href="'publish.html?isbn=' + m.hkIsbn" class="vol-btn bg-pink-500"><span>兒童版</span><span>Vol. {{m.vol}}</span></a>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div v-if="m = getMapping(row.作品番, ['とっておき'])" class="flex justify-center">
+                                            <a :href="'publish.html?isbn=' + m.hkIsbn" class="vol-btn bg-rose-500"><span>特選</span><span>Vol. {{m.vol}}</span></a>
+                                        </div>
+                                    </td>
 
                                     <td class="text-slate-400 italic col-wrap text-xs min-w-[120px]">{{ row.備考 }}</td>
                                 </tr>
@@ -176,7 +196,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                             </button>
                         </div>
-                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} / {{ totalPages }} — Found {{ filteredData.length }}</div>
+                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} / {{ totalPages }} — Hits: {{ filteredData.length }}</div>
                     </div>
                 </div>
             </div>
@@ -189,19 +209,7 @@
 
     <script>
         const { createApp } = Vue;
-
-        const LinkBtn = {
-            props: ['data', 'color'],
-            template: `
-                <a :href="'publish.html?isbn=' + data.hkIsbn" :class="color" class="vol-btn">
-                    <span>{{ data.typeLabel }}</span>
-                    <span>Vol. {{ data.vol }}</span>
-                </a>
-            `
-        };
-
         createApp({
-            components: { LinkBtn },
             data() {
                 return {
                     loading: true, searchQuery: '', activeMagazines: [],
@@ -227,9 +235,7 @@
                     });
                 },
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
-                paginatedData() {
-                    return this.filteredData.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
-                }
+                paginatedData() { return this.filteredData.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage); }
             },
             methods: {
                 async init() {
@@ -242,44 +248,34 @@
                         this.master = m.filter(r => r.作品番?.toString().trim());
                         this.contents = c;
                         this.publishHk = h;
-                        
-                        const magParam = new URLSearchParams(window.location.search).get('mag');
-                        if (magParam) this.activeMagazines = [magParam];
+                        const mag = new URLSearchParams(window.location.search).get('mag');
+                        if (mag) this.activeMagazines = [mag];
                     } catch (e) { console.error(e); } finally { this.loading = false; }
                 },
-                getHKMapping(workId, query) {
-                    if (!workId || !this.contents.length) return null;
-                    const id = workId.toString().trim();
-                    
-                    const match = this.contents.find(c => {
-                        if (c.作品番?.toString().trim() !== id) return false;
-                        const type = c.類 || '';
-                        if (query === 'ぴっかぴか') return type.startsWith('ぴっかぴか');
-                        if (query === 'とっておき') return type.includes('とっておき');
-                        return Array.isArray(query) ? query.includes(type) : type === query;
-                    });
-
-                    if (match) {
-                        const jpIsbn = match.ISBN?.toString().trim();
-                        const hk = this.publishHk.find(h => h.ISBN_JP?.toString().trim() === jpIsbn);
-                        if (hk) {
-                            let label = match.類;
-                            if (label.includes('文庫')) label = '文庫';
-                            if (label.startsWith('ぴっかぴか')) label = '兒童版';
-                            if (label.includes('とっておき')) label = '特選';
-                            if (label.includes('大全集')) label = '大全集';
-                            return { vol: match.卷 || match.巻, hkIsbn: hk.ISBN, typeLabel: label };
-                        }
-                    }
-                    return null;
+                getMapping(workId, types) {
+                    const id = workId?.toString().trim();
+                    const match = this.contents.find(c => c.作品番?.toString().trim() === id && types.includes(c.類));
+                    return this.processMatch(match);
+                },
+                getMappingPrefix(workId, prefix) {
+                    const id = workId?.toString().trim();
+                    const match = this.contents.find(c => c.作品番?.toString().trim() === id && c.類?.startsWith(prefix));
+                    return this.processMatch(match);
+                },
+                processMatch(match) {
+                    if (!match) return null;
+                    const hk = this.publishHk.find(h => h.ISBN_JP?.toString().trim() === match.ISBN?.toString().trim());
+                    if (!hk) return null;
+                    return { vol: match.卷 || match.巻, hkIsbn: hk.ISBN, type: match.類 };
                 },
                 getSubtitleInfo(workId) {
-                    const match = this.contents.find(c => c.作品番?.toString().trim() === workId?.toString().trim() && c.類?.includes('大全集'));
+                    const id = workId?.toString().trim();
+                    const match = this.contents.find(c => c.作品番?.toString().trim() === id && (c.類 === '大全集' || c.類 === '大長編大全集'));
                     return match ? { pubSub: match.出版副題, hkSub: match.副題港譯 } : { pubSub: '', hkSub: '' };
                 },
-                toggleMagazine(mag) {
-                    const i = this.activeMagazines.indexOf(mag);
-                    if (i > -1) this.activeMagazines.splice(i, 1); else this.activeMagazines.push(mag);
+                toggleMagazine(m) {
+                    const i = this.activeMagazines.indexOf(m);
+                    if (i > -1) this.activeMagazines.splice(i, 1); else this.activeMagazines.push(m);
                     this.currentPage = 1;
                 },
                 resetFilters() { this.activeMagazines = []; this.searchQuery = ''; this.currentPage = 1; },
