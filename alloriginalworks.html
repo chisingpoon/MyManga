@@ -1,245 +1,42 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日本原作目録 | Archive Portal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Security: Disable Selection */
-        body { -webkit-user-select: none; user-select: none; }
-        
-        [v-cloak] { display: none; }
-
-        .bg-grid {
-            background-color: #f8fafc;
-            background-image: 
-                linear-gradient(to right, #e2e8f0 1px, transparent 1px),
-                linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        .sticky-header th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; }
-        
-        .checkbox-container label {
-            display: flex; align-items: center; gap: 8px; font-size: 0.75rem;
-            padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
-        }
-        .checkbox-container label:hover { background: #f1f5f9; }
-        .checkbox-container input { border-radius: 4px; border: 1.5px solid #cbd5e1; }
-    </style>
-</head>
-<body class="bg-grid text-slate-900 font-sans min-h-screen flex flex-col" oncontextmenu="return false;">
-
-    <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50">
-        <div class="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <a href="index.html" class="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black italic shadow-lg hover:scale-105 transition-transform">M</a>
-                <div>
-                    <h1 class="font-black text-slate-900 leading-none">日本原作目録</h1>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Original Works Archive</span>
-                </div>
-            </div>
-
-            <div class="hidden md:flex flex-1 max-w-xl mx-8 relative">
-                <input type="text" id="searchInput" oninput="handleSearchInput()" 
-                    placeholder="Search titles, magazines, or translations..." 
-                    class="w-full bg-slate-100 border-none rounded-full py-2.5 px-12 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                <svg class="w-4 h-4 absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3"></path></svg>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <a href="manga-database.html?region=HK" class="text-xs font-black text-blue-600 bg-blue-50 px-4 py-2 rounded-full hover:bg-blue-100 transition-colors">HK</a>
-                <a href="manga-database.html?region=JP" class="text-xs font-black text-red-600 bg-red-50 px-4 py-2 rounded-full hover:bg-red-100 transition-colors">JP</a>
-            </div>
-        </div>
-    </header>
-
-    <div class="flex flex-1 overflow-hidden max-w-[1600px] mx-auto w-full">
-        
-        <aside class="w-64 border-r bg-white/50 backdrop-blur-sm overflow-y-auto p-6 hidden lg:block space-y-8">
-            <div class="flex items-center justify-between">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Filters</h3>
-                <button onclick="clearSearch()" class="text-[10px] font-black text-blue-600 hover:underline">Reset</button>
-            </div>
-
-            <div class="space-y-6">
-                <div class="filter-group">
-                    <label class="text-xs font-black text-slate-700 block mb-3">初出掲載誌</label>
-                    <div id="magazineFilter" class="checkbox-container space-y-1"></div>
-                </div>
-                <div class="filter-group">
-                    <label class="text-xs font-black text-slate-700 block mb-3">単行本系列</label>
-                    <div id="tankobonFilter" class="checkbox-container space-y-1"></div>
-                </div>
-                <div class="filter-group">
-                    <label class="text-xs font-black text-slate-700 block mb-3">大全集</label>
-                    <div id="completeCollectionFilter" class="checkbox-container space-y-1"></div>
-                </div>
-            </div>
-        </aside>
-
-        <main class="flex-1 overflow-hidden flex flex-col p-4">
-            <div class="flex items-center justify-between mb-4">
-                <div id="resultCount" class="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white px-3 py-1.5 rounded-lg border">0 Results Found</div>
-                <div id="pagination" class="flex gap-1"></div>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-auto flex-1 relative">
-                <div id="mangalist" class="min-w-max">
-                    <div class="p-20 text-center text-slate-400 font-bold animate-pulse">Initializing Database...</div>
-                </div>
-            </div>
-        </main>
+<aside class="w-72 border-r bg-white/50 backdrop-blur-sm overflow-y-auto p-6 hidden lg:block space-y-6">
+    <div class="flex items-center justify-between border-b pb-4">
+        <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest">Filters</h3>
+        <button onclick="clearSearch()" class="text-[10px] font-black text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition-colors">RESET ALL</button>
     </div>
 
-    <script>
-        const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
-        let sheetData = [], currentList = [], currentPage = 1, itemsPerPage = 50;
-        let currentSortColumn = "作品番", currentSortDirection = "asc";
-        let searchTimeout;
+    <div class="space-y-3">
+        <div class="flex justify-between items-center">
+            <label class="text-[11px] font-black text-slate-500 uppercase tracking-tight">初出掲載誌</label>
+            <div class="flex gap-2">
+                <button onclick="toggleAll('magazineFilter', true)" class="text-[9px] font-bold text-slate-400 hover:text-blue-600">ALL</button>
+                <button onclick="toggleAll('magazineFilter', false)" class="text-[9px] font-bold text-slate-400 hover:text-red-600">NONE</button>
+            </div>
+        </div>
+        <input type="text" id="magSearch" oninput="filterCheckboxes('magazineFilter', this.value)" 
+               placeholder="Search magazines..." 
+               class="w-full text-[11px] bg-slate-100 border-none rounded-md px-3 py-2 focus:ring-1 focus:ring-blue-400 outline-none">
+        <div id="magazineFilter" class="checkbox-container space-y-1 max-h-60 overflow-y-auto pr-2 border-b pb-4"></div>
+    </div>
 
-        // Security
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        window.addEventListener('keydown', e => { if((e.ctrlKey || e.metaKey) && ['c','s','p','u','a'].includes(e.key)) e.preventDefault(); });
+    <div class="space-y-3">
+        <div class="flex justify-between items-center">
+            <label class="text-[11px] font-black text-slate-500 uppercase tracking-tight">単行本系列</label>
+            <div class="flex gap-2">
+                <button onclick="toggleAll('tankobonFilter', true)" class="text-[9px] font-bold text-slate-400 hover:text-blue-600">ALL</button>
+                <button onclick="toggleAll('tankobonFilter', false)" class="text-[9px] font-bold text-slate-400 hover:text-red-600">NONE</button>
+            </div>
+        </div>
+        <div id="tankobonFilter" class="checkbox-container space-y-1 max-h-48 overflow-y-auto pr-2 border-b pb-4"></div>
+    </div>
 
-        fetch(SHEET_URL)
-            .then(res => res.json())
-            .then(data => {
-                sheetData = data.filter(r => r.作品番 && r.作品番.trim() !== "");
-                initializeFilters();
-                applyUrlFilters();
-            });
-
-        function initializeFilters(){
-            const filters = [
-                {id:"magazineFilter", col:"初出掲載誌"},
-                {id:"tankobonFilter", col:"単行本"},
-                {id:"completeCollectionFilter", col:"大全集"}
-            ];
-            filters.forEach(f => populateCheckboxFilter(f.id, [...new Set(sheetData.map(r => r[f.col]).filter(Boolean))]));
-        }
-
-        function populateCheckboxFilter(id, values){
-            const container = document.getElementById(id);
-            if(!container) return;
-            values.sort().forEach(v => {
-                const label = document.createElement("label");
-                label.innerHTML = `<input type="checkbox" value="${v}" onchange="applyFilters()" class="text-blue-600 focus:ring-blue-500 border-slate-300"> <span>${v}</span>`;
-                container.appendChild(label);
-            });
-        }
-
-        function handleSearchInput(){
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(applyFilters, 300);
-        }
-
-        function getCheckedValues(id){
-            return Array.from(document.getElementById(id).querySelectorAll("input:checked")).map(i => i.value);
-        }
-
-        function applyFilters(){
-            const search = document.getElementById("searchInput").value.toLowerCase();
-            const mag = getCheckedValues("magazineFilter");
-            const tanko = getCheckedValues("tankobonFilter");
-            const complete = getCheckedValues("completeCollectionFilter");
-
-            currentList = sheetData.filter(r => {
-                const match = Object.values(r).join(" ").toLowerCase().includes(search);
-                return match &&
-                    (!mag.length || mag.includes(r.初出掲載誌)) &&
-                    (!tanko.length || tanko.includes(r.単行本)) &&
-                    (!complete.length || complete.includes(r.大全集));
-            });
-
-            document.getElementById("resultCount").textContent = `${currentList.length} WORKS FOUND`;
-            renderPage();
-        }
-
-        function renderPage(){
-            const start = (currentPage - 1) * itemsPerPage;
-            const pageItems = currentList.slice(start, start + itemsPerPage);
-
-            let html = `<table class="w-full text-left border-collapse text-xs">
-                <thead class="sticky-header">
-                    <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">`;
-            
-            const cols = ["作品番", "初出掲載誌", "初出掲載号", "初出副題", "全集副題", "全集副題香港譯名", "単行本", "大全集"];
-            cols.forEach(c => {
-                html += `<th onclick="sortBy('${c}')" class="px-4 py-3 cursor-pointer hover:text-blue-600 transition-colors">${c} ${currentSortColumn === c ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}</th>`;
-            });
-            
-            html += `</tr></thead><tbody class="divide-y divide-slate-100 bg-white">`;
-
-            pageItems.forEach(row => {
-                html += `<tr class="hover:bg-blue-50/50 transition-colors group">
-                    <td class="px-4 py-3 font-mono text-slate-300 font-bold">${row.作品番}</td>
-                    <td class="px-4 py-3 font-bold text-slate-800">${row.初出掲載誌 || ''}</td>
-                    <td class="px-4 py-3 text-slate-500">${row.初出掲載号 || ''}</td>
-                    <td class="px-4 py-3 italic">${row.初出副題 || ''}</td>
-                    <td class="px-4 py-3 font-bold text-slate-900">${row.全集副題 || ''}</td>
-                    <td class="px-4 py-3 text-blue-600 font-black">${row.全集副題香港譯名 || ''}</td>
-                    <td class="px-4 py-3"><span class="bg-slate-100 px-2 py-0.5 rounded">${row.単行本 || ''}</span></td>
-                    <td class="px-4 py-3"><span class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded font-black text-[10px]">${row.大全集 || ''}</span></td>
-                </tr>`;
-            });
-
-            html += `</tbody></table>`;
-            document.getElementById("mangalist").innerHTML = pageItems.length ? html : `<div class="p-20 text-center font-bold text-slate-300">No results found for your filters.</div>`;
-            renderPagination();
-        }
-
-        function sortBy(col){
-            if(currentSortColumn === col) currentSortDirection = currentSortDirection === "asc" ? "desc" : "asc";
-            else { currentSortColumn = col; currentSortDirection = "asc"; }
-            currentList.sort((a,b) => {
-                const valA = (a[col] || "").toString();
-                const valB = (b[col] || "").toString();
-                return currentSortDirection === "asc" ? valA.localeCompare(valB, 'ja') : valB.localeCompare(valA, 'ja');
-            });
-            renderPage();
-        }
-
-        function renderPagination(){
-            const total = Math.ceil(currentList.length / itemsPerPage);
-            let html = "";
-            if(total <= 1) { document.getElementById("pagination").innerHTML = ""; return; }
-            
-            const btnClass = "px-3 py-1 rounded text-[10px] font-black border transition-all ";
-            html += `<button onclick="changePage(1)" class="${btnClass} bg-white hover:bg-slate-50">FIRST</button>`;
-            html += `<button onclick="changePage(${Math.max(1, currentPage-1)})" class="${btnClass} bg-white">PREV</button>`;
-            html += `<span class="px-4 py-1 text-[10px] font-black text-slate-400">PAGE ${currentPage} / ${total}</span>`;
-            html += `<button onclick="changePage(${Math.min(total, currentPage+1)})" class="${btnClass} bg-white">NEXT</button>`;
-            
-            document.getElementById("pagination").innerHTML = html;
-        }
-
-        function changePage(p){ currentPage = p; renderPage(); }
-
-        function clearSearch(){
-            document.getElementById("searchInput").value = "";
-            document.querySelectorAll("input[type=checkbox]").forEach(c => c.checked = false);
-            applyFilters();
-        }
-
-        function applyUrlFilters(){
-            const params = new URLSearchParams(window.location.search);
-            // Handle Magazine Filter from Portal Shortcut
-            const mag = params.get("初出掲載誌");
-            if(mag){
-                setTimeout(() => {
-                    const cb = Array.from(document.querySelectorAll("#magazineFilter input")).find(i => i.value === mag);
-                    if(cb) { cb.checked = true; applyFilters(); }
-                }, 500);
-            } else { applyFilters(); }
-        }
-    </script>
-</body>
-</html>
+    <div class="space-y-3">
+        <div class="flex justify-between items-center">
+            <label class="text-[11px] font-black text-slate-500 uppercase tracking-tight">大全集</label>
+            <div class="flex gap-2">
+                <button onclick="toggleAll('completeCollectionFilter', true)" class="text-[9px] font-bold text-slate-400 hover:text-blue-600">ALL</button>
+                <button onclick="toggleAll('completeCollectionFilter', false)" class="text-[9px] font-bold text-slate-400 hover:text-red-600">NONE</button>
+            </div>
+        </div>
+        <div id="completeCollectionFilter" class="checkbox-container space-y-1 max-h-40 overflow-y-auto pr-2"></div>
+    </div>
+</aside>
