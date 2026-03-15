@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Archive | Extended View</title>
+    <title>Master Archive | Detailed View</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -17,6 +17,18 @@
         td, th { white-space: nowrap; padding: 1.5rem !important; }
         .filter-scroll::-webkit-scrollbar { width: 6px; }
         .filter-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .home-btn {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background: white;
+        }
     </style>
 </head>
 <body class="bg-grid text-slate-900 min-h-screen relative overflow-x-hidden">
@@ -25,11 +37,12 @@
         <header class="bg-white/90 backdrop-blur-md border-b sticky top-0 z-40 shadow-md">
             <div class="max-w-[98%] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <a href="index.html" class="flex items-center gap-3 bg-slate-900 text-white px-5 py-2.5 rounded-xl shadow-lg hover:scale-105 transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        <span class="font-black uppercase tracking-tighter">Home</span>
+                    <a href="index.html" class="home-btn w-12 h-12 rounded-2xl flex items-center justify-center text-slate-700 shadow-sm group">
+                        <svg class="w-6 h-6 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
                     </a>
-                    <h1 class="font-black text-2xl tracking-tighter uppercase border-l-2 border-slate-200 pl-6">Master Archive</h1>
+                    <h1 class="font-black text-2xl tracking-tighter uppercase text-slate-800">Master Archive</h1>
                 </div>
             </div>
         </header>
@@ -38,18 +51,29 @@
             
             <div v-if="loading" class="flex flex-col items-center justify-center py-40">
                 <div class="w-16 h-16 border-8 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                <p class="mt-6 text-xl font-black text-slate-400 uppercase tracking-widest">整合中...</p>
+                <p class="mt-6 text-xl font-black text-slate-400 uppercase tracking-widest">載入中...</p>
             </div>
 
             <div v-else>
                 <div class="bg-white rounded-[2.5rem] shadow-lg border border-slate-200 p-8 mb-6">
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-10">
                         <div class="space-y-4">
-                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">搜尋</label>
-                            <input type="text" v-model="searchQuery" placeholder="搜尋..." class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-4 px-6 font-bold outline-none focus:ring-4 focus:ring-indigo-500/10">
+                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">全域搜尋</label>
+                            <input type="text" v-model="searchQuery" placeholder="搜尋任何副題、譯名或備註..." class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-4 px-6 font-bold outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                            
+                            <div class="pt-4">
+                                <label class="text-sm font-black text-slate-400 uppercase tracking-widest block mb-2">每頁顯示數量</label>
+                                <select v-model="itemsPerPage" @change="currentPage = 1" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-2 px-4 font-bold outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                                    <option :value="20">20 筆</option>
+                                    <option :value="50">50 筆</option>
+                                    <option :value="100">100 筆</option>
+                                    <option :value="filteredData.length">全部顯示</option>
+                                </select>
+                            </div>
                         </div>
+                        
                         <div class="lg:col-span-3 space-y-4">
-                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">初出掲載誌</label>
+                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">初出掲載誌 篩選</label>
                             <div class="flex flex-wrap gap-3 max-h-48 overflow-y-auto filter-scroll p-1">
                                 <button v-for="(count, mag) in magazineStats" :key="mag" @click="toggleMagazine(mag)" :class="activeMagazines.includes(mag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'" class="px-5 py-2 rounded-2xl border-2 font-bold transition-all shadow-sm">
                                     {{ mag }} ({{ count }})
@@ -66,8 +90,8 @@
                                 <tr>
                                     <th class="px-8 py-6">掲載番</th>
                                     <th class="px-8 py-6">初出副題</th>
-                                    <th class="px-8 py-6">全集副題</th>
-                                    <th class="px-8 py-6">全集副題香港譯名</th>
+                                    <th class="px-8 py-6 text-indigo-600 bg-indigo-50/30">全集副題</th>
+                                    <th class="px-8 py-6 text-indigo-600 bg-indigo-50/30">全集副題香港譯名</th>
                                     <th class="px-8 py-6">初出掲載誌</th>
                                     <th class="px-8 py-6">初出掲載號</th>
                                     <th class="px-8 py-6">初出掲載頁</th>
@@ -77,20 +101,18 @@
                                 </tr>
                             </thead>
                             <tbody class="text-[17px] divide-y-2 divide-slate-50">
-                                <tr v-for="row in paginatedData" :key="row.作品番">
+                                <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50/50 transition-colors">
                                     <td class="px-8 py-6 font-bold text-slate-400">{{ row.掲載番 }}</td>
                                     <td class="px-8 py-6 font-black text-slate-900">{{ row.初出副題 }}</td>
-                                    
-                                    <td class="px-8 py-6 text-slate-700">{{ getSubtitleData(row.作品番, 'daizenshu').sub || getSubtitleData(row.作品番, 'tanko').sub || '——' }}</td>
-                                    <td class="px-8 py-6 text-slate-700">{{ getSubtitleData(row.作品番, 'daizenshu').hkSub || getSubtitleData(row.作品番, 'tanko').hkSub || '——' }}</td>
-
+                                    <td class="px-8 py-6 text-slate-700 font-bold">{{ row.全集副題 || '——' }}</td>
+                                    <td class="px-8 py-6 text-slate-700 font-bold">{{ row.全集副題香港譯名 || '——' }}</td>
                                     <td class="px-8 py-6 font-bold text-slate-600">{{ row.初出掲載誌 }}</td>
                                     <td class="px-8 py-6 text-slate-500">{{ row.初出掲載号 }}</td>
                                     <td class="px-8 py-6 text-slate-500">{{ row.初出掲載頁 }}</td>
                                     
                                     <td class="px-8 py-6 text-center">
                                         <template v-if="getHKMapping(row.作品番, 'tanko')">
-                                            <a :href="'publish.html?isbn=' + getHKMapping(row.作品番, 'tanko').hkIsbn" class="inline-flex flex-col items-center bg-emerald-600 text-white px-4 py-2 rounded-2xl text-[12px] font-black hover:bg-emerald-700 shadow-md transition-all hover:scale-105 min-w-[120px]">
+                                            <a :href="'publish.html?isbn=' + getHKMapping(row.作品番, 'tanko').hkIsbn" class="inline-flex flex-col items-center bg-emerald-600 text-white px-4 py-2 rounded-2xl text-[12px] font-black hover:bg-emerald-700 shadow-md transition-all hover:scale-105 min-w-[130px]">
                                                 <span class="opacity-80 text-[10px]">{{ getHKMapping(row.作品番, 'tanko').type }}</span>
                                                 <span>Vol. {{ getHKMapping(row.作品番, 'tanko').vol }}</span>
                                             </a>
@@ -100,7 +122,7 @@
 
                                     <td class="px-8 py-6 text-center">
                                         <template v-if="getHKMapping(row.作品番, 'daizenshu')">
-                                            <a :href="'publish.html?isbn=' + getHKMapping(row.作品番, 'daizenshu').hkIsbn" class="inline-flex flex-col items-center bg-indigo-600 text-white px-4 py-2 rounded-2xl text-[12px] font-black hover:bg-indigo-700 shadow-md transition-all hover:scale-105 min-w-[120px]">
+                                            <a :href="'publish.html?isbn=' + getHKMapping(row.作品番, 'daizenshu').hkIsbn" class="inline-flex flex-col items-center bg-indigo-600 text-white px-4 py-2 rounded-2xl text-[12px] font-black hover:bg-indigo-700 shadow-md transition-all hover:scale-105 min-w-[130px]">
                                                 <span class="opacity-80 text-[10px]">{{ getHKMapping(row.作品番, 'daizenshu').type }}</span>
                                                 <span>Vol. {{ getHKMapping(row.作品番, 'daizenshu').vol }}</span>
                                             </a>
@@ -108,16 +130,21 @@
                                         <span v-else class="text-slate-200">——</span>
                                     </td>
 
-                                    <td class="px-8 py-6 text-slate-400 italic truncate max-w-sm">{{ row.備考 }}</td>
+                                    <td class="px-8 py-6 text-slate-400 italic truncate max-w-xs">{{ row.備考 }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     
                     <div class="p-10 border-t-2 bg-slate-50 flex items-center justify-between">
-                        <button @click="currentPage--" :disabled="currentPage === 1" class="px-10 py-4 bg-white border-2 border-slate-200 rounded-2xl font-black disabled:opacity-20">PREV</button>
-                        <span class="font-black text-slate-400 uppercase text-sm">Page {{ currentPage }} / {{ totalPages }}</span>
-                        <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-10 py-4 bg-white border-2 border-slate-200 rounded-2xl font-black disabled:opacity-20">NEXT</button>
+                        <div class="flex items-center gap-4">
+                            <button @click="currentPage--" :disabled="currentPage === 1" class="px-10 py-4 bg-white border-2 border-slate-200 rounded-2xl font-black disabled:opacity-20 hover:border-indigo-500 transition-all shadow-sm">PREV</button>
+                            <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-10 py-4 bg-white border-2 border-slate-200 rounded-2xl font-black disabled:opacity-20 hover:border-indigo-500 transition-all shadow-sm">NEXT</button>
+                        </div>
+                        <div class="text-right">
+                            <span class="block font-black text-slate-400 uppercase text-sm tracking-widest">Page {{ currentPage }} / {{ totalPages }}</span>
+                            <span class="block text-xs font-bold text-slate-300">Total Records: {{ filteredData.length }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -130,9 +157,13 @@
             data() {
                 return {
                     loading: true,
-                    searchQuery: '', activeMagazines: [],
-                    currentPage: 1, itemsPerPage: 50,
-                    master: [], contents: [], publishHk: []
+                    searchQuery: '',
+                    activeMagazines: [],
+                    currentPage: 1,
+                    itemsPerPage: 20, // Default changed to 20
+                    master: [],
+                    contents: [],
+                    publishHk: []
                 }
             },
             computed: {
@@ -145,12 +176,19 @@
                     const q = this.searchQuery.toLowerCase().trim();
                     const hasMags = this.activeMagazines.length > 0;
                     return this.master.filter(r => {
-                        const mText = !q || (r.初出副題||'').toLowerCase().includes(q) || (r.備考||'').toLowerCase().includes(q);
+                        const mText = !q || 
+                                     (r.初出副題||'').toLowerCase().includes(q) || 
+                                     (r.全集副題||'').toLowerCase().includes(q) || 
+                                     (r.全集副題香港譯名||'').toLowerCase().includes(q) || 
+                                     (r.備考||'').toLowerCase().includes(q);
                         const mMag = !hasMags || this.activeMagazines.includes(r.初出掲載誌?.trim());
                         return mText && mMag;
                     });
                 },
-                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
+                totalPages() { 
+                    const total = Math.ceil(this.filteredData.length / this.itemsPerPage);
+                    return total > 0 ? total : 1;
+                },
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.filteredData.slice(start, start + this.itemsPerPage);
@@ -173,7 +211,6 @@
                     if (!workId || !this.contents.length) return null;
                     const cleanWorkId = workId.toString().trim();
                     const targetTypes = mode === 'tanko' ? ["45卷", "カラー作品集", "プラス"] : ["大全集", "大長編大全集"];
-
                     const contentMatch = this.contents.find(c => c.作品番?.toString().trim() === cleanWorkId && targetTypes.includes(c.類));
                     if (contentMatch) {
                         const jpIsbn = contentMatch.ISBN?.toString().trim();
@@ -181,12 +218,6 @@
                         if (hkMatch) return { vol: contentMatch.卷 || contentMatch.巻, hkIsbn: hkMatch.ISBN, type: contentMatch.類 };
                     }
                     return null;
-                },
-                getSubtitleData(workId, mode) {
-                    const cleanWorkId = workId.toString().trim();
-                    const targetTypes = mode === 'tanko' ? ["45卷", "カラー作品集", "プラス"] : ["大全集", "大長編大全集"];
-                    const match = this.contents.find(c => c.作品番?.toString().trim() === cleanWorkId && targetTypes.includes(c.類));
-                    return match ? { sub: match.全集副題, hkSub: match.全集副題香港譯名 } : { sub: null, hkSub: null };
                 },
                 toggleMagazine(mag) {
                     const idx = this.activeMagazines.indexOf(mag);
