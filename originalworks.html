@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Archive | HK Mapping Version</title>
+    <title>Master Archive | HK Dual Mapping</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -37,7 +37,7 @@
             
             <div v-if="loading" class="flex flex-col items-center justify-center py-40">
                 <div class="w-16 h-16 border-8 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                <p class="mt-6 text-xl font-black text-slate-400 uppercase tracking-widest">正在對照港版資料...</p>
+                <p class="mt-6 text-xl font-black text-slate-400 uppercase tracking-widest">正在對照港版單行本及大全集資料...</p>
             </div>
 
             <div v-else>
@@ -53,7 +53,7 @@
                             <div class="flex flex-wrap gap-3 max-h-48 overflow-y-auto filter-scroll p-1">
                                 <button v-for="(count, mag) in magazineStats" :key="mag" 
                                     @click="toggleMagazine(mag)"
-                                    :class="activeMagazines.includes(mag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'"
+                                    :class="activeMagazines.includes(mag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-400'"
                                     class="px-5 py-2 rounded-2xl border-2 font-bold transition-all shadow-sm">
                                     {{ mag }} ({{ count }})
                                 </button>
@@ -72,7 +72,8 @@
                                     <th class="px-8 py-6">初出掲載誌</th>
                                     <th class="px-8 py-6">初出掲載號</th>
                                     <th class="px-8 py-6">初出掲載頁</th>
-                                    <th class="px-8 py-6 text-center bg-indigo-50 text-indigo-600">大全集 (港版連結)</th>
+                                    <th class="px-8 py-6 text-center bg-emerald-50 text-emerald-700">單行本</th>
+                                    <th class="px-8 py-6 text-center bg-indigo-50 text-indigo-600">大全集</th>
                                     <th class="px-8 py-6">備考</th>
                                 </tr>
                             </thead>
@@ -85,10 +86,20 @@
                                     <td class="px-8 py-6 text-slate-500">{{ row.初出掲載頁 }}</td>
                                     
                                     <td class="px-8 py-6 text-center">
-                                        <template v-if="getHKMapping(row.作品番)">
-                                            <a :href="'publish.html?isbn=' + getHKMapping(row.作品番).hkIsbn" 
+                                        <template v-if="getHKMapping(row.作品番, 'tanko')">
+                                            <a :href="'publish.html?isbn=' + getHKMapping(row.作品番, 'tanko').hkIsbn" 
+                                               class="inline-flex items-center justify-center bg-emerald-600 text-white px-6 py-2 rounded-2xl text-sm font-black hover:bg-emerald-700 shadow-lg transition-transform hover:scale-105">
+                                                Vol. {{ getHKMapping(row.作品番, 'tanko').vol }}
+                                            </a>
+                                        </template>
+                                        <span v-else class="text-slate-200">——</span>
+                                    </td>
+
+                                    <td class="px-8 py-6 text-center">
+                                        <template v-if="getHKMapping(row.作品番, 'daizenshu')">
+                                            <a :href="'publish.html?isbn=' + getHKMapping(row.作品番, 'daizenshu').hkIsbn" 
                                                class="inline-flex items-center justify-center bg-indigo-600 text-white px-6 py-2 rounded-2xl text-sm font-black hover:bg-indigo-700 shadow-lg transition-transform hover:scale-105">
-                                                Vol. {{ getHKMapping(row.作品番).vol }}
+                                                Vol. {{ getHKMapping(row.作品番, 'daizenshu').vol }}
                                             </a>
                                         </template>
                                         <span v-else class="text-slate-200">——</span>
@@ -165,15 +176,20 @@
                         this.loading = false; 
                     }
                 },
-                getHKMapping(workId) {
+                getHKMapping(workId, mode) {
                     if (!workId || !this.contents.length) return null;
                     const cleanWorkId = workId.toString().trim();
                     
-                    // 1. 在「書籍收錄作品」尋找對應作品番且類別為大全集的記錄
+                    // 定義篩選條件
+                    const targetTypes = mode === 'tanko' 
+                        ? ["45卷", "カラー作品集", "プラス"] 
+                        : ["大全集", "大長編大全集"];
+
+                    // 1. 在「書籍收錄作品」尋找對應作品番且類別符合 mode 的記錄
                     const contentMatch = this.contents.find(c => {
                         const cid = c.作品番 ? c.作品番.toString().trim() : '';
                         const type = c.類 ? c.類.toString().trim() : '';
-                        return cid === cleanWorkId && (type === "大全集" || type === "大長編大全集");
+                        return cid === cleanWorkId && targetTypes.includes(type);
                     });
 
                     if (contentMatch) {
@@ -186,7 +202,7 @@
                             return target === jpIsbn;
                         });
 
-                        // 3. 如果找到港版記錄，則返回港版 ISBN 供連結，卷數維持顯示
+                        // 3. 返回港版資料
                         if (hkMatch) {
                             return { 
                                 vol: volume, 
