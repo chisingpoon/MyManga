@@ -1,190 +1,166 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>叮噹多啦A夢漫畫資訊</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Security: Disable Selection */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            background-color: #f1f5f9;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
-        .container {
-            width: 100%;
-            max-width: 700px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+        /* Subtle Technical Grid Background */
+        .bg-grid {
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
         }
 
-        /* Main Card */
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
+        /* Fixed Watermark */
+        .watermark {
+            position: fixed;
+            bottom: -20px;
+            right: -20px;
+            font-size: 12rem;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.03);
+            pointer-events: none;
+            z-index: -1;
+            transform: rotate(-15deg);
         }
 
-        h2 {
-            margin: 0 0 16px 0;
-            font-size: 1.25rem;
-            color: #0f172a;
+        .hover-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        /* Sub-Card */
-        .sub-card {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 16px;
-            border: 1px solid #cbd5e1;
-            margin-top: 12px;
-        }
-
-        h3 {
-            margin: 0 0 12px 0;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-        }
-
-        /* Grid for 2-Column Links inside Sub-Cards */
-        .link-grid {
-            display: grid;
-            grid-template-columns: 1fr; /* 1 col on small mobile */
-            gap: 10px;
-        }
-
-        @media (min-width: 480px) {
-            .link-grid {
-                grid-template-columns: 1fr 1fr; /* 2 cols on tablet/desktop */
-            }
-        }
-
-        /* General Link Item Styling */
-        .link-item {
-            text-decoration: none;
-            color: #334155;
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .link-item:hover {
+        .hover-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -10px rgba(0,0,0,0.1);
             border-color: #3b82f6;
-            color: #3b82f6;
-            background: #eff6ff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        /* Style for the 'All Records' link to make it full width */
-        .standalone-link {
-            margin-bottom: 12px;
-            display: block;
+            background-color: #ffffff;
         }
     </style>
 </head>
-<body>
+<body class="bg-grid text-slate-900 font-sans min-h-screen py-12 px-4 relative overflow-x-hidden" oncontextmenu="return false;">
 
-    <div class="container">
-        <section class="card">
-            <h2>香港版漫畫資訊記錄</h2>
-            <div class="standalone-link">
-                <a href="manga-database.html?region=hk" class="link-item" style="background-color: #f0f7ff; border-color: #3b82f6; color: #1d4ed8;">所有香港版漫畫資訊記錄 →</a>
+    <div class="watermark">ARCHIVE</div>
+
+    <div class="max-w-3xl mx-auto space-y-8 relative z-10">
+        
+        <header class="text-center space-y-2 mb-12">
+            <div class="relative inline-block">
+                <div class="absolute -inset-1 bg-blue-500 rounded-2xl blur opacity-20"></div>
+                <div class="relative w-16 h-16 bg-blue-600 rounded-2xl text-white text-3xl flex items-center justify-center font-black italic shadow-xl">M</div>
             </div>
-<!--
-            <div class="standalone-link">
-                <a href="publishhk.html" class="link-item" style="background-color: #f0f7ff; border-color: #3b82f6; color: #1d4ed8;">所有香港版漫畫資訊記錄 →</a>
-            </div>            
+            <h1 class="text-3xl font-black tracking-tight text-slate-900 uppercase mt-4">Archive Portal</h1>
+            <p class="text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">叮噹多啦A夢漫畫資訊</p>
+        </header>
 
-            <div class="sub-card">
-                <h2>捷徑</h2>
-                <div class="link-grid">
-                    <a href="publishhk.html?title=叮噹" class="link-item">叮噹系列 →</a>
-                    <a href="publishhk.html?title=叮噹大長篇" class="link-item">叮噹大長篇系列 →</a>
-                    <a href="publishhk.html?title=多啦A夢" class="link-item">多啦A夢系列 →</a>
-                    <a href="publishhk.html?title=多啦A夢大長篇,多啦A夢大長篇[新裝版]" class="link-item">多啦A夢大長篇系列 →</a>
-                    <a href="publishhk.html?title=多啦A夢文庫版" class="link-item">文庫版系列 →</a>
-                    <a href="publishhk.html?title=多啦A夢大長篇文庫版" class="link-item">大長篇文庫版系列 →</a>
-                    <a href="publishhk.html?title=藤子．F．不二雄大全集 多啦A夢" class="link-item">大全集 系列 →</a>
-                    <a href="publishhk.html?title=藤子．F．不二雄大全集 多啦A夢大長篇" class="link-item">大全集 大長篇 →</a>
-                    <a href="publishhk.html?title=多啦A夢彩色電影版" class="link-item">彩色電影版 →</a>
-                    <a href="publishhk.html?title=多啦A夢超棒球外傳" class="link-item">超棒球外傳 →</a>
+        <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
+                    <h2 class="text-xl font-black text-slate-800">香港版漫畫資訊記錄</h2>
                 </div>
+                <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-tighter">Region: HK</span>
             </div>
--->
+            
+            <a href="manga-database.html?region=hk" class="group flex items-center justify-between bg-blue-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200">
+                <span class="tracking-tight text-lg">所有香港版漫畫資訊記錄</span>
+                <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
+            </a>
         </section>
 
-        <section class="card">
-            <h2>日本版漫畫資訊記錄</h2>
-            <div class="standalone-link">
-                <a href="manga-database.html?region=jp" class="link-item" style="background-color: #f0f7ff; border-color: #3b82f6; color: #1d4ed8;">所有日本版漫畫資訊記錄 →</a>
-            </div> 
-<!--
-            <div class="standalone-link">
-                <a href="publishjp.html" class="link-item" style="background-color: #f0f7ff; border-color: #3b82f6; color: #1d4ed8;">所有日本版漫畫資訊記錄 →</a>
-            </div> 
-
-            <div class="sub-card">
-                <h2>捷徑</h2>
-                <div class="link-grid">
-                    <a href="publishjp.html?category=ドラえもん,ドラえもんプラス" class="link-item">ドラえもん →</a>
-                    <a href="publishjp.html?category=大長編ドラえもん" class="link-item">大長編ドラえもん →</a>
-                    <a href="publishjp.html?category=藤子・Ｆ・不二雄大全集 ドラえもん" class="link-item">大全集 ドラえもん →</a>
-                    <a href="publishjp.html?category=藤子・Ｆ・不二雄大全集 大長編ドラえもん" class="link-item">大全集 大長編 →</a>
-                    <a href="publishjp.html?category=小学館コロコロ文庫 ドラえもん" class="link-item">文庫 ドラえもん →</a>
-                    <a href="publishjp.html?category=小学館コロコロ文庫 大長編ドラえもん" class="link-item">文庫 大長編 →</a>      
-                    <a href="publishjp.html?series=てんとう虫コミックス" class="link-item">てんとう虫系列 →</a>
-                    <a href="publishjp.html?category=ドラベース" class="link-item">ドラベース系列 →</a>
-                    
+        <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="w-2 h-8 bg-red-600 rounded-full"></span>
+                    <h2 class="text-xl font-black text-slate-800">日本版漫畫資訊記錄</h2>
                 </div>
+                <span class="text-[10px] font-black text-red-600 bg-red-50 px-3 py-1 rounded-full uppercase tracking-tighter">Region: JP</span>
             </div>
--->
+            
+            <a href="manga-database.html?region=jp" class="group flex items-center justify-between bg-red-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-red-700 hover:shadow-lg hover:shadow-red-200">
+                <span class="tracking-tight text-lg">所有日本版漫畫資訊記錄</span>
+                <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
+            </a>
         </section>
 
-        <section class="card">
-            <h2>日本原作記錄</h2>
-            <div class="standalone-link">
-                <a href="alloriginalworks.html" class="link-item" style="background-color: #f0f7ff; border-color: #3b82f6; color: #1d4ed8;">所有原作資訊記錄 →</a>
+        <section class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-8">
+            <div class="flex items-center gap-3">
+                <span class="w-2 h-8 bg-slate-800 rounded-full"></span>
+                <h2 class="text-xl font-black text-slate-800">日本原作記錄</h2>
             </div>
 
-            <div class="sub-card">
-                <h2>捷徑</h2>
-                <div class="link-grid">
-                    <a href="alloriginalworks.html?初出掲載誌=よいこ" class="link-item">よいこ 發表作品 →</a>
-                    <a href="alloriginalworks.html?初出掲載誌=幼稚園" class="link-item">幼稚園 發表作品 →</a>                    
-                    <a href="alloriginalworks.html?初出掲載誌=小学一年生" class="link-item">小学一年生 發表作品 →</a>
-                    <a href="alloriginalworks.html?初出掲載誌=小学二年生" class="link-item">小学二年生 發表作品 →</a>
-                    <a href="alloriginalworks.html?初出掲載誌=小学三年生" class="link-item">小学三年生 發表作品 →</a>
-                    <a href="alloriginalworks.html?初出掲載誌=小学四年生" class="link-item">小学四年生 發表作品 →</a>
-                    <a href="alloriginalworks.html?初出掲載誌=小学五年生" class="link-item">小学五年生 發表作品 →</a>
-                    <a href="alloriginalworks.html?初出掲載誌=小学六年生" class="link-item">小学六年生 發表作品 →</a>
-                    <a href="alloriginalworks.html?初出掲載誌=てれびくん" class="link-item">てれびくん 發表作品 →</a>
-                    <a href="alloriginalworks.html?初出掲載誌=小学館BOOK" class="link-item">小学館BOOK 發表作品 →</a>
-                    <a href="alloriginalworks.html?初出掲載誌=週刊少年サンデー" class="link-item">週刊少年サンデー 發表作品 →</a>
-                    <a href="alloriginalworks.html?初出掲載誌=コロコロコミック" class="link-item">コロコロコミック 發表作品 →</a>
+            <a href="alloriginalworks.html" class="group flex items-center justify-between bg-slate-800 p-5 rounded-2xl text-white font-black transition-all hover:bg-slate-900 hover:shadow-lg hover:shadow-slate-200">
+                <span class="tracking-tight text-lg">所有原作資訊記錄</span>
+                <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
+            </a>
+
+            <div class="space-y-4 pt-4 border-t border-slate-100">
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M12.59 13.59L18.59 7.59 20 9l-7.41 7.41-4-4 1.41-1.41 2.59 2.59zM0 9l2.59-2.59L10 13.82l-2.59 2.59L0 9zm10 0l2.59-2.59L20 13.82l-2.59 2.59L10 9z"/></svg>
+                    Magazine Shortcuts / 捷徑
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <a href="alloriginalworks.html?初出掲載誌=よいこ" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600">
+                        <span>よいこ</span>
+                        <span class="text-slate-300">→</span>
+                    </a>
+                    <a href="alloriginalworks.html?初出掲載誌=幼稚園" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600">
+                        <span>幼稚園</span>
+                        <span class="text-slate-300">→</span>
+                    </a>
+                    <a href="alloriginalworks.html?初出掲載誌=小学一年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600">
+                        <span>小学一年生</span>
+                        <span class="text-slate-300">→</span>
+                    </a>
+                    <a href="alloriginalworks.html?初出掲載誌=小学二年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600">
+                        <span>小学二年生</span>
+                        <span class="text-slate-300">→</span>
+                    </a>
+                    <a href="alloriginalworks.html?初出掲載誌=小学三年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600">
+                        <span>小学三年生</span>
+                        <span class="text-slate-300">→</span>
+                    </a>
+                    <a href="alloriginalworks.html?初出掲載誌=小学四年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600">
+                        <span>小学四年生</span>
+                        <span class="text-slate-300">→</span>
+                    </a>
+                    <a href="alloriginalworks.html?初出掲載誌=小学五年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600">
+                        <span>小学五年生</span>
+                        <span class="text-slate-300">→</span>
+                    </a>
+                    <a href="alloriginalworks.html?初出掲載誌=小学六年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600">
+                        <span>小学六年生</span>
+                        <span class="text-slate-300">→</span>
+                    </a>
                 </div>
             </div>
         </section>
+
+        <footer class="text-center space-y-4 pt-8 pb-12">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">System Status: Online</p>
+            <div class="flex justify-center gap-2">
+                <span class="w-1 h-1 bg-blue-600 rounded-full animate-pulse"></span>
+                <span class="w-1 h-1 bg-blue-600 rounded-full animate-pulse [animation-delay:0.2s]"></span>
+                <span class="w-1 h-1 bg-blue-600 rounded-full animate-pulse [animation-delay:0.4s]"></span>
+            </div>
+        </footer>
     </div>
+
     <script>
-        // Disable right-click context menu for the whole page
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
+        // Security: Prevent Copy / Save / Source
+        window.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && ['c','s','p','u','a'].includes(e.key)) {
+                e.preventDefault();
+            }
         });
     </script>
 </body>
