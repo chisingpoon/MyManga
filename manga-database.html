@@ -35,10 +35,10 @@
         <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <button @click="resetToSeries" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:scale-105 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5"></path></svg>
-                    </button>
-                    <h1 @click="resetToSeries" class="font-black text-xl tracking-tighter text-slate-800 uppercase cursor-pointer">Manga DB</h1>
+                    <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:scale-105 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </a>
+                    <h1 @click="view = 'series'; selectedSeries = null; selectedBook = null;" class="font-black text-xl tracking-tighter text-slate-800 uppercase cursor-pointer">Manga DB</h1>
                 </div>
 
                 <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
@@ -57,7 +57,7 @@
                         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Total {{ filteredSeries.length }} groups</p>
                     </div>
                     <div class="relative max-w-sm w-full">
-                        <input type="text" v-model="seriesSearchQuery" placeholder="Search series/category..." 
+                        <input type="text" v-model="seriesSearchQuery" placeholder="Search series..." 
                             class="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all">
                         <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
                     </div>
@@ -80,7 +80,7 @@
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                    <div v-for="book in filteredBooks" :key="book.ISBN" @click="selectBook(book)" 
+                    <div v-for="book in filteredBooks" :key="book.ISBN || book.ISBN_JP" @click="selectBook(book)" 
                         class="book-card bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-200 cursor-pointer group transition-all hover:shadow-2xl flex flex-col h-full">
                         <div class="bg-slate-50 p-4 aspect-[3/4] flex items-center justify-center overflow-hidden">
                             <img v-if="book.Image" :src="book.Image" class="w-full h-full object-contain rounded-lg shadow-md group-hover:scale-105 transition-transform duration-500">
@@ -108,7 +108,7 @@
                 </button>
 
                 <div class="flex flex-col lg:flex-row gap-8 items-start justify-center">
-                    <div v-if="hkDetail" class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col md:flex-row w-full max-w-4xl">
+                    <div v-if="region === 'HK' && hkDetail" class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col md:flex-row w-full max-w-4xl">
                         <div class="md:w-1/3 p-8 bg-slate-50 flex items-center justify-center">
                             <img :src="hkDetail.Image" class="w-full h-auto object-contain shadow-2xl rounded-xl">
                         </div>
@@ -141,12 +141,12 @@
                             <p class="text-slate-400 font-bold mt-1 italic text-sm">{{ jpDetail.副標題 }}</p>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
-                                <div class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">類</span><span class="font-bold text-slate-700">{{ jpDetail.類 }}</span></div>
                                 <div class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">著</span><span class="font-bold text-slate-700">{{ jpDetail.著 }}</span></div>
                                 <div class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">頁</span><span class="font-bold text-slate-700">{{ jpDetail.頁 }}</span></div>
                                 <div class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">初版発行日</span><span class="font-bold text-slate-700">{{ jpDetail.初版発行日 }}</span></div>
                                 <div class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">定価</span><span class="font-bold text-slate-700">{{ jpDetail.定価 }}</span></div>
                                 <div class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">判型</span><span class="font-bold text-slate-700">{{ jpDetail.判型 }}</span></div>
+                                <div class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">類</span><span class="font-bold text-slate-700">{{ jpDetail.類 }}</span></div>
                                 <div class="flex justify-between border-b border-slate-50 pb-1 md:col-span-2"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-red-600">{{ jpDetail.ISBN }}</span></div>
                             </div>
                         </div>
@@ -155,19 +155,12 @@
 
                 <div v-if="currentStories.length > 0" class="bg-white md:rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
                     <div class="px-8 py-6 bg-slate-50 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div class="flex items-center gap-4">
-                            <h4 class="text-sm font-black uppercase tracking-[0.2em] text-slate-800">Archive Detail</h4>
-                            <div class="bg-slate-900 text-white px-4 py-1 rounded-full text-[10px] font-black">
-                                {{ searchedTableStories.length }} / {{ currentStories.length }} CHAPTERS
-                            </div>
-                        </div>
+                        <h4 class="text-sm font-black uppercase tracking-[0.2em] text-slate-800">Contents Detail</h4>
                         <div class="relative max-w-xs w-full">
-                            <input type="text" v-model="tableQuery" placeholder="Find chapter..." 
-                                class="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm">
+                            <input type="text" v-model="tableQuery" placeholder="Find chapter..." class="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
                             <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3"></path></svg>
                         </div>
                     </div>
-
                     <div class="overflow-x-auto">
                         <table class="w-full text-left table-fixed min-w-[1000px] responsive-table">
                             <thead class="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b bg-white">
@@ -187,10 +180,10 @@
                                         <div class="font-black text-slate-900 uppercase text-[15px]">{{ story.出版副題 }}</div>
                                         <div class="text-[12px] text-blue-600 font-bold mt-2">{{ story.副題港譯 }}</div>
                                     </td>
-                                    <td class="px-8 py-8 space-y-3">
-                                        <div v-if="story.master?.初出副題"><span class="text-[10px] block text-slate-400 font-black uppercase mb-1">ORIGINAL</span> <span class="font-bold text-slate-600">{{ story.master.初出副題 }}</span></div>
+                                    <td class="px-8 py-8">
+                                        <div v-if="story.master?.初出副題"><span class="text-[10px] block text-slate-400 font-black mb-1 uppercase">ORIGINAL</span> <span class="font-bold text-slate-600">{{ story.master.初出副題 }}</span></div>
                                     </td>
-                                    <td class="px-8 py-8 font-bold text-slate-700 leading-snug">{{ story.master?.初出掲載誌 || '-' }}</td>
+                                    <td class="px-8 py-8 font-bold text-slate-700">{{ story.master?.初出掲載誌 || '-' }}</td>
                                     <td class="px-8 py-8 font-black text-slate-800 text-[13px]">{{ story.master?.大全集 || '-' }}</td>
                                     <td class="px-8 py-8 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
                                 </tr>
@@ -207,22 +200,19 @@
         createApp({
             data() {
                 return {
-                    region: 'HK', view: 'series', loading: true,
-                    selectedSeries: null, selectedBook: null,
-                    seriesSearchQuery: '', tableQuery: '', showScrollTop: false,
-                    db: { hk: [], jp: [], contents: [], master: [] }
+                    region: 'HK', view: 'series', selectedSeries: null, selectedBook: null,
+                    seriesSearchQuery: '', tableQuery: '', db: { hk: [], jp: [], contents: [], master: [] }
                 }
             },
             computed: {
-                activeHK() { return this.db.hk.filter(item => item.Active?.toString().trim().toLowerCase() === 'yes'); },
-                activeJP() { return this.db.jp.filter(item => item.Active?.toString().trim().toLowerCase() === 'yes'); },
+                activeHK() { return this.db.hk.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
+                activeJP() { return this.db.jp.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
                 filteredSeries() {
                     const data = this.region === 'HK' ? this.activeHK : this.activeJP;
                     const key = this.region === 'HK' ? 'Title' : '類';
                     return [...new Set(data.map(item => item[key]))].filter(Boolean).sort();
                 },
                 searchedSeries() {
-                    if (!this.seriesSearchQuery) return this.filteredSeries;
                     const q = this.seriesSearchQuery.toLowerCase();
                     return this.filteredSeries.filter(s => s.toLowerCase().includes(q));
                 },
@@ -231,26 +221,22 @@
                     const key = this.region === 'HK' ? 'Title' : '類';
                     return data.filter(b => b[key] === this.selectedSeries);
                 },
-                hkDetail() {
+                hkDetail() { 
                     if (!this.selectedBook) return null;
-                    return this.region === 'HK' ? this.selectedBook : this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN);
+                    return this.region === 'HK' ? this.selectedBook : this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN); 
                 },
-                jpDetail() {
+                jpDetail() { 
                     if (!this.selectedBook) return null;
-                    return this.region === 'JP' ? this.selectedBook : this.db.jp.find(j => j.ISBN == this.selectedBook.ISBN_JP);
+                    return this.region === 'JP' ? this.selectedBook : this.db.jp.find(j => j.ISBN == (this.selectedBook.ISBN_JP || this.selectedBook.ISBN)); 
                 },
                 currentStories() {
                     if (!this.selectedBook) return [];
-                    const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
-                    if (!targetISBN) return [];
-                    return this.db.contents.filter(c => c.ISBN == targetISBN).map(c => {
-                        const code = c.作品番?.toString().trim();
-                        const masterRecord = code ? this.db.master.find(m => m.作品番?.toString().trim() === code) : null;
-                        return { ...c, master: masterRecord };
-                    }).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
+                    const isbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
+                    return this.db.contents.filter(c => c.ISBN == isbn).map(c => ({
+                        ...c, master: this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim())
+                    })).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
                 },
                 searchedTableStories() {
-                    if (!this.tableQuery) return this.currentStories;
                     const q = this.tableQuery.toLowerCase();
                     return this.currentStories.filter(s => (s.出版副題||'').toLowerCase().includes(q));
                 }
@@ -265,23 +251,22 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
                         ]);
                         this.db = { hk, jp, contents, master };
-                    } catch (e) { console.error("Data Fetch Error:", e); } finally { this.loading = false; }
+                    } catch (e) { console.error(e); }
                 },
-                toggleRegion(r) { this.region = r; this.view = 'series'; this.seriesSearchQuery = ''; this.selectedSeries = null; },
+                toggleRegion(r) { 
+                    this.region = r; 
+                    this.view = 'series';
+                    this.selectedSeries = null;
+                    this.selectedBook = null;
+                },
                 selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
-                selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); },
-                resetToSeries() { this.view = 'series'; this.selectedSeries = null; this.seriesSearchQuery = ''; },
-                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); }
             },
             mounted() {
                 this.init();
-                // URL Region Detection
                 const urlParams = new URLSearchParams(window.location.search);
-                const urlRegion = urlParams.get('region');
-                if (urlRegion && (urlRegion.toUpperCase() === 'JP' || urlRegion.toUpperCase() === 'HK')) {
-                    this.region = urlRegion.toUpperCase();
-                }
-                window.addEventListener('scroll', () => { this.showScrollTop = window.scrollY > 300 });
+                const urlRegion = urlParams.get('region')?.toUpperCase();
+                if (urlRegion === 'JP' || urlRegion === 'HK') this.region = urlRegion;
             }
         }).mount('#app')
     </script>
