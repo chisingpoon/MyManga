@@ -58,7 +58,7 @@
                     </div>
                     <div class="relative max-w-sm w-full">
                         <input type="text" v-model="seriesSearchQuery" placeholder="Search series/category..." 
-                            class="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all">
+                            class="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all">
                         <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
                     </div>
                 </div>
@@ -89,12 +89,12 @@
                             <template v-if="region === 'HK'">
                                 <h3 class="font-black text-lg text-slate-900 uppercase leading-tight line-clamp-2">{{ book.Title }}</h3>
                                 <div class="text-[11px] font-black text-blue-600 uppercase tracking-widest">Volume {{ book.Volume }}</div>
-                                <p v-if="book.Subtitle" class="text-[11px] text-slate-400 font-medium italic line-clamp-2 border-t pt-2 border-slate-50">{{ book.Subtitle }}</p>
+                                <p v-if="book.Subtitle" class="text-[11px] text-slate-400 font-medium italic mt-2 line-clamp-2 border-t pt-2 border-slate-50">{{ book.Subtitle }}</p>
                             </template>
                             <template v-else>
                                 <h3 class="font-black text-lg text-slate-900 uppercase leading-tight line-clamp-2">{{ book.標題 }}</h3>
                                 <div class="text-[11px] font-black text-red-600 uppercase tracking-widest">巻 {{ book.巻 }}</div>
-                                <p v-if="book.副標題" class="text-[11px] text-slate-400 font-medium italic line-clamp-2 border-t pt-2 border-slate-50">{{ book.副標題 }}</p>
+                                <p v-if="book.副標題" class="text-[11px] text-slate-400 font-medium italic mt-2 line-clamp-2 border-t pt-2 border-slate-50">{{ book.副標題 }}</p>
                             </template>
                         </div>
                     </div>
@@ -155,12 +155,19 @@
 
                 <div v-if="currentStories.length > 0" class="bg-white md:rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
                     <div class="px-8 py-6 bg-slate-50 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <h4 class="text-sm font-black uppercase tracking-[0.2em] text-slate-800">Contents Detail</h4>
+                        <div class="flex items-center gap-4">
+                            <h4 class="text-sm font-black uppercase tracking-[0.2em] text-slate-800">Archive Detail</h4>
+                            <div class="bg-slate-900 text-white px-4 py-1 rounded-full text-[10px] font-black">
+                                {{ searchedTableStories.length }} / {{ currentStories.length }} CHAPTERS
+                            </div>
+                        </div>
                         <div class="relative max-w-xs w-full">
-                            <input type="text" v-model="tableQuery" placeholder="Find chapter..." class="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                            <input type="text" v-model="tableQuery" placeholder="Find chapter..." 
+                                class="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm">
                             <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3"></path></svg>
                         </div>
                     </div>
+
                     <div class="overflow-x-auto">
                         <table class="w-full text-left table-fixed min-w-[1000px] responsive-table">
                             <thead class="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b bg-white">
@@ -181,11 +188,9 @@
                                         <div class="text-[12px] text-blue-600 font-bold mt-2">{{ story.副題港譯 }}</div>
                                     </td>
                                     <td class="px-8 py-8 space-y-3">
-                                        <div v-if="story.master?.初出副題"><span class="text-[10px] block text-slate-400 font-black mb-1 uppercase">ORIGINAL</span> <span class="font-bold text-slate-600">{{ story.master.初出副題 }}</span></div>
+                                        <div v-if="story.master?.初出副題"><span class="text-[10px] block text-slate-400 font-black uppercase mb-1">ORIGINAL</span> <span class="font-bold text-slate-600">{{ story.master.初出副題 }}</span></div>
                                     </td>
-                                    <td class="px-8 py-8">
-                                        <div class="font-bold text-slate-700 leading-snug">{{ story.master?.初出掲載誌 || '-' }}</div>
-                                    </td>
+                                    <td class="px-8 py-8 font-bold text-slate-700 leading-snug">{{ story.master?.初出掲載誌 || '-' }}</td>
                                     <td class="px-8 py-8 font-black text-slate-800 text-[13px]">{{ story.master?.大全集 || '-' }}</td>
                                     <td class="px-8 py-8 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
                                 </tr>
@@ -218,7 +223,8 @@
                 },
                 searchedSeries() {
                     if (!this.seriesSearchQuery) return this.filteredSeries;
-                    return this.filteredSeries.filter(s => s.toLowerCase().includes(this.seriesSearchQuery.toLowerCase()));
+                    const q = this.seriesSearchQuery.toLowerCase();
+                    return this.filteredSeries.filter(s => s.toLowerCase().includes(q));
                 },
                 filteredBooks() {
                     const data = this.region === 'HK' ? this.activeHK : this.activeJP;
@@ -236,14 +242,17 @@
                 currentStories() {
                     if (!this.selectedBook) return [];
                     const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
+                    if (!targetISBN) return [];
                     return this.db.contents.filter(c => c.ISBN == targetISBN).map(c => {
-                        const masterRecord = this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim());
+                        const code = c.作品番?.toString().trim();
+                        const masterRecord = code ? this.db.master.find(m => m.作品番?.toString().trim() === code) : null;
                         return { ...c, master: masterRecord };
                     }).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
                 },
                 searchedTableStories() {
                     if (!this.tableQuery) return this.currentStories;
-                    return this.currentStories.filter(s => (s.出版副題||'').toLowerCase().includes(this.tableQuery.toLowerCase()));
+                    const q = this.tableQuery.toLowerCase();
+                    return this.currentStories.filter(s => (s.出版副題||'').toLowerCase().includes(q));
                 }
             },
             methods: {
@@ -256,16 +265,22 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
                         ]);
                         this.db = { hk, jp, contents, master };
-                    } catch (e) { console.error(e); } finally { this.loading = false; }
+                    } catch (e) { console.error("Data Fetch Error:", e); } finally { this.loading = false; }
                 },
-                toggleRegion(r) { this.region = r; this.view = 'series'; this.seriesSearchQuery = ''; },
+                toggleRegion(r) { this.region = r; this.view = 'series'; this.seriesSearchQuery = ''; this.selectedSeries = null; },
                 selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
                 selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); },
                 resetToSeries() { this.view = 'series'; this.selectedSeries = null; this.seriesSearchQuery = ''; },
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
             },
-            mounted() { 
+            mounted() {
                 this.init();
+                // URL Region Detection
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlRegion = urlParams.get('region');
+                if (urlRegion && (urlRegion.toUpperCase() === 'JP' || urlRegion.toUpperCase() === 'HK')) {
+                    this.region = urlRegion.toUpperCase();
+                }
                 window.addEventListener('scroll', () => { this.showScrollTop = window.scrollY > 300 });
             }
         }).mount('#app')
