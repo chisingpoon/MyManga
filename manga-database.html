@@ -129,6 +129,7 @@
                 </button>
 
                 <div class="flex flex-col md:flex-row gap-8 items-center md:items-start justify-center">
+                    
                     <div v-if="region === 'HK' && hkDetail" class="detail-card bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
                         <div class="sm:w-1/2 p-6 bg-slate-50 flex items-center justify-center cursor-zoom-out" @click="zoomImage = hkDetail.Image">
                             <img :src="hkDetail.Image" class="w-full h-auto max-h-[450px] object-contain shadow-2xl rounded-xl">
@@ -190,8 +191,8 @@
                                         <div class="text-[11px] text-blue-600 font-bold mt-1.5">{{ story.副題港譯 }}</div>
                                     </td>
                                     <td class="px-8 py-6">
-                                        <div class="font-bold text-slate-700">{{ story.master?.初出掲載誌 }}</div>
-                                        <div class="text-[10px] text-slate-400 font-black mt-0.5 uppercase tracking-wider">{{ story.master?.初出掲載号 }}</div>
+                                        <div class="font-bold text-slate-700">{{ story.master?.初出掲載誌 || '-' }}</div>
+                                        <div class="text-[10px] text-slate-400 font-black mt-0.5 uppercase tracking-wider">{{ story.master?.初出掲載号 || '' }}</div>
                                     </td>
                                     <td class="px-8 py-6">
                                         <div class="text-slate-500 font-bold leading-relaxed">{{ story.master?.大全集 || '-' }}</div>
@@ -251,9 +252,18 @@
                     if (!this.selectedBook) return [];
                     const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
                     if (!targetISBN) return [];
-                    return this.db.contents.filter(c => c.ISBN == targetISBN).map(c => ({ 
-                        ...c, master: this.db.master.find(m => m.作品番 == c.作品番) 
-                    })).sort((a, b) => (parseInt(a.收錄話) || 0) - (parseInt(b.收錄話) || 0));
+                    
+                    return this.db.contents
+                        .filter(c => c.ISBN == targetISBN)
+                        .map(c => {
+                            // Explicit mapping: if 作品番 not found in master, return null for master
+                            const masterRecord = this.db.master.find(m => m.作品番 == c.作品番);
+                            return { 
+                                ...c, 
+                                master: masterRecord || null 
+                            };
+                        })
+                        .sort((a, b) => (parseInt(a.收錄話) || 0) - (parseInt(b.收錄話) || 0));
                 }
             },
             methods: {
