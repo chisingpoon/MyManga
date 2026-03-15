@@ -8,44 +8,58 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
+        html { scroll-behavior: smooth; }
         body { -webkit-user-select: none; user-select: none; font-size: 18px; }
         .bg-grid {
             background-color: #f8fafc;
             background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
             background-size: 50px 50px;
         }
-        /* Custom Table Spacing */
         td, th { padding: 1.25rem 1.5rem !important; }
         .filter-scroll::-webkit-scrollbar { width: 6px; }
         .filter-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        .home-btn {
+        .glass-ui {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .home-btn:hover {
+        .glass-ui:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             background: white;
         }
 
-        /* Wrappable columns to save space */
         .col-wrap {
             white-space: normal !important;
             word-break: break-all;
             line-height: 1.4;
+        }
+
+        /* Floating Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
         }
     </style>
 </head>
 <body class="bg-grid text-slate-900 min-h-screen relative overflow-x-hidden">
 
     <div id="app" v-cloak>
-        <header class="bg-white/90 backdrop-blur-md border-b sticky top-0 z-40 shadow-md">
+        <header id="top" class="bg-white/90 backdrop-blur-md border-b sticky top-0 z-40 shadow-md">
             <div class="max-w-[98%] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <a href="index.html" class="home-btn w-12 h-12 rounded-2xl flex items-center justify-center text-slate-700 shadow-sm group">
+                    <a href="index.html" class="glass-ui w-12 h-12 rounded-2xl flex items-center justify-center text-slate-700 shadow-sm group">
                         <svg class="w-6 h-6 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
@@ -111,16 +125,13 @@
                                 <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50/50 transition-colors">
                                     <td class="font-bold text-slate-400">{{ row.掲載番 }}</td>
                                     <td class="font-black text-slate-900 col-wrap">{{ row.初出副題 }}</td>
-                                    
                                     <td class="text-slate-700 font-bold col-wrap">{{ getSubtitleInfo(row.作品番).pubSub || '——' }}</td>
                                     <td class="text-slate-700 font-bold col-wrap">{{ getSubtitleInfo(row.作品番).hkSub || '——' }}</td>
-
                                     <td class="font-bold text-slate-600 col-wrap">{{ row.初出掲載誌 }}</td>
                                     <td class="text-slate-500 text-sm">
                                         <div class="font-bold">{{ row.初出掲載號 || row.初出掲載号 }}</div>
                                         <div class="opacity-60">p.{{ row.初出掲載頁 }}</div>
                                     </td>
-                                    
                                     <td class="text-center">
                                         <template v-if="getHKMapping(row.作品番, 'tanko')">
                                             <a :href="'publish.html?isbn=' + getHKMapping(row.作品番, 'tanko').hkIsbn" class="inline-flex flex-col items-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[11px] font-black hover:bg-emerald-700 shadow-md transition-all hover:scale-105 w-full">
@@ -130,7 +141,6 @@
                                         </template>
                                         <span v-else class="text-slate-200">——</span>
                                     </td>
-
                                     <td class="text-center">
                                         <template v-if="getHKMapping(row.作品番, 'daizenshu')">
                                             <a :href="'publish.html?isbn=' + getHKMapping(row.作品番, 'daizenshu').hkIsbn" class="inline-flex flex-col items-center bg-indigo-600 text-white px-3 py-2 rounded-xl text-[11px] font-black hover:bg-indigo-700 shadow-md transition-all hover:scale-105 w-full">
@@ -140,7 +150,6 @@
                                         </template>
                                         <span v-else class="text-slate-200">——</span>
                                     </td>
-
                                     <td class="text-slate-400 italic col-wrap text-sm">{{ row.備考 }}</td>
                                 </tr>
                             </tbody>
@@ -160,6 +169,12 @@
                 </div>
             </div>
         </main>
+
+        <button @click="scrollToTop" :class="{'show': showScrollBtn}" class="back-to-top glass-ui w-14 h-14 rounded-full flex items-center justify-center text-slate-700 shadow-xl border-2 border-slate-100">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </button>
     </div>
 
     <script>
@@ -169,7 +184,8 @@
                 return {
                     loading: true, searchQuery: '', activeMagazines: [],
                     currentPage: 1, itemsPerPage: 20,
-                    master: [], contents: [], publishHk: []
+                    master: [], contents: [], publishHk: [],
+                    showScrollBtn: false
                 }
             },
             computed: {
@@ -234,9 +250,21 @@
                     const idx = this.activeMagazines.indexOf(mag);
                     if (idx > -1) this.activeMagazines.splice(idx, 1); else this.activeMagazines.push(mag);
                     this.currentPage = 1;
+                },
+                scrollToTop() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+                handleScroll() {
+                    this.showScrollBtn = window.scrollY > 500;
                 }
             },
-            mounted() { this.init(); }
+            mounted() { 
+                this.init();
+                window.addEventListener('scroll', this.handleScroll);
+            },
+            unmounted() {
+                window.removeEventListener('scroll', this.handleScroll);
+            }
         }).mount('#app')
     </script>
 </body>
