@@ -56,7 +56,7 @@
             <div v-if="view === 'series'">
                 <h2 class="text-2xl font-black text-slate-800 mb-8">{{ region === 'HK' ? '香港版系列' : '日本版系列' }}</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    <div v-for="s in filteredSeries" @click="selectSeries(s)" class="series-card bg-white p-6 rounded-2xl border border-slate-200 cursor-pointer transition-all text-center">
+                    <div v-for="s in filteredSeries" :key="s" @click="selectSeries(s)" class="series-card bg-white p-6 rounded-2xl border border-slate-200 cursor-pointer transition-all text-center">
                         <h3 class="font-black text-slate-700 break-words">{{ s }}</h3>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                    <div v-for="book in searchedBooks" @click="selectBook(book)" class="book-card bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer group flex flex-col">
+                    <div v-for="book in searchedBooks" :key="book.ISBN" @click="selectBook(book)" class="book-card bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer group flex flex-col">
                         <div class="bg-slate-100 relative p-2 flex items-center justify-center img-container">
                             <img v-if="book.Image" :src="book.Image" class="w-full h-auto object-contain transition-all duration-500 shadow-sm rounded">
                         </div>
@@ -97,41 +97,41 @@
                 <div class="flex flex-wrap gap-8 justify-center items-stretch">
                     
                     <div v-if="hkDetail" class="detail-card flex-1 min-w-[320px] bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
-                        <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in group" @click="zoomImage = hkDetail.Image">
+                        <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in" @click="zoomImage = hkDetail.Image">
                             <img :src="hkDetail.Image" class="w-full h-auto max-h-[400px] object-contain shadow-lg rounded">
                         </div>
                         <div class="sm:w-1/2 p-6 flex flex-col justify-between">
                             <div>
                                 <span class="bg-blue-600 text-[10px] font-black text-white px-2 py-1 rounded-full uppercase">HK INFO</span>
                                 <h2 class="text-lg font-black text-slate-800 mt-4 leading-tight">{{ hkDetail.Title }}</h2>
-                                <p class="text-slate-400 text-[10px] font-bold uppercase mt-1">{{ hkDetail.Subtitle }}</p>
+                                <p class="text-slate-400 text-[10px] font-bold uppercase mt-1 line-clamp-2">{{ hkDetail.Subtitle }}</p>
                             </div>
                             <div class="space-y-1 text-[11px] border-t pt-4 mt-4">
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Volume</span><span>{{ hkDetail.Volume }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Author</span><span>{{ hkDetail.Author }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Publisher</span><span>{{ hkDetail.Publisher }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Issue Date</span><span>{{ hkDetail.IssueDate }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1 pt-1"><span class="text-slate-400 uppercase">ISBN</span><span class="font-mono">{{ hkDetail.ISBN }}</span></p>
+                                <p v-if="hkDetail.Volume" class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Volume</span><span>{{ hkDetail.Volume }}</span></p>
+                                <p v-if="hkDetail.Author" class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Author</span><span>{{ hkDetail.Author }}</span></p>
+                                <p v-if="hkDetail.Publisher" class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Publisher</span><span>{{ hkDetail.Publisher }}</span></p>
+                                <p v-if="hkDetail.IssueDate" class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Issue Date</span><span>{{ hkDetail.IssueDate }}</span></p>
+                                <p v-if="hkDetail.ISBN" class="flex justify-between border-b border-slate-50 pb-1 pt-1"><span class="text-slate-400 uppercase">ISBN</span><span class="font-mono">{{ hkDetail.ISBN }}</span></p>
                             </div>
                         </div>
                     </div>
 
                     <div v-if="jpDetail" class="detail-card flex-1 min-w-[320px] bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
-                        <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in group" @click="zoomImage = jpDetail.Image">
+                        <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in" @click="zoomImage = jpDetail.Image">
                             <img :src="jpDetail.Image" class="w-full h-auto max-h-[400px] object-contain shadow-lg rounded">
                         </div>
                         <div class="sm:w-1/2 p-6 flex flex-col justify-between">
                             <div>
                                 <span class="bg-red-600 text-[10px] font-black text-white px-2 py-1 rounded-full uppercase">JP SPECS</span>
                                 <h2 class="text-lg font-black text-slate-800 mt-4 leading-tight">{{ jpDetail.標題 }}</h2>
-                                <p class="text-slate-400 text-[10px] font-bold mt-1">{{ jpDetail.副標題 }}</p>
+                                <p class="text-slate-400 text-[10px] font-bold mt-1 line-clamp-2">{{ jpDetail.副標題 }}</p>
                             </div>
                             <div class="space-y-1 text-[11px] border-t pt-4 mt-4">
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">巻</span><span>{{ jpDetail.巻 }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">著</span><span>{{ jpDetail.著 }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">初版発行日</span><span>{{ jpDetail.初版発行日 }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 uppercase">ISBN</span><span class="font-mono">{{ jpDetail.ISBN }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">判型</span><span>{{ jpDetail.判型 }}</span></p>
+                                <p v-if="jpDetail.巻" class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">巻</span><span>{{ jpDetail.巻 }}</span></p>
+                                <p v-if="jpDetail.著" class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">著</span><span>{{ jpDetail.著 }}</span></p>
+                                <p v-if="jpDetail.初版発行日" class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">初版発行日</span><span>{{ jpDetail.初版発行日 }}</span></p>
+                                <p v-if="jpDetail.ISBN" class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 uppercase">ISBN</span><span class="font-mono">{{ jpDetail.ISBN }}</span></p>
+                                <p v-if="jpDetail.判型" class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">判型</span><span>{{ jpDetail.判型 }}</span></p>
                             </div>
                         </div>
                     </div>
@@ -179,10 +179,6 @@
     </div>
 
     <script>
-        window.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && ['c','s','p','u','a'].includes(e.key)) e.preventDefault();
-        });
-
         const { createApp } = Vue;
         createApp({
             data() {
@@ -214,23 +210,23 @@
                     const dates = this.filteredBooks.map(b => parseInt((b.IssueDate || b.初版発行日 || "").split('/')[0])).filter(y => !isNaN(y));
                     return dates.length ? `${Math.min(...dates)} – ${Math.max(...dates)}` : null;
                 },
-                // NEW: Explicit HK Detail Lookup
+                // Updated Logic: Find specific details for the cards
                 hkDetail() {
                     if (!this.selectedBook) return null;
                     if (this.region === 'HK') return this.selectedBook;
-                    // If in JP mode, find the HK book that links to this JP ISBN
+                    // In JP mode: selectedBook is from JP sheet. Find HK book where ISBN_JP matches JP's ISBN.
                     return this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN) || null;
                 },
-                // NEW: Explicit JP Detail Lookup
                 jpDetail() {
                     if (!this.selectedBook) return null;
                     if (this.region === 'JP') return this.selectedBook;
-                    // If in HK mode, find the JP book via ISBN_JP link
+                    // In HK mode: selectedBook is from HK sheet. Find JP book where ISBN matches HK's ISBN_JP.
                     return this.db.jp.find(j => j.ISBN == this.selectedBook.ISBN_JP) || null;
                 },
                 currentStories() {
                     if (!this.selectedBook) return [];
                     const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
+                    if (!targetISBN) return [];
                     return this.db.contents.filter(c => c.ISBN == targetISBN).map(c => ({ 
                         ...c, master: this.db.master.find(m => m.作品番 == c.作品番) 
                     })).sort((a, b) => (parseInt(a.收錄話) || 0) - (parseInt(b.收錄話) || 0));
@@ -238,6 +234,13 @@
             },
             methods: {
                 async init() {
+                    // Check URL for region parameter immediately
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const rParam = urlParams.get('region');
+                    if (rParam && rParam.toUpperCase() === 'JP') {
+                        this.region = 'JP';
+                    }
+
                     try {
                         const [hk, jp, contents, master] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
@@ -246,14 +249,30 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
                         ]);
                         this.db = { hk, jp, contents, master };
-                    } catch (e) { console.error(e); } finally { this.loading = false; }
+                    } catch (e) { 
+                        console.error(e); 
+                    } finally { 
+                        this.loading = false; 
+                    }
                 },
-                toggleRegion(r) { this.region = r; this.view = 'series'; this.selectedSeries = null; },
+                toggleRegion(r) { 
+                    this.region = r; 
+                    this.view = 'series'; 
+                    this.selectedSeries = null; 
+                    // Update URL without reloading page
+                    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?region=' + r;
+                    window.history.pushState({path:newUrl},'',newUrl);
+                },
                 selectSeries(name) { this.selectedSeries = name; this.view = 'books'; },
                 selectBook(book) { this.selectedBook = book; this.view = 'detail'; window.scrollTo(0, 0); },
                 resetToSeries() { this.view = 'series'; this.selectedSeries = null; this.selectedBook = null; }
             },
-            mounted() { this.init(); }
+            mounted() { 
+                this.init(); 
+                window.addEventListener('keydown', function(e) {
+                    if ((e.ctrlKey || e.metaKey) && ['c','s','p','u','a'].includes(e.key)) e.preventDefault();
+                });
+            }
         }).mount('#app')
     </script>
 </body>
