@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Archive | Robust Version</title>
+    <title>Master Archive | Refined View</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -35,56 +35,37 @@
 
         <main class="max-w-[98%] mx-auto py-6 px-4">
             
-            <div v-if="error" class="flex flex-col items-center justify-center py-32 bg-white rounded-[2rem] border-2 border-dashed border-red-200">
-                <div class="text-red-500 mb-4 font-black">CONNECTION ERROR</div>
-                <p class="text-slate-500 text-sm mb-6">{{ error }}</p>
-                <button @click="forceRefresh" class="px-8 py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all">Retry Sync</button>
-            </div>
-
-            <div v-else-if="loading" class="flex flex-col items-center justify-center py-32">
+            <div v-if="loading" class="flex flex-col items-center justify-center py-32">
                 <div class="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                <p class="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Syncing with Google Database...</p>
+                <p class="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Mapping Relational Data...</p>
             </div>
 
             <div v-else>
                 <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-6 mb-4">
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                         <div class="space-y-4">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Live Search</label>
-                            <div class="relative">
-                                <input type="text" v-model="searchQuery" placeholder="Search records..." 
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
-                                <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
-                            </div>
-                            <button @click="resetFilters" class="text-[9px] font-black text-indigo-500 uppercase hover:underline">Reset All</button>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Search Keywords</label>
+                            <input type="text" v-model="searchQuery" placeholder="Search title or remarks..." 
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
                         </div>
 
                         <div class="lg:col-span-3 space-y-4">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-between">
-                                Magazine Filter
-                                <span class="bg-slate-100 px-2 py-0.5 rounded text-slate-500 text-[9px]">{{ activeMagazines.length }} Selected</span>
-                            </label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Magazine Filter</label>
                             <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto filter-scroll p-1">
                                 <button v-for="(count, mag) in magazineStats" :key="mag" 
                                     @click="toggleMagazine(mag)"
-                                    :class="activeMagazines.includes(mag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'"
-                                    class="px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all flex items-center gap-2 shadow-sm">
-                                    {{ mag }}
-                                    <span class="opacity-50 text-[9px]">{{ count }}</span>
+                                    :class="activeMagazines.includes(mag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'"
+                                    class="px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shadow-sm flex items-center gap-2">
+                                    {{ mag }} <span class="opacity-50 text-[9px]">{{ count }}</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between px-6 py-3 mb-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl">
-                    <div class="flex items-center gap-4">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                            <span class="text-[11px] font-black text-indigo-900 uppercase tracking-widest">Found {{ filteredData.length }} Results</span>
-                        </div>
-                    </div>
-                    <div class="text-[10px] font-black text-slate-400 uppercase">Page {{ currentPage }} / {{ totalPages }}</div>
+                <div class="px-6 py-3 mb-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl flex items-center justify-between">
+                    <span class="text-[11px] font-black text-indigo-900 uppercase tracking-widest">Showing {{ filteredData.length }} Records</span>
+                    <button @click="resetFilters" class="text-[9px] font-black text-indigo-500 uppercase hover:underline">Clear Filters</button>
                 </div>
 
                 <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
@@ -92,36 +73,35 @@
                         <table class="w-full text-left">
                             <thead class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b bg-slate-50">
                                 <tr>
-                                    <th class="px-6 py-5 w-20">#</th>
-                                    <th class="px-6 py-5 w-80">Story Title</th>
-                                    <th class="px-6 py-5 w-40">Magazine</th>
-                                    <th v-for="col in mappingColumns" :key="col" class="px-6 py-5 bg-indigo-50/20 text-indigo-600 border-x border-slate-100/30 text-center">
-                                        {{ col }}
-                                    </th>
-                                    <th class="px-6 py-5">Remarks</th>
+                                    <th class="px-6 py-5">掲載番</th>
+                                    <th class="px-6 py-5">初出副題</th>
+                                    <th class="px-6 py-5">初出掲載誌</th>
+                                    <th class="px-6 py-5">初出掲載号</th>
+                                    <th class="px-6 py-5">初出掲載頁</th>
+                                    <th class="px-6 py-5 text-center bg-indigo-50/30 text-indigo-600">大全集</th>
+                                    <th class="px-6 py-5">頁</th>
+                                    <th class="px-6 py-5">備考</th>
                                 </tr>
                             </thead>
                             <tbody class="text-[13px] divide-y divide-slate-50">
                                 <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50/50 transition-colors">
-                                    <td class="px-6 py-5 font-black text-slate-300">{{ row.作品番 }}</td>
-                                    <td class="px-6 py-5">
-                                        <div class="font-black text-slate-900">{{ row.初出副題 }}</div>
-                                        <div class="text-[11px] text-slate-400 font-bold">{{ row.全集副題 }}</div>
-                                    </td>
-                                    <td class="px-6 py-5">
-                                        <span class="bg-slate-100 px-2 py-1 rounded text-[11px] font-bold text-slate-600">{{ row.初出掲載誌 }}</span>
-                                    </td>
+                                    <td class="px-6 py-5 font-bold text-slate-400">{{ row.掲載番 }}</td>
+                                    <td class="px-6 py-5 font-black text-slate-900">{{ row.初出副題 }}</td>
+                                    <td class="px-6 py-5 font-bold text-slate-600">{{ row.初出掲載誌 }}</td>
+                                    <td class="px-6 py-5 text-slate-500">{{ row.初出掲載号 }}</td>
+                                    <td class="px-6 py-5 text-slate-500">{{ row.初出掲載頁 }}</td>
                                     
-                                    <td v-for="col in mappingColumns" :key="col" class="px-4 py-5 border-x border-slate-50/50 text-center">
-                                        <template v-if="cachedMappings[row.作品番] && cachedMappings[row.作品番][col]">
-                                            <a :href="'publishjp.html?isbn=' + cachedMappings[row.作品番][col].ISBN" 
-                                               class="inline-flex items-center justify-center bg-white border border-indigo-100 px-3 py-1.5 rounded-xl shadow-sm hover:border-indigo-500 transition-all">
-                                                <span class="font-black text-indigo-600 text-[10px]">Vol. {{ cachedMappings[row.作品番][col].巻 }}</span>
+                                    <td class="px-6 py-5 text-center">
+                                        <template v-if="getDQSMapping(row.作品番)">
+                                            <a :href="'publishjp.html?isbn=' + getDQSMapping(row.作品番).ISBN" 
+                                               class="inline-flex items-center justify-center bg-indigo-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black hover:bg-indigo-700 transition-all shadow-sm">
+                                                Vol. {{ getDQSMapping(row.作品番).巻 }}
                                             </a>
                                         </template>
-                                        <div v-else class="text-slate-100">-</div>
+                                        <span v-else class="text-slate-200">-</span>
                                     </td>
 
+                                    <td class="px-6 py-5 text-slate-500">{{ row.頁 }}</td>
                                     <td class="px-6 py-5 text-slate-400 italic text-[11px] truncate max-w-xs">{{ row.備考 }}</td>
                                 </tr>
                             </tbody>
@@ -129,15 +109,9 @@
                     </div>
                     
                     <div class="p-6 border-t bg-slate-50/50 flex items-center justify-between">
-                        <button @click="currentPage--" :disabled="currentPage === 1" class="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black disabled:opacity-20">PREV</button>
-                        <div class="flex gap-2">
-                             <button v-for="p in visiblePages" :key="p" @click="currentPage = p" 
-                                :class="p === currentPage ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400'"
-                                class="w-8 h-8 rounded-lg text-[10px] font-black transition-all">
-                                {{ p }}
-                             </button>
-                        </div>
-                        <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black disabled:opacity-20">NEXT</button>
+                        <button @click="currentPage--" :disabled="currentPage === 1" class="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black disabled:opacity-20 hover:shadow-sm transition-all">PREV</button>
+                        <span class="text-[10px] font-black text-slate-400 uppercase">Page {{ currentPage }} / {{ totalPages }}</span>
+                        <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black disabled:opacity-20 hover:shadow-sm transition-all">NEXT</button>
                     </div>
                 </div>
             </div>
@@ -149,29 +123,23 @@
         createApp({
             data() {
                 return {
-                    loading: true, error: null, refreshing: false,
+                    loading: true,
                     searchQuery: '', activeMagazines: [],
                     currentPage: 1, itemsPerPage: 50,
-                    master: [], contents: [], books: [],
-                    mappingColumns: ["単行本", "第0巻", "ドラミちゃん", "大全集"],
-                    cachedMappings: {}
+                    master: [], contents: [], books: []
                 }
             },
             watch: {
                 searchQuery() { this.updateURL(); this.currentPage = 1; },
-                activeMagazines: { handler() { this.updateURL(); this.currentPage = 1; }, deep: true },
-                paginatedData: {
-                    handler(newVal) { if(newVal.length) this.computeVisibleMappings(newVal); },
-                    immediate: true
-                }
+                activeMagazines: { handler() { this.updateURL(); this.currentPage = 1; }, deep: true }
             },
             computed: {
                 magazineStats() {
                     const stats = {};
                     this.master.forEach(r => {
                         if (r.初出掲載誌) {
-                            const t = r.初出掲載誌.trim();
-                            stats[t] = (stats[t] || 0) + 1;
+                            const name = r.初出掲載誌.trim();
+                            stats[name] = (stats[name] || 0) + 1;
                         }
                     });
                     return stats;
@@ -180,86 +148,49 @@
                     const q = this.searchQuery.toLowerCase().trim();
                     const hasMags = this.activeMagazines.length > 0;
                     return this.master.filter(r => {
-                        const mText = !q || (r.初出副題||'').toLowerCase().includes(q) || (r.全集副題||'').toLowerCase().includes(q) || (r.作品番||'').toString().includes(q);
-                        const mMag = !hasMags || this.activeMagazines.includes(r.初出掲載誌?.trim());
-                        return mText && mMag;
+                        const matchesText = !q || (r.初出副題||'').toLowerCase().includes(q) || (r.備考||'').toLowerCase().includes(q);
+                        const matchesMag = !hasMags || this.activeMagazines.includes(r.初出掲載誌?.trim());
+                        return matchesText && matchesMag;
                     });
                 },
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.filteredData.slice(start, start + this.itemsPerPage);
-                },
-                visiblePages() {
-                    let start = Math.max(1, this.currentPage - 2);
-                    let end = Math.min(this.totalPages, start + 4);
-                    if (end - start < 4) start = Math.max(1, end - 4);
-                    const pages = [];
-                    for (let i = start; i <= end; i++) pages.push(i);
-                    return pages;
                 }
             },
             methods: {
                 async init() {
-                    this.loading = true;
-                    this.error = null;
-
                     try {
-                        // 1. Fetch with Timeout
-                        const fetchWithTimeout = (url) => {
-                            return Promise.race([
-                                fetch(url).then(r => {
-                                    if(!r.ok) throw new Error("Sheet response not OK");
-                                    return r.json();
-                                }),
-                                new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 10000))
-                            ]);
-                        };
-
                         const [m, c, b] = await Promise.all([
-                            fetchWithTimeout("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表"),
-                            fetchWithTimeout("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品"),
-                            fetchWithTimeout("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP")
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json())
                         ]);
-
-                        if (!m || !c || !b) throw new Error("Empty Data Received");
-
-                        this.master = m.filter(r => r.作品番);
+                        this.master = m;
                         this.contents = c;
                         this.books = b;
-                        
-                        // 2. Initialize URL Params
+
+                        // URL Parameter Sync
                         const p = new URLSearchParams(window.location.search);
                         if (p.get('q')) this.searchQuery = decodeURIComponent(p.get('q'));
                         if (p.get('mag')) {
                             const requested = p.get('mag').split(',').map(m => decodeURIComponent(m).trim());
                             this.activeMagazines = requested.filter(m => this.magazineStats[m]);
                         }
-
-                        this.loading = false;
-                    } catch (e) {
-                        console.error("Init Error:", e);
-                        this.error = "Failed to load database. This can happen if the Google Sheet is busy or your connection is unstable.";
-                        this.loading = false;
-                    }
+                    } catch (e) { console.error(e); } finally { this.loading = false; }
                 },
-                computeVisibleMappings(rows) {
-                    const newMappings = { ...this.cachedMappings };
-                    rows.forEach(row => {
-                        if (!newMappings[row.作品番]) {
-                            const rowMap = {};
-                            this.mappingColumns.forEach(cat => {
-                                const found = this.contents.find(c => c.作品番?.toString().trim() === row.作品番?.toString().trim() && 
-                                    this.books.find(b => b.ISBN === c.ISBN && b.類 === cat));
-                                if (found) {
-                                    const bInfo = this.books.find(b => b.ISBN === found.ISBN);
-                                    rowMap[cat] = { 巻: bInfo.巻, ISBN: bInfo.ISBN };
-                                }
-                            });
-                            newMappings[row.作品番] = rowMap;
-                        }
+                getDQSMapping(workId) {
+                    if (!workId) return null;
+                    // Find appearance in contents where type is 大全集 or 大長編大全集
+                    const appearance = this.contents.find(c => {
+                        if (c.作品番?.toString().trim() !== workId.toString().trim()) return false;
+                        const book = this.books.find(b => b.ISBN === c.ISBN);
+                        return book && (book.類 === "大全集" || book.類 === "大長編大全集");
                     });
-                    this.cachedMappings = newMappings;
+                    if (!appearance) return null;
+                    const bookInfo = this.books.find(b => b.ISBN === appearance.ISBN);
+                    return bookInfo ? { 巻: bookInfo.巻, ISBN: bookInfo.ISBN } : null;
                 },
                 toggleMagazine(mag) {
                     const idx = this.activeMagazines.indexOf(mag);
@@ -272,17 +203,11 @@
                 updateURL() {
                     const url = new URL(window.location);
                     if (this.searchQuery) url.searchParams.set('q', this.searchQuery); else url.searchParams.delete('q');
-                    if (this.activeMagazines.length) url.searchParams.set('mag', this.activeMagazines.join(',')); else url.searchParams.delete('mag');
+                    if (this.activeMagazines.length > 0) url.searchParams.set('mag', this.activeMagazines.join(',')); else url.searchParams.delete('mag');
                     window.history.replaceState({}, '', url);
-                },
-                forceRefresh() {
-                    localStorage.clear();
-                    window.location.reload();
                 }
             },
-            mounted() {
-                this.init();
-            }
+            mounted() { this.init(); }
         }).mount('#app')
     </script>
 </body>
