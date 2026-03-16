@@ -26,32 +26,32 @@
             background-size: 40px 40px;
         }
 
-        /* Loading & Processing Overlays */
+        /* Full Screen Loader */
         .loader-wrapper {
             position: fixed; inset: 0;
-            background: rgba(248, 250, 252, 0.9);
-            backdrop-filter: blur(8px);
+            background: #f8fafc;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             z-index: 9999;
         }
 
-        .refresh-overlay {
+        /* Processing Spinner Overlay */
+        .processing-overlay {
             position: absolute; inset: 0;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(2px);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 80; border-radius: 16px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 80;
         }
 
         .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #e2e8f0; border-top: 4px solid #4f46e5;
+            width: 50px; height: 50px;
+            border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5;
             border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Navigation Header */
         .top-nav {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
@@ -61,35 +61,19 @@
 
         @media (min-width: 769px) {
             .sticky-col-1 { position: sticky; left: 0; z-index: 20; background: inherit; }
-            .sticky-col-2 {
-                position: sticky; left: 80px; z-index: 20; background: inherit;
-                box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
-            }
+            .sticky-col-2 { position: sticky; left: 80px; z-index: 20; background: inherit; }
             th.sticky-col-1, th.sticky-col-2 { background: #f8fafc; z-index: 30; }
         }
 
         .row-focused { background-color: #eef2ff !important; }
-        tr:not(.row-focused):hover { background-color: #f8fafc; cursor: pointer; }
-
-        .main-card {
-            position: relative;
-            background: white; border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            margin-bottom: 3rem; overflow: hidden; border: 1px solid #e2e8f0;
-        }
-
+        .main-card { position: relative; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 3rem; overflow: hidden; border: 1px solid #e2e8f0; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1000px; }
         th { font-size: 11px; font-weight: 800; padding: 14px 10px; text-align: left; color: #64748b; background: #f8fafc; border-bottom: 2px solid #e2e8f0; }
         td { padding: 16px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
-
-        .vol-btn {
-            display: flex; flex-direction: column; font-size: 9px; font-weight: 800;
-            color: white; padding: 6px 4px; border-radius: 8px;
-            line-height: 1.1; transition: all 0.2s; text-align: center;
-            width: 100%; border: none; cursor: pointer;
-        }
+        
+        .vol-btn { display: flex; flex-direction: column; font-size: 9px; font-weight: 800; color: white; padding: 6px 4px; border-radius: 8px; line-height: 1.1; text-align: center; width: 100%; cursor: pointer; border: none; }
         .col-wrap { word-break: break-word; white-space: normal; line-height: 1.5; }
-
+        
         @media (max-width: 768px) { .mobile-hide { display: none; } }
     </style>
 </head>
@@ -98,7 +82,7 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-xs font-black uppercase tracking-widest text-slate-400">Syncing Master Archive...</p>
+            <p class="mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Initializing Database</p>
         </div>
 
         <nav class="top-nav">
@@ -117,9 +101,14 @@
                 <div class="flex items-end justify-between mb-6">
                     <div>
                         <h2 class="text-3xl font-black text-slate-900 mb-2">Original Works</h2>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Chronological Publication Record</p>
+                        <div class="flex items-center gap-4 mt-2">
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Chronological Publication Record</p>
+                            <button @click="toggleAllMagazines" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded-full text-[10px] font-black uppercase transition-colors">
+                                {{ activeMagazines.length === sortedMagazines.length ? 'Deselect All' : 'Select All' }}
+                            </button>
+                        </div>
                     </div>
-                    <button v-if="searchQuery || activeMagazines.length > 0" @click="resetFilters" class="text-[10px] font-black text-rose-500 uppercase hover:underline">✕ Clear All Filters</button>
+                    <button v-if="searchQuery || activeMagazines.length > 0" @click="resetFilters" class="text-[10px] font-black text-rose-500 uppercase hover:underline">✕ Reset All</button>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
@@ -133,17 +122,18 @@
             </div>
 
             <div class="main-card">
-                <div v-if="processing" class="refresh-overlay">
-                    <div class="flex flex-col items-center">
-                        <div class="spinner !border-t-slate-800"></div>
-                        <span class="mt-2 text-[10px] font-black uppercase text-slate-600">Refreshing...</span>
-                    </div>
+                <div v-if="processing" class="processing-overlay">
+                    <div class="spinner"></div>
+                    <p class="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-600">Sorting & Filtering...</p>
                 </div>
 
                 <div class="p-6 border-b border-slate-100">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <input type="text" v-model="searchQuery" placeholder="Search titles..." class="w-full md:max-w-lg bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-3 text-sm font-semibold outline-none focus:border-indigo-500 transition-all">
-                        <div class="text-right"><span class="block text-[10px] font-black text-slate-400 uppercase">Found Matches</span><span class="text-sm font-black text-slate-800">{{ filteredData.length }} Entries</span></div>
+                        <input type="text" v-model="searchQuery" placeholder="Search titles, remarks, or numbers..." class="w-full md:max-w-lg bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-3 text-sm font-semibold outline-none focus:border-indigo-500 transition-all">
+                        <div class="text-right">
+                            <span class="block text-[10px] font-black text-slate-400 uppercase tracking-tighter">Total Matches</span>
+                            <span class="text-sm font-black text-slate-800">{{ filteredData.length }} Entries</span>
+                        </div>
                     </div>
                 </div>
 
@@ -227,7 +217,7 @@
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.master.filter(r => {
                         const sub = this.getSubtitleInfo(r.作品番);
-                        const combinedText = [r.掲載番, r.初出副題, sub.pubSub, sub.hkSub, r.初出掲載誌, r.初出掲載號].join(' ').toLowerCase();
+                        const combinedText = [r.掲載番, r.初出副題, sub.pubSub, sub.hkSub, r.初出掲載誌, r.初出掲載號, r.備考].join(' ').toLowerCase();
                         const matchesSearch = q === '' || combinedText.includes(q);
                         const matchesMag = this.activeMagazines.length === 0 || this.activeMagazines.includes(r.初出掲載誌?.trim());
                         return matchesSearch && matchesMag;
@@ -254,7 +244,7 @@
                         this.master = m.filter(r => r.作品番);
                         this.contents = c; this.publishHk = h;
                         this.checkUrlParameters();
-                    } catch (e) { console.error(e); } finally { this.loading = false; }
+                    } catch (e) { console.error(e); } finally { setTimeout(() => { this.loading = false; }, 400); }
                 },
                 checkUrlParameters() {
                     const params = new URLSearchParams(window.location.search);
@@ -262,22 +252,38 @@
                     if (mag) this.activeMagazines = mag.split(',');
                 },
                 toggleMagazine(m) {
-                    this.processing = true; // Show mini-spinner
-                    
-                    // Small timeout to allow the browser to paint the spinner before heavy calculation
-                    setTimeout(() => {
+                    this.triggerProcessing(() => {
                         const i = this.activeMagazines.indexOf(m);
                         if (i > -1) this.activeMagazines.splice(i, 1);
                         else this.activeMagazines.push(m);
-                        
-                        const url = new URL(window.location);
-                        if (this.activeMagazines.length) url.searchParams.set('mag', this.activeMagazines.join(','));
-                        else url.searchParams.delete('mag');
-                        window.history.pushState({}, '', url);
-
+                        this.updateUrl();
                         this.currentPage = 1;
-                        this.processing = false; // Hide mini-spinner
-                    }, 50);
+                    });
+                },
+                toggleAllMagazines() {
+                    this.triggerProcessing(() => {
+                        if (this.activeMagazines.length === this.sortedMagazines.length) {
+                            this.activeMagazines = [];
+                        } else {
+                            this.activeMagazines = [...this.sortedMagazines];
+                        }
+                        this.updateUrl();
+                        this.currentPage = 1;
+                    });
+                },
+                triggerProcessing(callback) {
+                    this.processing = true;
+                    // Timeout allows UI to show spinner before heavy computation starts
+                    setTimeout(() => {
+                        callback();
+                        this.processing = false;
+                    }, 100);
+                },
+                updateUrl() {
+                    const url = new URL(window.location);
+                    if (this.activeMagazines.length) url.searchParams.set('mag', this.activeMagazines.join(','));
+                    else url.searchParams.delete('mag');
+                    window.history.pushState({}, '', url);
                 },
                 navigateToDB(isbn) {
                     if (!isbn) return;
@@ -305,8 +311,11 @@
                 },
                 setFocus(id) { this.activeRow = (this.activeRow === id) ? null : id; },
                 resetFilters() { 
-                    this.searchQuery = ''; this.activeMagazines = []; this.activeRow = null; 
-                    window.history.pushState({}, '', window.location.pathname);
+                    this.triggerProcessing(() => {
+                        this.searchQuery = ''; this.activeMagazines = []; this.activeRow = null; 
+                        window.history.pushState({}, '', window.location.pathname);
+                        this.currentPage = 1;
+                    });
                 },
                 changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); }
             },
