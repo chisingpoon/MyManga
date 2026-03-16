@@ -56,9 +56,16 @@
             color: white;
             text-decoration: none;
         }
+
+        .bg-grid {
+            background-color: #f8fafc;
+            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
+                              linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
     </style>
 </head>
-<body class="text-slate-900 min-h-screen">
+<body class="bg-grid text-slate-900 min-h-screen">
 
     <div id="app" v-cloak>
         <header class="main-nav border-b flex items-center">
@@ -106,7 +113,7 @@
                                 <th>掲載番</th>
                                 <th>初出副題</th>
                                 <th class="bg-indigo-50">大全集收錄副題</th>
-                                <th>掲載誌</th>
+                                <th>掲載誌 / 號</th>
                                 <th class="text-center bg-emerald-50">單行本</th>
                                 <th class="text-center bg-indigo-50">大全集</th>
                                 <th class="text-center bg-slate-100">第0卷</th>
