@@ -111,7 +111,7 @@
                         Back to Volume List
                     </button>
                     <button v-if="previousBook" @click="selectBook(previousBook); previousBook = null;" class="text-[10px] font-black text-slate-400 hover:text-red-600 uppercase flex items-center gap-2 border-l pl-6 border-slate-200">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" stroke-width="3"></path></svg>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" stroke-width="3"></path></svg>                        
                         Back to Previous Page
                     </button>
 
@@ -332,27 +332,28 @@ createApp({
             if (!workId || !this.db.contents || !this.db.hk) return null;
             const id = workId.toString().trim();
             
-            // 1. FILTER specifically for 大全集 or 大長編大全集 FIRST
-            // This prevents picking up standard tankobon ISBNs
+            // STEP 1: Find the record in 'contents' sheet where 作品番 matches 
+            // AND 類 is either '大全集' or '大長編大全集'
             const contentsMatch = this.db.contents.find(c => 
                 c.作品番?.toString().trim() === id && 
                 (c.類 === '大全集' || c.類 === '大長編大全集')
             );
             
-            // If no Great Collection record exists for this story, return null
             if (!contentsMatch) return null;
         
+            // STEP 2: Use the ISBN from that record to find the corresponding 
+            // HK edition by matching against its ISBN_JP column
             const targetIsbnJp = contentsMatch.ISBN?.trim();
-        
-            // 2. Map that specific Great Collection ISBN to the HK Edition list
             const hkMatch = this.db.hk.find(h => 
                 h.ISBN_JP?.toString().trim() === targetIsbnJp
             );
         
+            // STEP 3: Retrieve the HK-specific ISBN for the jump link 
+            // and the HK Volume for the label
             if (hkMatch) {
                 return {
-                    vol: hkMatch.Volume,
-                    isbn: hkMatch.ISBN
+                    vol: hkMatch.Volume, // Used for the button label
+                    isbn: hkMatch.ISBN    // Used for jumpToBook logic
                 };
             }
         
