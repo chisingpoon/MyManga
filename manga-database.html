@@ -110,6 +110,10 @@
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3"></path></svg>
                         Back to Volume List
                     </button>
+                    <button v-if="previousBook" @click="selectBook(previousBook); previousBook = null;" class="text-[10px] font-black text-slate-400 hover:text-red-600 uppercase flex items-center gap-2 border-l pl-6 border-slate-200">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" stroke-width="3"></path></svg>
+                        Back to Previous Page
+                    </button>
 
                     <div class="flex flex-col lg:flex-row gap-8 items-start justify-center">
                         <div v-if="region === 'HK' && hkDetail" class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col md:flex-row w-full max-w-4xl">
@@ -225,6 +229,7 @@ createApp({
         return {
             region: 'HK', view: 'series', loading: true, refreshing: false,
             selectedSeries: null, selectedBook: null,
+            previousBook: null, //
             seriesSearchQuery: '', tableQuery: '', 
             db: { hk: [], jp: [], contents: [], master: [] }
         }
@@ -355,30 +360,26 @@ createApp({
     
         jumpToBook(isbn) {
             if (!isbn) return;
-    
-            // 1. Find the book object in either HK or JP database
+        
             const targetBook = this.db.hk.find(b => b.ISBN === isbn) || 
                                this.db.jp.find(b => b.ISBN === isbn);
-    
+        
             if (targetBook) {
-                // 2. Determine region based on which array the book belongs to
+                // Save current book as previous before switching
+                if (this.selectedBook) {
+                    this.previousBook = this.selectedBook;
+                }
+        
                 this.region = this.db.hk.includes(targetBook) ? 'HK' : 'JP';
-                
-                // 3. Update the selected series name so the "Back" button works correctly
                 this.selectedSeries = targetBook.Title || targetBook.類;
-                
-                // 4. Trigger your existing selectBook logic
                 this.selectBook(targetBook);
                 
-                // 5. Update URL so users can refresh or share the specific book view
                 const url = new URL(window.location);
                 url.searchParams.set('isbn', isbn);
                 url.searchParams.set('region', this.region);
                 window.history.pushState({}, '', url);
-            } else {
-                console.warn("Reference book with ISBN " + isbn + " not found in databases.");
             }
-        }
+        },
     },
     mounted() {
         this.init();
