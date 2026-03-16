@@ -20,31 +20,24 @@
         td, th { padding: 0.8rem 1rem !important; }
         .col-wrap { white-space: normal !important; word-break: break-word; line-height: 1.4; }
         
-        /* Sticky Logic */
+        /* THE STICKY FIX */
+        #table-header th {
+            position: sticky;
+            top: var(--header-offset, 160px); /* Managed by JS */
+            z-index: 20;
+            background-clip: padding-box;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
         .sticky-controls {
             position: sticky;
-            top: 56px; /* Below the main header */
+            top: 56px; /* Height of the static blue/black top bar */
             z-index: 40;
-        }
-
-        thead th {
-            position: sticky;
-            /* Height of header (56px) + glass panel (dynamic, approx 110px-150px depending on wrap) */
-            /* We use a slightly higher z-index for the panel, and this for the header */
-            top: 0; 
-            z-index: 30;
-        }
-
-        /* Improved Header Stickiness */
-        #table-header th {
-            top: var(--header-offset, 160px);
-            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
         }
 
         .glass-panel {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid #e2e8f0;
         }
 
         .vol-btn {
@@ -73,7 +66,7 @@
 <body class="bg-grid text-slate-900 min-h-screen relative overflow-x-hidden">
 
     <div id="app" v-cloak>
-        <header class="bg-white border-b shadow-sm h-14 flex items-center sticky top-0 z-[51]">
+        <header class="bg-white border-b shadow-sm h-14 flex items-center sticky top-0 z-[50]">
             <div class="max-w-[99%] mx-auto px-6 w-full flex items-center justify-between">
                 <a href="index.html" class="flex items-center gap-2 group">
                     <div class="w-9 h-9 bg-slate-900 rounded-lg flex items-center justify-center text-white group-hover:bg-indigo-600 transition-colors">
@@ -84,14 +77,14 @@
             </div>
         </header>
 
-        <div class="sticky-controls glass-panel py-3 shadow-md" id="control-panel">
+        <div class="sticky-controls glass-panel py-3 border-b shadow-md" id="control-panel">
             <div class="max-w-[99%] mx-auto px-6">
                 <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
                     <div class="w-full lg:w-1/4 relative">
                         <input type="text" v-model="searchQuery" placeholder="搜尋副題、譯名或備註..." 
                             class="w-full bg-slate-100 border-none rounded-lg py-2 pl-4 pr-10 font-bold focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm">
                         <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" /></svg>
                         </button>
                     </div>
                     
@@ -125,21 +118,21 @@
             <div v-else>
                 <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left table-auto border-separate border-spacing-0">
-                            <thead class="text-[12px] font-black text-slate-900 uppercase tracking-wider" id="table-header">
+                        <table class="w-full text-left border-collapse">
+                            <thead id="table-header" class="text-[12px] font-black text-slate-900 uppercase tracking-wider">
                                 <tr>
-                                    <th class="bg-slate-50 whitespace-nowrap border-b">掲載番</th>
-                                    <th class="bg-slate-50 border-b">初出副題</th>
-                                    <th class="bg-indigo-100/50 border-b">大全集收錄副題 / 港譯</th>
-                                    <th class="bg-slate-50 border-b">掲載誌 / 初出枚數</th>
-                                    <th class="text-center bg-emerald-100/50 border-b">單行本</th>
-                                    <th class="text-center bg-indigo-100/50 border-b">大全集</th>
-                                    <th class="text-center bg-slate-200/50 border-b">第0卷</th>
-                                    <th class="text-center bg-amber-100/50 border-b">ドラミ</th>
-                                    <th class="text-center bg-blue-100/50 border-b">文庫</th>
-                                    <th class="text-center bg-pink-100/50 border-b">兒童版</th>
-                                    <th class="text-center bg-rose-100/50 border-b">特選珍藏</th>
-                                    <th class="bg-slate-50 border-b">備考</th>
+                                    <th class="bg-slate-50 whitespace-nowrap">掲載番</th>
+                                    <th class="bg-slate-50">初出副題</th>
+                                    <th class="bg-indigo-100/80">大全集收錄副題 / 港譯</th>
+                                    <th class="bg-slate-50">掲載誌 / 初出枚數</th>
+                                    <th class="text-center bg-emerald-100/80">單行本</th>
+                                    <th class="text-center bg-indigo-100/80">大全集</th>
+                                    <th class="text-center bg-slate-200/80">第0卷</th>
+                                    <th class="text-center bg-amber-100/80">ドラミ</th>
+                                    <th class="text-center bg-blue-100/80">文庫</th>
+                                    <th class="text-center bg-pink-100/80">兒童版</th>
+                                    <th class="text-center bg-rose-100/80">特選珍藏</th>
+                                    <th class="bg-slate-50">備考</th>
                                 </tr>
                             </thead>
                             <tbody class="text-[14px] divide-y divide-slate-100">
@@ -169,26 +162,17 @@
                     
                     <div class="px-6 py-6 border-t bg-slate-50/80 flex flex-wrap items-center justify-between gap-6">
                         <div class="flex items-center gap-1">
-                            <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" 
-                                class="w-9 h-9 flex items-center justify-center bg-white border rounded-lg disabled:opacity-20 hover:border-slate-900 transition-all shadow-sm mr-2">
+                            <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="w-9 h-9 flex items-center justify-center bg-white border rounded-lg disabled:opacity-20 hover:border-slate-900 transition-all shadow-sm mr-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                             </button>
-
                             <template v-for="p in paginationRange" :key="p">
-                                <button v-if="p !== '...'" @click="changePage(p)" 
-                                    :class="p === currentPage ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-900'"
-                                    class="w-9 h-9 flex items-center justify-center border rounded-lg text-xs font-black transition-all">
-                                    {{ p }}
-                                </button>
+                                <button v-if="p !== '...'" @click="changePage(p)" :class="p === currentPage ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-900'" class="w-9 h-9 flex items-center justify-center border rounded-lg text-xs font-black transition-all">{{ p }}</button>
                                 <span v-else class="px-2 text-slate-400 font-bold">...</span>
                             </template>
-
-                            <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" 
-                                class="w-9 h-9 flex items-center justify-center bg-white border rounded-lg disabled:opacity-20 hover:border-slate-900 transition-all shadow-sm ml-2">
+                            <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="w-9 h-9 flex items-center justify-center bg-white border rounded-lg disabled:opacity-20 hover:border-slate-900 transition-all shadow-sm ml-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                             </button>
                         </div>
-
                         <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
                             <span class="text-slate-900">Page {{ currentPage }} / {{ totalPages }}</span> — Showing {{ filteredData.length }} results
                         </div>
@@ -235,23 +219,18 @@
                     const current = this.currentPage, last = this.totalPages, delta = 2, left = current - delta, right = current + delta + 1, range = [], rangeWithDots = [];
                     let l;
                     for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= left && i < right)) range.push(i); }
-                    for (let i of range) {
-                        if (l) {
-                            if (i - l === 2) rangeWithDots.push(l + 1);
-                            else if (i - l !== 1) rangeWithDots.push('...');
-                        }
-                        rangeWithDots.push(i); l = i;
-                    }
+                    for (let i of range) { if (l) { if (i - l === 2) rangeWithDots.push(l + 1); else if (i - l !== 1) rangeWithDots.push('...'); } rangeWithDots.push(i); l = i; }
                     return rangeWithDots;
                 }
             },
             methods: {
-                updateHeaderOffset() {
+                calculateHeaderOffset() {
+                    // Logic: The table header sticky top should be: 
+                    // Main Header Height (56px) + Filter Panel Height
                     const panel = document.getElementById('control-panel');
                     if (panel) {
-                        // Header height (56px) + panel height
-                        const offset = 56 + panel.offsetHeight;
-                        document.documentElement.style.setProperty('--header-offset', offset + 'px');
+                        const totalOffset = 56 + panel.offsetHeight;
+                        document.documentElement.style.setProperty('--header-offset', `${totalOffset - 1}px`);
                     }
                 },
                 async init() {
@@ -266,7 +245,12 @@
                         this.publishHk = h;
                         const mag = new URLSearchParams(window.location.search).get('mag');
                         if (mag) this.activeMagazines = [mag];
-                        this.$nextTick(() => this.updateHeaderOffset());
+                        
+                        // Wait for DOM and setup observer
+                        this.$nextTick(() => {
+                            this.calculateHeaderOffset();
+                            new ResizeObserver(() => this.calculateHeaderOffset()).observe(document.getElementById('control-panel'));
+                        });
                     } catch (e) { console.error(e); } finally { this.loading = false; }
                 },
                 getMapping(workId, types) {
@@ -294,23 +278,20 @@
                     const i = this.activeMagazines.indexOf(m);
                     if (i > -1) this.activeMagazines.splice(i, 1); else this.activeMagazines.push(m);
                     this.currentPage = 1;
-                    this.$nextTick(() => this.updateHeaderOffset());
                 },
                 changePage(p) {
                     this.currentPage = p;
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    // Scroll to just below the sticky header for better UX
+                    const panelHeight = document.getElementById('control-panel').offsetHeight;
+                    window.scrollTo({ top: 56 + panelHeight - 10, behavior: 'smooth' });
                 },
-                resetFilters() { 
-                    this.activeMagazines = []; this.searchQuery = ''; this.currentPage = 1; 
-                    this.$nextTick(() => this.updateHeaderOffset());
-                },
+                resetFilters() { this.activeMagazines = []; this.searchQuery = ''; this.currentPage = 1; },
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 handleScroll() { this.showScrollBtn = window.scrollY > 300; }
             },
             mounted() { 
                 this.init(); 
                 window.addEventListener('scroll', this.handleScroll);
-                window.addEventListener('resize', this.updateHeaderOffset);
             }
         }).mount('#app')
     </script>
