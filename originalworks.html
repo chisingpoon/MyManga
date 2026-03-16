@@ -13,7 +13,7 @@
             min-height: 100vh;
             background-color: #f8fafc; 
             margin: 0; padding: 0; 
-            font-family: 'Inter', system-ui, sans-serif; 
+            font-family: 'Inter', 'Noto Sans JP', system-ui, sans-serif; 
             color: #1e293b;
             -webkit-user-select: none;
             user-select: none;
@@ -42,7 +42,7 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Navigation */
+        /* Restored Navigation Button Style */
         .top-nav {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
@@ -61,31 +61,22 @@
         .home-btn:hover { background: #f1f5f9; color: #1e293b; border-color: #cbd5e1; }
 
         /* Frozen Column Logic */
-        .sticky-col-1 {
-            position: sticky;
-            left: 0;
-            z-index: 20;
-            background: white; /* Matches row color */
-        }
+        .sticky-col-1 { position: sticky; left: 0; z-index: 20; background: inherit; }
         .sticky-col-2 {
-            position: sticky;
-            left: 80px; /* Width of Col 1 */
-            z-index: 20;
-            background: white;
-            border-right: 2px solid #e2e8f0 !important;
+            position: sticky; left: 80px; z-index: 20; background: inherit;
+            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
+            border-right: 1px solid #e2e8f0 !important;
         }
 
-        /* Header logic for sticky columns */
-        th.sticky-col-1, th.sticky-col-2 {
-            background: #f8fafc;
-            z-index: 30;
-        }
+        th.sticky-col-1, th.sticky-col-2 { background: #f8fafc; z-index: 30; }
 
-        /* Change background on hover for sticky cells too */
-        tr:hover td.sticky-col-1, 
-        tr:hover td.sticky-col-2 {
-            background-color: #f1f5f9;
-        }
+        /* Focused Row Styles */
+        .row-focused { background-color: #eef2ff !important; }
+        .row-focused td { border-bottom: 1px solid #c7d2fe !important; color: #312e81 !important; }
+        .row-focused .sticky-col-1, .row-focused .sticky-col-2 { background-color: #eef2ff !important; }
+
+        tr:not(.row-focused):hover { background-color: #f8fafc; cursor: pointer; }
+        tr:not(.row-focused):hover .sticky-col-1, tr:not(.row-focused):hover .sticky-col-2 { background-color: #f8fafc; }
 
         /* Card & Table */
         .main-card {
@@ -93,13 +84,13 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
             margin-bottom: 3rem; overflow: hidden; border: 1px solid #e2e8f0;
         }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1200px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1200px; background: white; }
         th { 
             font-size: 11px; font-weight: 800; text-transform: uppercase; 
             padding: 14px 10px; text-align: left; color: #64748b; 
             background: #f8fafc; border-bottom: 2px solid #e2e8f0;
         }
-        td { padding: 16px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
+        td { padding: 16px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; transition: background 0.2s; }
 
         .vol-btn {
             display: flex; flex-direction: column; font-size: 9px; font-weight: 800;
@@ -119,48 +110,6 @@
             transition: all 0.3s ease; opacity: 0; pointer-events: none; z-index: 100;
         }
         .scroll-top-btn.visible { opacity: 1; pointer-events: auto; }
-
-        /* Frozen Column Logic with Shadow */
-        .sticky-col-1 {
-            position: sticky;
-            left: 0;
-            z-index: 20;
-            background: white;
-        }
-    
-        .sticky-col-2 {
-            position: sticky;
-            left: 80px; /* Adjust if Col 1 width changes */
-            z-index: 20;
-            background: white;
-            /* The Shadow Effect */
-            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
-            border-right: 1px solid #e2e8f0 !important;
-        }
-    
-        /* Ensure headers also have the shadow to match */
-        th.sticky-col-2 {
-            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
-            background: #f8fafc;
-            z-index: 30;
-        }
-    
-        /* Clean up borders for the frozen area */
-        .sticky-col-1, .sticky-col-2 {
-            border-bottom: 1px solid #f1f5f9;
-        }
-    
-        /* Hover state for sticky cells */
-        tr:hover td.sticky-col-1, 
-        tr:hover td.sticky-col-2 {
-            background-color: #f8fafc !important;
-        }
-        
-        /* Extra refinement for the table container to handle the shadow overflow */
-        .overflow-x-auto {
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 transparent;
-        }
     </style>
 </head>
 <body class="bg-grid" oncontextmenu="return false;">
@@ -203,18 +152,18 @@
                         <h2 class="text-3xl font-black text-slate-900 mb-2">Original Works</h2>
                         <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Chronological Publication Record</p>
                     </div>
-                    <button v-if="searchQuery || activeMagazines.length > 0" @click="resetFilters" 
+                    <button v-if="searchQuery || activeMagazines.length > 0 || activeRow" @click="resetFilters" 
                         class="text-[10px] font-black text-rose-500 uppercase hover:underline">
-                        ✕ Clear All Filters
+                        ✕ Clear All Filters & Focus
                     </button>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <button v-for="(count, mName) in magazineStats" :key="mName" 
+                    <button v-for="mName in sortedMagazines" :key="mName" 
                         @click="toggleMagazine(mName)" 
                         :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-500 border-slate-200'" 
                         class="px-3 py-2 rounded-xl text-[10px] font-black uppercase border-2 transition-all">
-                        {{ mName }} <span class="ml-1 opacity-50">{{ count }}</span>
+                        {{ mName }} <span class="ml-1 opacity-50">{{ magazineStats[mName] }}</span>
                     </button>
                 </div>
             </div>
@@ -252,7 +201,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50 transition-colors">
+                            <tr v-for="row in paginatedData" :key="row.作品番" 
+                                @click="setFocus(row.作品番)"
+                                :class="{'row-focused': activeRow === row.作品番}">
                                 <td class="sticky-col-1 font-mono text-slate-400 text-xs pl-4">{{ row.掲載番 }}</td>
                                 <td class="sticky-col-2 font-extrabold text-slate-800 col-wrap">{{ row.初出副題 }}</td>
                                 <td class="col-wrap">
@@ -309,7 +260,7 @@
             data() {
                 return {
                     loading: true, searchQuery: '', activeMagazines: [],
-                    currentPage: 1, itemsPerPage: 50,
+                    currentPage: 1, itemsPerPage: 50, activeRow: null,
                     master: [], contents: [], publishHk: []
                 }
             },
@@ -318,6 +269,9 @@
                     const stats = {};
                     this.master.forEach(r => { if (r.初出掲載誌) { const n = r.初出掲載誌.trim(); stats[n] = (stats[n] || 0) + 1; } });
                     return stats;
+                },
+                sortedMagazines() {
+                    return Object.keys(this.magazineStats).sort((a, b) => a.localeCompare(b, 'ja'));
                 },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
@@ -378,9 +332,13 @@
                     if (i > -1) this.activeMagazines.splice(i, 1); else this.activeMagazines.push(m);
                     this.currentPage = 1;
                 },
+                setFocus(id) {
+                    this.activeRow = (this.activeRow === id) ? null : id;
+                },
                 resetFilters() {
                     this.searchQuery = '';
                     this.activeMagazines = [];
+                    this.activeRow = null;
                     this.currentPage = 1;
                 },
                 changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
