@@ -322,7 +322,7 @@ createApp({
             this.selectedBook = null;
         },
         selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
-        selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); }
+        selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); },
         getDCSMapping(workId) {
             if (!workId || !this.db.contents) return null;
             const id = workId.toString().trim();
