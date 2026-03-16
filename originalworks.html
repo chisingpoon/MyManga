@@ -26,7 +26,6 @@
             background-size: 40px 40px;
         }
 
-        /* Initial Full Screen Loader */
         .loader-wrapper {
             position: fixed; inset: 0;
             background: #f8fafc;
@@ -35,7 +34,6 @@
             z-index: 9999;
         }
 
-        /* Persistent Processing Spinner Overlay */
         .processing-overlay {
             position: absolute; 
             top: 0; left: 0; right: 0; bottom: 0;
@@ -54,12 +52,9 @@
             animation: spin 0.8s linear infinite;
         }
         
-        .pulse-text {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .pulse-text { animation: pulse 1.5s ease-in-out infinite; }
 
         .top-nav {
             background: rgba(255, 255, 255, 0.8);
@@ -82,7 +77,21 @@
         td { padding: 16px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
         
         .vol-btn { display: flex; flex-direction: column; font-size: 9px; font-weight: 800; color: white; padding: 6px 4px; border-radius: 8px; line-height: 1.1; text-align: center; width: 100%; cursor: pointer; border: none; }
-        
+        .col-wrap { word-break: break-word; white-space: normal; line-height: 1.5; }
+
+        /* Floating Button Styles */
+        .scroll-top-btn {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 50px; height: 50px;
+            background: #1e293b; color: white;
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease; opacity: 0; pointer-events: none; z-index: 600;
+        }
+        .scroll-top-btn.visible { opacity: 1; pointer-events: auto; }
+        .scroll-top-btn:hover { transform: translateY(-5px); background: #4f46e5; }
+
         @media (max-width: 768px) { .mobile-hide { display: none; } }
     </style>
 </head>
@@ -92,6 +101,10 @@
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
             <p class="mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Initializing Database</p>
+        </div>
+
+        <div id="scrollToTop" class="scroll-top-btn" :class="{ 'visible': showScrollButton }" @click="backToTop">
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
         </div>
 
         <nav class="top-nav">
@@ -173,9 +186,9 @@
                                         <div class="font-bold text-slate-700 leading-tight">{{ row.初出掲載誌 }}</div>
                                         <div class="text-[11px] text-blue-500 font-black mt-1">{{ row.初出掲載號 }}</div>
                                     </td>
-                                    <td><button v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" @click.stop="navigateToDB(m.hkIsbn)" class="vol-btn bg-emerald-500"><span>{{m.type}}</span><span>V{{m.vol}}</span></button></td>
-                                    <td><button v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" @click.stop="navigateToDB(m.hkIsbn)" class="vol-btn bg-indigo-500"><span>大全集</span><span>V{{m.vol}}</span></button></td>
-                                    <td class="mobile-hide"><button v-if="m = getMapping(row.作品番, ['0卷', 'ドラミちゃん', '文庫版'])" @click.stop="navigateToDB(m.hkIsbn)" class="vol-btn bg-slate-600"><span>{{m.type}}</span><span>V{{m.vol}}</span></button></td>
+                                    <td><button v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" @click.stop="navigateToDB(m.hkIsbn)" class="vol-btn bg-emerald-500 hover:brightness-110"><span>{{m.type}}</span><span>V{{m.vol}}</span></button></td>
+                                    <td><button v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" @click.stop="navigateToDB(m.hkIsbn)" class="vol-btn bg-indigo-500 hover:brightness-110"><span>大全集</span><span>V{{m.vol}}</span></button></td>
+                                    <td class="mobile-hide"><button v-if="m = getMapping(row.作品番, ['0卷', 'ドラミちゃん', '文庫版'])" @click.stop="navigateToDB(m.hkIsbn)" class="vol-btn bg-slate-600 hover:brightness-110"><span>{{m.type}}</span><span>V{{m.vol}}</span></button></td>
                                     <td class="text-slate-400 italic text-[11px] col-wrap pr-4">{{ row.備考 }}</td>
                                 </tr>
                                 <tr v-if="activeRow === row.作品番" class="md:hidden bg-indigo-50/30">
@@ -209,7 +222,7 @@
             data() {
                 return {
                     loading: true, processing: false, searchQuery: '', activeMagazines: [],
-                    currentPage: 1, itemsPerPage: 50, activeRow: null,
+                    currentPage: 1, itemsPerPage: 50, activeRow: null, showScrollButton: false,
                     master: [], contents: [], publishHk: []
                 }
             },
@@ -253,6 +266,7 @@
                         this.master = m.filter(r => r.作品番);
                         this.contents = c; this.publishHk = h;
                         this.checkUrlParameters();
+                        window.addEventListener('scroll', () => { this.showScrollButton = window.scrollY > 400; });
                     } catch (e) { console.error(e); } finally { setTimeout(() => { this.loading = false; }, 400); }
                 },
                 checkUrlParameters() {
@@ -262,7 +276,6 @@
                 },
                 triggerProcessing(callback) {
                     this.processing = true;
-                    // Double frame ensures the browser paints the spinner before starting logic
                     requestAnimationFrame(() => {
                         requestAnimationFrame(() => {
                             setTimeout(() => {
@@ -298,6 +311,7 @@
                     else url.searchParams.delete('mag');
                     window.history.pushState({}, '', url);
                 },
+                backToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 navigateToDB(isbn) {
                     if (!isbn) return;
                     window.location.href = `manga-database.html?isbn=${isbn}&region=HK`;
