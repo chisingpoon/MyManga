@@ -189,7 +189,21 @@
                                             <div class="font-black text-slate-900 uppercase text-[15px]">{{ story.master?.初出掲載誌 || '-' }}</div>
                                             <div class="text-[12px] text-blue-600 font-bold mt-2">{{ story.master?.初出掲載号 || '-' }}</div>
                                         </td>
-                                        <td class="px-8 py-8 font-black text-slate-800 text-[13px]">{{ story.master?.大全集 || '-' }}</td>
+                                        <!-- <td class="px-8 py-8 font-black text-slate-800 text-[13px]">{{ story.master?.大全集 || '-' }}</td> -->
+                                        <td class="px-8 py-8 font-black text-slate-800 text-[13px]" data-label="大全集 Ref">
+                                            <template v-if="refData = getDCSMapping(story.作品番)">
+                                                <a :href="'manga-database.html?isbn=' + refData.isbn + '&region=HK'" 
+                                                   class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors group">
+                                                    <svg class="w-3.5 h-3.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </svg>
+                                                    {{ refData.label }}
+                                                </a>
+                                            </template>
+                                            <template v-else>
+                                                <span class="text-slate-300">-</span>
+                                            </template>
+                                        </td>
                                         <td class="px-8 py-8 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
                                     </tr>
                                 </tbody>
@@ -314,6 +328,36 @@ createApp({
         },
         selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
         selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); }
+    },
+    getDCSMapping(workId) {
+        if (!workId || !this.db.contents || !this.db.hk) return null;
+        const id = workId.toString().trim();
+        
+        // 1 & 2. Find unique record in 書籍收錄作品 where 作品番 matches AND 類 is 大全集/大長編大全集
+        const contentsMatch = this.db.contents.find(c => 
+            c.作品番?.toString().trim() === id && 
+            (c.類 === '大全集' || c.類 === '大長編大全集')
+        );
+        
+        if (!contentsMatch) return null;
+    
+        // 3. Get the ISBN from that retrieved record
+        const targetIsbnJp = contentsMatch.ISBN?.trim();
+    
+        // 4 & 5. Map with ISBN_JP in 出版目録HK to get the HK ISBN
+        const hkMatch = this.db.hk.find(h => 
+            h.ISBN_JP?.toString().trim() === targetIsbnJp
+        );
+    
+        // 6. Return data to build the link
+        if (hkMatch) {
+            return {
+                label: `[${contentsMatch.類} vol. ${contentsMatch.巻}]`,
+                isbn: hkMatch.ISBN
+            };
+        }
+    
+        return null;
     },
     mounted() {
         this.init();
