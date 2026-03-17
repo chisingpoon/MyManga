@@ -171,7 +171,7 @@
                                         <th class="px-8 py-5 w-80">JP Title / HK Translation</th>
                                         <th class="px-8 py-5 w-60">First Publish Title</th>
                                         <th class="px-8 py-5 w-52">First Publish Magazine</th>
-                                        <th class="px-8 py-5 w-52">Full Collection Ref</th>
+                                        <th class="px-8 py-5 w-52">Full Collection Ref.</th>
                                         <th class="px-8 py-5 w-20 text-center">Pages</th>
                                     </tr>
                                 </thead>
@@ -189,7 +189,7 @@
                                             <div class="font-black text-slate-900 uppercase text-[15px]">{{ story.master?.初出掲載誌 || '-' }}</div>
                                             <div class="text-[12px] text-blue-600 font-bold mt-2">{{ story.master?.初出掲載号 || '-' }}</div>
                                         </td>
-                                        <td class="px-8 py-8 font-black text-slate-800 text-[13px]">{{ story.master?.大全集 || '-' }}</td>
+                                        <td class="px-8 py-8 font-black text-slate-800 text-[13px]">{{ story.collectionVol || '-' }}</td>
                                         <td class="px-8 py-8 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
                                     </tr>
                                 </tbody>
@@ -248,9 +248,20 @@ createApp({
         currentStories() {
             if (!this.selectedBook) return [];
             const isbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
-            return this.db.contents.filter(c => c.ISBN == isbn).map(c => ({
-                ...c, master: this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim())
-            })).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
+            
+            return this.db.contents.filter(c => c.ISBN == isbn).map(c => {
+                // Search for the "Complete Works" reference for this specific story (作品番)
+                const collectionRef = this.db.contents.find(item => 
+                    item.作品番 === c.作品番 && 
+                    (item.類 === '大長編大全集' || item.類 === '大全集')
+                );
+        
+                return {
+                    ...c, 
+                    master: this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim()),
+                    collectionVol: collectionRef ? collectionRef.巻 : '-' // Get the 巻 (Volume) from the found record
+                };
+            }).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
         },
         searchedTableStories() {
             const q = this.tableQuery.toLowerCase();
