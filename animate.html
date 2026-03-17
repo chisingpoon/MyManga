@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電影動畫作品記錄 - 敬請期待</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Security: Disable Selection */
+        body {
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+        }
+
+        .bg-grid {
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .watermark {
+            position: fixed; bottom: -20px; right: -20px; font-size: 12rem; font-weight: 900;
+            color: rgba(0, 0, 0, 0.03); pointer-events: none; z-index: -1; transform: rotate(-15deg);
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(0.98); }
+        }
+        .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-grid text-slate-900 font-sans min-h-screen flex items-center justify-center px-4" oncontextmenu="return false;">
+
+    <div class="watermark">ANIMATE</div>
+
+    <div class="max-w-md w-full text-center space-y-8 relative z-10">
+        
+        <div class="relative inline-block animate-pulse-soft">
+            <div class="absolute -inset-4 bg-purple-500 rounded-full blur-xl opacity-20"></div>
+            <div class="relative w-24 h-24 bg-purple-600 rounded-[2rem] text-white text-4xl flex items-center justify-center font-black shadow-2xl mx-auto">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h1 class="text-3xl font-black tracking-tight text-slate-900 uppercase">Coming Soon</h1>
+            <p class="text-slate-500 font-bold text-sm uppercase tracking-widest leading-relaxed">
+                電影動畫作品記錄<br>
+                <span class="text-purple-600">正在整理中，敬請期待</span>
+            </p>
+        </div>
+
+        <div class="bg-white/80 backdrop-blur-sm border border-slate-200 p-6 rounded-[2rem] shadow-sm">
+            <p class="text-slate-400 text-xs font-medium leading-relaxed">
+                我們目前正努力收集與校對多啦A夢（叮噹）的電影與動畫作品相關資訊，包括公映日期、粵語配音陣容及原著對照等。
+            </p>
+        </div>
+
+        <a href="index.html" class="inline-flex items-center gap-2 bg-slate-800 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg hover:shadow-slate-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            返回主頁
+        </a>
+
+        <footer class="pt-8">
+            <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">
+                Doraemon Archive Project
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Security: Disable View Source / Keys
+        window.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && ['c','s','p','u','a'].includes(e.key)) e.preventDefault();
+        });
+    </script>
+</body>
+</html>
