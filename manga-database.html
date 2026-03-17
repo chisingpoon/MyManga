@@ -15,16 +15,14 @@
             background-size: 40px 40px;
         }
         
-        /* Sticky Header Styling */
         .responsive-table thead th {
             position: sticky;
             top: 0;
             z-index: 20;
-            background-color: #f8fafc; /* Matches card header bg */
+            background-color: #f8fafc;
             box-shadow: inset 0 -1px 0 #e2e8f0;
         }
 
-        /* Mobile Responsive Table */
         @media (max-width: 768px) {
             .responsive-table thead { display: none; }
             .responsive-table tr { display: block; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; border-radius: 1.5rem; background: white; padding: 1.25rem; }
@@ -32,7 +30,6 @@
             .responsive-table td::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
         }
 
-        /* Back to Top Animation */
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(20px); }
     </style>
@@ -57,7 +54,6 @@
         </header>
 
         <main class="max-w-[95%] mx-auto py-8 relative z-10">
-            
             <div v-if="loading" class="flex flex-col items-center justify-center py-32 animate-pulse">
                 <div class="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
                 <p class="mt-4 font-black text-slate-400 uppercase tracking-widest text-[10px]">Syncing Database...</p>
@@ -71,14 +67,12 @@
                             <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Total {{ filteredSeries.length }} groups</p>
                         </div>
                         <div class="relative max-w-sm w-full">
-                            <input type="text" v-model="seriesSearchQuery" placeholder="Search series..." 
-                                class="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all">
+                            <input type="text" v-model="seriesSearchQuery" placeholder="Search series..." class="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all">
                             <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <div v-for="s in searchedSeries" :key="s" @click="selectSeries(s)" 
-                            class="bg-white/80 p-6 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-blue-500 hover:shadow-xl text-center group">
+                        <div v-for="s in searchedSeries" :key="s" @click="selectSeries(s)" class="bg-white/80 p-6 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-blue-500 hover:shadow-xl text-center group">
                             <h3 class="font-black text-lg text-slate-700 group-hover:text-blue-600 uppercase">{{ s }}</h3>
                         </div>
                     </div>
@@ -96,8 +90,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                        <div v-for="book in filteredBooks" :key="book.ISBN || book.ISBN_JP" @click="selectBook(book)" 
-                            class="book-card bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-200 cursor-pointer group transition-all hover:shadow-2xl flex flex-col h-full">
+                        <div v-for="book in filteredBooks" :key="book.ISBN || book.ISBN_JP" @click="selectBook(book)" class="book-card bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-200 cursor-pointer group transition-all hover:shadow-2xl flex flex-col h-full">
                             <div class="bg-slate-50 p-4 aspect-[3/4] flex items-center justify-center overflow-hidden">
                                 <img v-if="book.Image" :src="book.Image" class="w-full h-full object-contain rounded-lg shadow-md group-hover:scale-105 transition-transform duration-500">
                             </div>
@@ -167,7 +160,7 @@
                         </div>
                     </div>
 
-                    <div v-if="currentStories.length > 0" class="bg-white md:rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
+                    <div id="contents-table" class="bg-white md:rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
                         <div class="px-8 py-6 bg-slate-50 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <h4 class="text-sm font-black uppercase tracking-[0.2em] text-slate-800">Contents Detail</h4>
                             <div class="relative max-w-xs w-full">
@@ -176,7 +169,7 @@
                             </div>
                         </div>
                         <div class="overflow-x-auto overflow-y-auto max-h-[70vh] relative">
-                            <table class="w-full text-left table-fixed min-w-[1000px] responsive-table">
+                            <table class="w-full text-left table-fixed min-w-[1200px] responsive-table">
                                 <thead class="text-[11px] font-black text-slate-400 uppercase tracking-widest bg-white">
                                     <tr>
                                         <th class="px-6 py-5 w-16 text-center">#</th>
@@ -185,45 +178,37 @@
                                         <th class="px-6 py-5 w-52">Magazine / Issue</th>
                                         <th class="px-6 py-5 w-72">Collection Reference</th>
                                         <th class="px-6 py-5 w-20 text-center">Pages</th>
+                                        <th class="px-6 py-5 w-64">出版備考</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-[14px] divide-y divide-slate-100">
                                     <tr v-for="story in searchedTableStories" :key="story.作品番" class="hover:bg-blue-50/30 transition-colors">
                                         <td class="px-6 py-6 text-center text-slate-300 font-black" data-label="#">{{ story.收錄話 }}</td>
-                                        
                                         <td class="px-6 py-6" data-label="Title">
                                             <div class="font-black text-slate-900 uppercase text-[14px] leading-tight">{{ story.出版副題 }}</div>
                                             <div class="text-[11px] text-blue-600 font-bold mt-1">{{ story.副題港譯 }}</div>
                                         </td>
-                                        
                                         <td class="px-6 py-6" data-label="Original">
                                             <div class="font-bold text-slate-600 text-[13px]">{{ story.master?.初出副題 || '-' }}</div>
                                         </td>
-                                        
                                         <td class="px-6 py-6" data-label="Source">
                                             <div class="font-black text-slate-800 uppercase text-[13px]">{{ story.master?.初出掲載誌 || '-' }}</div>
                                             <div class="text-[11px] text-slate-400 font-bold mt-1">{{ story.master?.初出掲載号 || '-' }}</div>
                                         </td>
-                                        
                                         <td class="px-6 py-6" data-label="Collection">
                                             <template v-if="story.collectionLink">
-                                                <a @click.prevent="navigateToCollection(story)" :href="story.collectionLink" 
-                                                   class="inline-flex items-center gap-2 group p-1 -ml-1 rounded-lg hover:bg-blue-50 transition-all cursor-pointer">
-                                                    <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-tighter">
-                                                        {{ story.collectionCategory }}
-                                                    </span>
+                                                <a @click.prevent="navigateToCollection(story)" :href="story.collectionLink" class="inline-flex items-center gap-2 group p-1 -ml-1 rounded-lg hover:bg-blue-50 transition-all cursor-pointer">
+                                                    <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-tighter">{{ story.collectionCategory }}</span>
                                                     <span class="font-black text-blue-600 text-[13px]">Vol. {{ story.collectionVol }}</span>
-                                                    <svg class="w-3 h-3 text-blue-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                    </svg>
+                                                    <svg class="w-3 h-3 text-blue-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                                 </a>
                                             </template>
-                                            <template v-else>
-                                                <span class="text-slate-300 font-bold italic">No reference found</span>
-                                            </template>
+                                            <template v-else><span class="text-slate-300 font-bold italic">No reference found</span></template>
                                         </td>
-                                        
                                         <td class="px-6 py-6 text-center font-black text-slate-400" data-label="Pages">{{ story.收錄頁 }}</td>
+                                        <td class="px-6 py-6" data-label="出版備考">
+                                            <div class="text-[12px] text-slate-500 font-medium leading-relaxed">{{ story.出版備考 || '-' }}</div>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -241,15 +226,27 @@
             </div>
         </main>
 
-        <transition name="fade">
-            <button v-show="view === 'detail'" 
-                    @click="scrollToTop"
-                    class="fixed bottom-8 right-8 w-12 h-12 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 border border-white/20">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-            </button>
-        </transition>
+        <div class="fixed bottom-8 right-8 flex flex-col gap-3 z-50">
+            <transition name="fade">
+                <button v-show="view === 'detail' && currentStories.length > 0" 
+                        @click="scrollToSection('contents-table')"
+                        class="w-12 h-12 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all border border-white/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M4 6h16M4 12h16M4 18h7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+            </transition>
+
+            <transition name="fade">
+                <button v-show="view === 'detail'" 
+                        @click="scrollToTop"
+                        class="w-12 h-12 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all border border-white/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+            </transition>
+        </div>
     </div>
 
 <script>
@@ -282,7 +279,7 @@ createApp({
         },
         hkDetail() { 
             if (!this.selectedBook) return null;
-            return this.region === 'HK' ? this.selectedBook : this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN); 
+            return this.region === 'HK' ? this.selectedBook : this.db.hk.find(h => h.ISBN_JP == (this.selectedBook.ISBN || this.selectedBook.ISBN_JP)); 
         },
         jpDetail() { 
             if (!this.selectedBook) return null;
@@ -349,7 +346,6 @@ createApp({
                 this.checkUrlParameters();
             } catch (e) { console.error(e); } finally { this.loading = false; }
             
-            // Listen for browser back/forward buttons
             window.addEventListener('popstate', this.checkUrlParameters);
         },
         checkUrlParameters() {
@@ -357,14 +353,10 @@ createApp({
             const urlRegion = urlParams.get('region')?.toUpperCase();
             const urlIsbn = urlParams.get('isbn');
 
-            if (urlRegion === 'JP' || urlRegion === 'HK') {
-                this.region = urlRegion;
-            }
+            if (urlRegion === 'JP' || urlRegion === 'HK') this.region = urlRegion;
 
             if (urlIsbn) {
-                const book = this.db.hk.find(b => b.ISBN === urlIsbn) || 
-                             this.db.jp.find(b => b.ISBN === urlIsbn);
-                
+                const book = this.db.hk.find(b => b.ISBN === urlIsbn) || this.db.jp.find(b => b.ISBN === urlIsbn);
                 if (book) {
                     this.selectedBook = book;
                     this.selectedSeries = book.Title || book.類;
@@ -372,12 +364,8 @@ createApp({
                     return;
                 }
             }
-            // If no valid ISBN, but we have a series selected, stay in book list
-            if (!urlIsbn && this.selectedSeries) {
-                this.view = 'books';
-            } else if (!urlIsbn) {
-                this.view = 'series';
-            }
+            if (!urlIsbn && this.selectedSeries) this.view = 'books';
+            else if (!urlIsbn) this.view = 'series';
         },
         async forceRefresh() {
             this.refreshing = true;
@@ -390,7 +378,6 @@ createApp({
             this.view = 'series';
             this.selectedSeries = null;
             this.selectedBook = null;
-            // Clear URL
             window.history.pushState({}, '', 'manga-database.html');
         },
         selectSeries(name) { 
@@ -402,19 +389,15 @@ createApp({
             this.selectedBook = book; 
             this.view = 'detail'; 
             this.tableQuery = ''; 
-            
-            // Sync URL for Bookmarked state
             const isbn = book.ISBN || book.ISBN_JP;
             const newUrl = `?region=${this.region}&isbn=${isbn}`;
             window.history.pushState({path: newUrl}, '', newUrl);
-            
             window.scrollTo({top: 0, behavior: 'smooth'}); 
         },
         navigateToCollection(story) {
-            // Find the actual HK book object based on the target ISBN
             const targetBook = this.db.hk.find(b => b.ISBN === story.targetIsbn);
             if (targetBook) {
-                this.region = 'HK'; // Force HK region since collection refs are HK links
+                this.region = 'HK';
                 this.selectBook(targetBook);
             }
         },
@@ -424,6 +407,17 @@ createApp({
             this.selectedBook = null;
             window.history.pushState({}, '', 'manga-database.html');
             window.scrollTo(0,0);
+        },
+        scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                const offset = 80;
+                const bodyRect = document.body.getBoundingClientRect().top;
+                const elementRect = el.getBoundingClientRect().top;
+                const elementPosition = elementRect - bodyRect;
+                const offsetPosition = elementPosition - offset;
+                window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+            }
         },
         scrollToTop() {
             window.scrollTo({top: 0, behavior: 'smooth'});
