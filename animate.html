@@ -33,8 +33,9 @@
         .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
         .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         
+        /* Data Card Vertical Styling */
         .data-card { transition: all 0.2s ease; border: 2px solid transparent; text-align: left; }
-        .data-card:hover { border-color: #4f46e5; background-color: #f5f3ff; transform: scale(1.01); }
+        .data-card:hover { border-color: #4f46e5; background-color: #ffffff; transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
 
         .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
@@ -122,21 +123,28 @@
                                 <h5 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">Manga Record (JP)</h5>
                                 
                                 <a v-if="mappedManga" 
-                                   :href="'manga-database.html?region=JP&ISBN=' + mappedManga.isbnValue" 
-                                   class="data-card block p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:shadow-lg transition-all">
-                                    <p class="font-black text-slate-900 text-xl leading-tight mb-2">{{ mappedManga.title }}</p>
-                                    <p v-if="mappedManga.subtitle" class="text-sm text-slate-500 font-bold mb-4 italic">{{ mappedManga.subtitle }}</p>
-                                    <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
+                                   :href="'manga-database.html?region=JP&ISBN=' + mappedManga.isbnValue + '&series=' + encodeURIComponent(mappedManga.series)" 
+                                   class="data-card block bg-slate-50 rounded-[2.5rem] border border-slate-100 overflow-hidden">
+                                    
+                                    <div class="aspect-[16/9] bg-slate-200">
+                                        <img :src="mappedManga.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
+                                    </div>
+
+                                    <div class="p-8">
+                                        <p class="font-black text-slate-900 text-xl leading-tight mb-2">{{ mappedManga.title }}</p>
+                                        <p v-if="mappedManga.subtitle" class="text-sm text-slate-500 font-bold mb-4 italic">{{ mappedManga.subtitle }}</p>
+                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
+                                    </div>
                                 </a>
 
-                                <div v-else class="p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-50">
+                                <div v-else class="h-full min-h-[300px] p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-50">
                                     <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">No Linked Manga</p>
                                 </div>
                             </div>
 
                             <div>
                                 <h5 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">Film Comic Record</h5>
-                                <div class="p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center opacity-50">
+                                <div class="h-full min-h-[300px] p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-50">
                                     <p class="text-[10px] text-slate-400 font-black tracking-widest uppercase">Coming Soon</p>
                                 </div>
                             </div>
@@ -173,11 +181,8 @@
                 },
                 mappedManga() {
                     if (!this.selectedMovie || !this.selectedMovie.mangaRaw) return null;
-                    
-                    // Normalize the ISBN from the Animate sheet (Remove dashes and spaces)
                     const searchISBN = this.selectedMovie.mangaRaw.toString().replace(/[-\s]/g, '');
                     
-                    // Find in the 出版目録JP sheet
                     const found = this.mangaCatalog.find(item => {
                         const itemISBN = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '');
                         return itemISBN === searchISBN && itemISBN !== "";
@@ -188,6 +193,8 @@
                             title: this.getVal(found, '標題'),
                             subtitle: this.getVal(found, '副標題'),
                             author: this.getVal(found, '著'),
+                            series: this.getVal(found, '類'),
+                            image: this.getVal(found, 'image'),
                             isbnValue: searchISBN
                         };
                     }
@@ -217,8 +224,7 @@
                         this.movies = movieData.map(item => {
                             const fullDate = this.getVal(item, 'JP Release Date');
                             const yearMatch = fullDate.match(/\d{4}/);
-                            
-                            const obj = {
+                            return {
                                 id: this.getVal(item, 'Media ID'),
                                 jpTitle: this.getVal(item, 'JP Title'),
                                 hkTitle: this.getVal(item, 'HK Title'),
@@ -228,10 +234,9 @@
                                 hkDate: this.getVal(item, 'HK Release Date'),
                                 jpImage: this.getVal(item, 'JP Image'),
                                 hkImage: this.getVal(item, 'HK Image'),
-                                mangaRaw: this.getVal(item, 'Manga ISBN') // Changed to match your prompt's column name
+                                mangaRaw: this.getVal(item, 'Manga ISBN'),
+                                searchStr: `${this.getVal(item, 'JP Title')} ${this.getVal(item, 'HK Title')} ${this.getVal(item, 'Media ID')}`.toLowerCase()
                             };
-                            obj.searchStr = `${obj.jpTitle} ${obj.hkTitle} ${obj.enTitle} ${obj.id}`.toLowerCase();
-                            return obj;
                         });
                     } catch (e) { console.error("Data Load Error:", e); }
                     finally { this.loading = false; }
