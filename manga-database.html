@@ -63,6 +63,9 @@
                             <input type="text" v-model="seriesSearchQuery" placeholder="Search series..." 
                                 class="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-12 pr-10 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all">
                             <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
+                            <button v-if="seriesSearchQuery" @click="seriesSearchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            </button>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -158,6 +161,9 @@
                             <div class="relative max-w-xs w-full">
                                 <input type="text" v-model="tableQuery" placeholder="Find chapter..." class="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-10 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
                                 <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3"></path></svg>
+                                <button v-if="tableQuery" @click="tableQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                </button>
                             </div>
                         </div>
                         <div class="overflow-x-auto">
@@ -265,7 +271,6 @@ createApp({
             const isbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
             
             return this.db.contents.filter(c => c.ISBN == isbn).map((c, index) => {
-                // Find reference in collection series
                 const collectionRecord = c.作品番 ? this.db.contents.find(item => 
                     item.作品番 === c.作品番 && (item.類 === '大長編大全集' || item.類 === '大全集')
                 ) : null;
@@ -277,7 +282,6 @@ createApp({
                 if (collectionRecord) {
                     collectionVol = collectionRecord.巻;
                     collectionCategory = collectionRecord.類;
-                    
                     if (this.region === 'HK') {
                         const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
                         if (hkMatch) collectionLink = `?region=HK&isbn=${hkMatch.ISBN}`;
@@ -289,7 +293,6 @@ createApp({
                 return {
                     ...c, 
                     UniqueKey: `${c.ISBN}-${index}`,
-                    // master stays null if c.作品番 is missing, leading to '-' in template
                     master: c.作品番 ? this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim()) : null,
                     collectionVol, collectionCategory, collectionLink
                 };
