@@ -69,9 +69,12 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <div v-for="s in searchedSeries" :key="s" @click="selectSeries(s)" 
-                            class="bg-white/80 p-6 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-blue-500 hover:shadow-xl text-center group">
-                            <h3 class="font-black text-lg text-slate-700 group-hover:text-blue-600 uppercase">{{ s }}</h3>
+                        <div v-for="s in searchedSeries" :key="s.name" @click="selectSeries(s.name)" 
+                            class="bg-white/80 p-6 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-blue-500 hover:shadow-xl text-center group relative overflow-hidden">
+                            <div class="absolute top-3 right-3 bg-slate-100 group-hover:bg-blue-600 group-hover:text-white transition-colors px-2 py-1 rounded-lg text-[10px] font-black font-mono">
+                                {{ s.count }}
+                            </div>
+                            <h3 class="font-black text-lg text-slate-700 group-hover:text-blue-600 uppercase pt-2">{{ s.name }}</h3>
                         </div>
                     </div>
                 </div>
@@ -247,11 +250,22 @@ createApp({
         filteredSeries() {
             const data = this.region === 'HK' ? this.activeHK : this.activeJP;
             const key = this.region === 'HK' ? 'Title' : '類';
-            return [...new Set(data.map(item => item[key]))].filter(Boolean).sort();
+            
+            // Create a map of series names and their counts
+            const counts = data.reduce((acc, item) => {
+                const name = item[key];
+                if (name) acc[name] = (acc[name] || 0) + 1;
+                return acc;
+            }, {});
+        
+            return Object.keys(counts).sort().map(name => ({
+                name: name,
+                count: counts[name]
+            }));
         },
         searchedSeries() {
             const q = this.seriesSearchQuery.toLowerCase();
-            return this.filteredSeries.filter(s => s.toLowerCase().includes(q));
+            return this.filteredSeries.filter(s => s.name.toLowerCase().includes(q));
         },
         filteredBooks() {
             const data = this.region === 'HK' ? this.activeHK : this.activeJP;
