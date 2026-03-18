@@ -123,8 +123,9 @@
                                 <span class="bg-blue-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase w-fit">HK Edition Details</span>
                                 <h2 class="text-3xl font-black text-slate-900 mt-4 uppercase leading-tight">{{ hkDetail.Title }}</h2>
                                 <p class="text-blue-600 font-black mt-2 text-lg">Vol. {{ hkDetail.Volume }}</p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-3 mt-8 border-t pt-6 text-sm">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-blue-600">{{ hkDetail.ISBN }}</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Publisher</span><span class="font-bold text-slate-700">{{ hkDetail.Publisher }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -137,8 +138,9 @@
                                 <span class="bg-red-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase w-fit">JP Spec Details</span>
                                 <h2 class="text-3xl font-black text-slate-900 mt-4 uppercase leading-tight">{{ jpDetail.標題 }}</h2>
                                 <p class="text-red-600 font-black mt-2 text-lg">巻 {{ jpDetail.巻 }}</p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-3 mt-8 border-t pt-6 text-sm">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-red-600">{{ jpDetail.ISBN }}</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Price</span><span class="font-bold text-slate-700">{{ jpDetail.定価 }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -161,7 +163,11 @@
                                     <tr>
                                         <th class="px-6 py-5 whitespace-nowrap text-center">#</th>
                                         <th class="px-6 py-5 min-w-[200px]">Title / Translation</th>
-                                        <th class="px-6 py-5 min-w-[150px]">Collection Reference</th>
+                                        <th class="px-6 py-5 min-w-[150px]">Original Title</th>
+                                        <th class="px-6 py-5 min-w-[150px]">Magazine / Issue</th>
+                                        <th class="px-6 py-5 min-w-[180px]">Collection Reference</th>
+                                        <th class="px-6 py-5 whitespace-nowrap text-center">Pages</th>
+                                        <th class="px-6 py-5 min-w-[150px]">Notes</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-[14px] divide-y divide-slate-100">
@@ -170,6 +176,13 @@
                                         <td class="px-6 py-6" data-label="Title">
                                             <div class="font-black text-slate-900 uppercase text-[14px] leading-tight">{{ story.出版副題 }}</div>
                                             <div class="text-[11px] text-blue-600 font-bold mt-1">{{ story.副題港譯 }}</div>
+                                        </td>
+                                        <td class="px-6 py-6" data-label="Original">
+                                            <div class="font-bold text-slate-600 text-[13px]">{{ story.master?.初出副題 || '-' }}</div>
+                                        </td>
+                                        <td class="px-6 py-6" data-label="Source">
+                                            <div class="font-black text-slate-800 uppercase text-[13px]">{{ story.master?.初出掲載誌 || '-' }}</div>
+                                            <div class="text-[11px] text-slate-400 font-bold mt-1">{{ story.master?.初出掲載号 || '-' }}</div>
                                         </td>
                                         <td class="px-6 py-6" data-label="Collection">
                                             <template v-if="story.collectionLink">
@@ -181,6 +194,10 @@
                                                 </a>
                                             </template>
                                             <span v-else class="text-slate-300 font-bold italic">No reference</span>
+                                        </td>
+                                        <td class="px-6 py-6 text-center font-black text-slate-400 whitespace-nowrap" data-label="Pages">{{ story.收錄頁 || '-' }}</td>
+                                        <td class="px-6 py-6" data-label="Notes">
+                                            <div class="text-[12px] text-slate-500 font-medium">{{ story.出版備考 || '-' }}</div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -250,7 +267,7 @@ createApp({
                     collectionVol = collectionRecord.巻;
                     collectionCategory = collectionRecord.類;
                     const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
-                    // Point 2 Fixed: Inherit current region dynamically
+                    // Point 2 Restored: Inherit current region dynamically
                     if (hkMatch) collectionLink = `?region=${this.region}&isbn=${hkMatch.ISBN}`;
                 }
                 return {
