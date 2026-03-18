@@ -8,16 +8,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
+        
+        /* Disable text selection and copying */
         body { 
-            -webkit-user-select: none; user-select: none;
+            -webkit-user-select: none; 
+            -moz-user-select: none; 
+            -ms-user-select: none; 
+            user-select: none;
             min-height: 100vh; background-color: #f8fafc; margin: 0; padding: 0; 
             font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
         }
+
         .bg-grid {
             background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
                               linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
             background-size: 40px 40px;
         }
+        
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         
         .loader-wrapper {
@@ -37,12 +44,12 @@
         .data-card { 
             display: flex; flex-direction: column;
             transition: all 0.2s ease; border: 2px solid transparent; 
-            text-align: left; position: relative; overflow: hidden; height: 550px; 
+            text-align: left; position: relative; overflow: hidden; height: 580px; 
         }
         .data-card:hover { border-color: #4f46e5; background-color: #ffffff; transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
 
         .image-container { height: 70%; width: 100%; background: #e2e8f0; overflow: hidden; }
-        .text-container { height: 30%; width: 100%; padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; }
+        .text-container { height: 30%; width: 100%; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; justify-content: center; }
 
         .badge {
             position: absolute; top: 12px; left: 12px;
@@ -65,7 +72,7 @@
         .fade-enter-from, .fade-leave-to { opacity: 0; }
     </style>
 </head>
-<body class="bg-grid">
+<body class="bg-grid" oncontextmenu="return false;">
     <div id="app" v-cloak>
         
         <div v-if="loading" class="loader-wrapper">
@@ -154,8 +161,9 @@
                                         <img :src="mappedManga.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
                                     </div>
                                     <div class="text-container">
-                                        <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2 mb-2">{{ mappedManga.title }}</p>
-                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
+                                        <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2">{{ mappedManga.title }}</p>
+                                        <p v-if="mappedManga.subtitle" class="text-[12px] text-slate-500 font-bold mb-2 italic line-clamp-1">{{ mappedManga.subtitle }}</p>
+                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest mt-auto">{{ mappedManga.author }}</p>
                                     </div>
                                     <div class="hover-hint">Click for Details</div>
                                 </a>
@@ -175,8 +183,9 @@
                                         <img :src="mappedFilmComic.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
                                     </div>
                                     <div class="text-container">
-                                        <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2 mb-2">{{ mappedFilmComic.title }}</p>
-                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedFilmComic.author }}</p>
+                                        <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2">{{ mappedFilmComic.title }}</p>
+                                        <p v-if="mappedFilmComic.subtitle" class="text-[12px] text-slate-500 font-bold mb-2 italic line-clamp-1">{{ mappedFilmComic.subtitle }}</p>
+                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest mt-auto">{{ mappedFilmComic.author }}</p>
                                     </div>
                                     <div class="hover-hint">Click for Details</div>
                                 </a>
@@ -236,6 +245,7 @@
                     if (found) {
                         return {
                             title: this.getVal(found, '標題'),
+                            subtitle: this.getVal(found, '副標題'), // Added Subtitle logic
                             author: this.getVal(found, '著'),
                             series: this.getVal(found, '類'),
                             image: this.getVal(found, 'image'),
@@ -264,8 +274,8 @@
                                 jpTitle: this.getVal(item, 'JP Title'),
                                 hkTitle: this.getVal(item, 'HK Title'),
                                 enTitle: this.getVal(item, 'EN Title'),
-                                jpDate: rawDateStr, // Keep full string for display
-                                jpYear: yearMatch ? yearMatch[0] : '', // Keep numeric for sorting
+                                jpDate: rawDateStr,
+                                jpYear: yearMatch ? yearMatch[0] : '',
                                 hkDate: this.getVal(item, 'HK Release Date'),
                                 jpImage: this.getVal(item, 'JP Image'),
                                 hkImage: this.getVal(item, 'HK Image'),
