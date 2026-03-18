@@ -25,43 +25,41 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
         }
         .spinner {
-            width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5;
+            width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #4f46e5;
             border-radius: 50%; animation: spin 0.8s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        
+        /* Reduced Height Data Card (450px) */
         .data-card { 
             display: flex; flex-direction: column;
             transition: all 0.2s ease; border: 2px solid transparent; 
-            text-align: left; position: relative; overflow: hidden; height: 580px; 
+            text-align: left; position: relative; overflow: hidden; height: 450px; 
         }
-        .data-card:hover { border-color: #4f46e5; background-color: #ffffff; transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .data-card:hover { border-color: #4f46e5; background-color: #ffffff; transform: translateY(-4px); shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
 
         .image-container { height: 70%; width: 100%; background: #e2e8f0; overflow: hidden; }
-        .text-container { height: 30%; width: 100%; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; justify-content: start; }
+        .text-container { height: 30%; width: 100%; padding: 1rem 1.25rem; display: flex; flex-direction: column; justify-content: start; line-height: 1.2; }
 
         .badge {
-            position: absolute; top: 12px; left: 12px;
+            position: absolute; top: 10px; left: 10px;
             background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(4px);
-            color: white; font-size: 10px; font-weight: 900; padding: 4px 10px;
-            border-radius: 6px; letter-spacing: 0.05em; z-index: 30;
+            color: white; font-size: 9px; font-weight: 900; padding: 3px 8px;
+            border-radius: 4px; letter-spacing: 0.05em; z-index: 30;
         }
 
         .hover-hint {
-            position: absolute; bottom: 12px; right: 12px;
+            position: absolute; bottom: 10px; right: 10px;
             background: #4f46e5; color: white;
-            font-size: 10px; font-weight: 900; padding: 4px 12px;
+            font-size: 9px; font-weight: 900; padding: 3px 10px;
             border-radius: 99px; text-transform: uppercase; letter-spacing: 0.1em;
-            opacity: 0; transform: translateY(10px);
+            opacity: 0; transform: translateY(8px);
             transition: all 0.3s ease; pointer-events: none; z-index: 40;
         }
         .data-card:hover .hover-hint { opacity: 1; transform: translateY(0); }
 
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .movie-card:hover { transform: translateY(-6px); box-shadow: 0 15px 20px -5px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="bg-grid" oncontextmenu="return false;">
@@ -69,99 +67,99 @@
         
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Master Archive...</p>
+            <p class="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Loading Archive...</p>
         </div>
 
         <nav class="top-nav">
-            <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-black transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <div class="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:bg-black transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Animate Archive</h1>
+                    <h1 class="font-black text-xl tracking-tighter text-slate-800 uppercase">Animate Archive</h1>
                 </div>
             </div>
         </nav>
 
         <transition name="fade" mode="out-in">
-            <main v-if="!selectedMovie" key="grid" class="max-w-[1920px] mx-auto px-6 pt-10">
-                <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <h2 class="text-4xl font-black text-slate-900">電影動畫作品</h2>
-                    <div class="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
-                        <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱..." class="flex-1 bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold outline-none focus:border-indigo-500 shadow-sm">
-                        <select v-model="sortOrder" class="bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-sm font-black uppercase outline-none cursor-pointer focus:border-indigo-500 shadow-sm">
-                            <option value="desc">最新優先 (Year Desc)</option>
-                            <option value="asc">年代順 (Year Asc)</option>
+            <main v-if="!selectedMovie" key="grid" class="max-w-[1920px] mx-auto px-6 pt-8">
+                <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <h2 class="text-3xl font-black text-slate-900">電影動畫作品</h2>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full max-w-xl">
+                        <input type="text" v-model="searchQuery" placeholder="搜尋..." class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm">
+                        <select v-model="sortOrder" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-black uppercase outline-none cursor-pointer focus:border-indigo-500 shadow-sm">
+                            <option value="desc">NEWEST</option>
+                            <option value="asc">OLDEST</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                    <div v-for="movie in sortedMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card bg-white rounded-[1.5rem] overflow-hidden border border-slate-200 flex flex-col shadow-sm">
+                <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    <div v-for="movie in sortedMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card bg-white rounded-2xl overflow-hidden border border-slate-200 flex flex-col shadow-sm">
                         <div class="aspect-[3/4] bg-slate-100 relative">
                             <img :src="movie.jpImage || 'https://placehold.co/600x800?text=No+Poster'" class="w-full h-full object-cover">
-                            <div class="absolute top-4 left-4 bg-indigo-600 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-widest shadow-lg">
-                                YEAR {{ movie.jpYear || 'TBA' }}
+                            <div class="absolute top-3 left-3 bg-indigo-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-lg">
+                                {{ movie.jpYear || 'TBA' }}
                             </div>
                         </div>
-                        <div class="p-6">
-                            <h3 class="font-black text-slate-900 line-clamp-2 mb-2 leading-tight min-h-[3rem]">{{ movie.jpTitle }}</h3>
-                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">{{ movie.jpDate }}</p>
+                        <div class="p-4">
+                            <h3 class="font-black text-slate-900 text-sm line-clamp-1 mb-1">{{ movie.jpTitle }}</h3>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ movie.jpDate }}</p>
                         </div>
                     </div>
                 </div>
             </main>
 
             <main v-else key="detail" class="max-w-[1920px] mx-auto px-6 pt-6 pb-20">
-                <div class="mb-8">
-                    <button @click="selectedMovie = null" class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-indigo-600 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
-                        Back to Animates and Movies Listing
+                <div class="mb-6">
+                    <button @click="selectedMovie = null" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-all">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
+                        Back to List
                     </button>
                 </div>
 
-                <div class="flex flex-col lg:flex-row gap-16">
-                    <div class="w-full lg:w-[400px] space-y-10">
-                        <img :src="selectedMovie.jpImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
-                        <img v-if="selectedMovie.hkImage" :src="selectedMovie.hkImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
+                <div class="flex flex-col lg:flex-row gap-12">
+                    <div class="w-full lg:w-[350px] space-y-6">
+                        <img :src="selectedMovie.jpImage" class="w-full rounded-3xl shadow-xl border-8 border-white">
+                        <img v-if="selectedMovie.hkImage" :src="selectedMovie.hkImage" class="w-full rounded-3xl shadow-xl border-8 border-white">
                     </div>
 
-                    <div class="flex-1 bg-white rounded-[2.5rem] p-10 md:p-16 border border-slate-200 shadow-sm relative">
-                        <div class="mb-12">
-                            <span class="text-indigo-600 font-black text-sm uppercase tracking-[0.3em] mb-4 block">Year {{ selectedMovie.jpYear || 'TBA' }}</span>
-                            <h2 class="text-5xl font-black text-slate-900 mb-6 leading-tight">{{ selectedMovie.jpTitle }}</h2>
-                            <div class="space-y-3">
-                                <p class="text-3xl font-black text-slate-600 leading-tight">{{ selectedMovie.hkTitle }}</p>
-                                <p class="text-xl font-bold text-slate-300 tracking-tight">{{ selectedMovie.enTitle }}</p>
+                    <div class="flex-1 bg-white rounded-[2rem] p-8 md:p-12 border border-slate-200 shadow-sm relative">
+                        <div class="mb-8">
+                            <span class="text-indigo-600 font-black text-xs uppercase tracking-[0.2em] mb-2 block">Year {{ selectedMovie.jpYear || 'TBA' }}</span>
+                            <h2 class="text-4xl font-black text-slate-900 mb-4 leading-tight">{{ selectedMovie.jpTitle }}</h2>
+                            <div class="space-y-1">
+                                <p class="text-2xl font-black text-slate-600">{{ selectedMovie.hkTitle }}</p>
+                                <p class="text-lg font-bold text-slate-300">{{ selectedMovie.enTitle }}</p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 py-12 border-y border-slate-100 mb-12">
-                            <div><h4 class="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-2">日本公映日期</h4><p class="text-2xl font-black text-slate-700">{{ selectedMovie.jpDate || '-' }}</p></div>
-                            <div><h4 class="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-2">香港公映日期</h4><p class="text-2xl font-black text-indigo-600">{{ selectedMovie.hkDate || '-' }}</p></div>
+                        <div class="grid grid-cols-2 gap-8 py-8 border-y border-slate-100 mb-8">
+                            <div><h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">日本公映日期</h4><p class="text-xl font-black text-slate-700">{{ selectedMovie.jpDate || '-' }}</p></div>
+                            <div><h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">香港公映日期</h4><p class="text-xl font-black text-indigo-600">{{ selectedMovie.hkDate || '-' }}</p></div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             
                             <div class="relative">
                                 <div class="badge">原作/改編漫畫</div>
                                 <a v-if="mappedManga" 
                                    :href="'manga-database.html?region=JP&isbn=' + mappedManga.isbnParam + '&series=' + encodeURIComponent(mappedManga.series)" 
                                    target="_blank"
-                                   class="data-card bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                                   class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
                                     <div class="image-container">
                                         <img :src="mappedManga.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
                                     </div>
                                     <div class="text-container">
-                                        <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2">{{ mappedManga.title }}</p>
-                                        <p v-if="mappedManga.subtitle" class="text-[12px] text-slate-500 font-bold italic line-clamp-1">{{ mappedManga.subtitle }}</p>
-                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
+                                        <p class="font-black text-slate-900 text-base line-clamp-1">{{ mappedManga.title }}</p>
+                                        <p v-if="mappedManga.subtitle" class="text-[11px] text-slate-500 font-bold italic line-clamp-1 mb-1">{{ mappedManga.subtitle }}</p>
+                                        <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
                                     </div>
-                                    <div class="hover-hint">Click for Details</div>
+                                    <div class="hover-hint">Details</div>
                                 </a>
-                                <div v-else class="data-card bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 flex items-center justify-center opacity-60">
-                                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">No Linked Manga</p>
-                                    <div class="hover-hint">No Record</div>
+                                <div v-else class="data-card bg-slate-50 rounded-[1.5rem] border-2 border-dashed border-slate-200 flex items-center justify-center opacity-60">
+                                    <p class="text-[9px] text-slate-400 font-black uppercase">No Linked Manga</p>
+                                    <div class="hover-hint">Missing</div>
                                 </div>
                             </div>
 
@@ -170,20 +168,20 @@
                                 <a v-if="mappedFilmComic" 
                                    :href="'manga-database.html?region=JP&isbn=' + mappedFilmComic.isbnParam + '&series=' + encodeURIComponent(mappedFilmComic.series)" 
                                    target="_blank"
-                                   class="data-card bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                                   class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
                                     <div class="image-container">
                                         <img :src="mappedFilmComic.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
                                     </div>
                                     <div class="text-container">
-                                        <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2">{{ mappedFilmComic.title }}</p>
-                                        <p v-if="mappedFilmComic.subtitle" class="text-[12px] text-slate-500 font-bold italic line-clamp-1">{{ mappedFilmComic.subtitle }}</p>
-                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedFilmComic.author }}</p>
+                                        <p class="font-black text-slate-900 text-base line-clamp-1">{{ mappedFilmComic.title }}</p>
+                                        <p v-if="mappedFilmComic.subtitle" class="text-[11px] text-slate-500 font-bold italic line-clamp-1 mb-1">{{ mappedFilmComic.subtitle }}</p>
+                                        <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedFilmComic.author }}</p>
                                     </div>
-                                    <div class="hover-hint">Click for Details</div>
+                                    <div class="hover-hint">Details</div>
                                 </a>
-                                <div v-else class="data-card bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 flex items-center justify-center opacity-60">
-                                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">No Linked Film Comic</p>
-                                    <div class="hover-hint">No Record</div>
+                                <div v-else class="data-card bg-slate-50 rounded-[1.5rem] border-2 border-dashed border-slate-200 flex items-center justify-center opacity-60">
+                                    <p class="text-[9px] text-slate-400 font-black uppercase">No Linked Film Comic</p>
+                                    <div class="hover-hint">Missing</div>
                                 </div>
                             </div>
 
@@ -199,86 +197,64 @@
         createApp({
             data() {
                 return {
-                    loading: true,
-                    searchQuery: '',
-                    sortOrder: 'desc',
-                    movies: [],
-                    mangaCatalog: [],
-                    selectedMovie: null
+                    loading: true, search: '', sortOrder: 'desc', movies: [], mangaCatalog: [], selectedMovie: null
                 }
             },
             computed: {
                 sortedMovies() {
-                    const q = this.searchQuery.toLowerCase().trim();
                     let filtered = this.movies;
-                    if (q) filtered = this.movies.filter(m => m.searchStr.includes(q));
+                    if (this.search) filtered = this.movies.filter(m => m.searchStr.includes(this.search.toLowerCase()));
                     return [...filtered].sort((a, b) => {
-                        const yearA = parseInt(a.jpYear) || 0;
-                        const yearB = parseInt(b.jpYear) || 0;
-                        return this.sortOrder === 'asc' ? yearA - yearB : yearB - yearA;
+                        const yA = parseInt(a.jpYear) || 0;
+                        const yB = parseInt(b.jpYear) || 0;
+                        return this.sortOrder === 'asc' ? yA - yB : yB - yA;
                     });
                 },
-                mappedManga() { return this.lookupInCatalog(this.selectedMovie?.mangaRaw); },
-                mappedFilmComic() { return this.lookupInCatalog(this.selectedMovie?.filmComicRaw); }
+                mappedManga() { return this.lookup(this.selectedMovie?.mangaRaw); },
+                mappedFilmComic() { return this.lookup(this.selectedMovie?.filmComicRaw); }
             },
             methods: {
-                getVal(obj, keyName) {
+                getVal(obj, key) {
                     if (!obj) return '';
-                    const key = Object.keys(obj).find(k => k.trim().toLowerCase() === keyName.trim().toLowerCase());
-                    return key ? obj[key] : '';
+                    const k = Object.keys(obj).find(x => x.trim().toLowerCase() === key.trim().toLowerCase());
+                    return k ? obj[k] : '';
                 },
-                lookupInCatalog(rawIsbn) {
-                    if (!rawIsbn) return null;
-                    const searchISBN = rawIsbn.toString().replace(/[-\s]/g, '');
+                lookup(isbn) {
+                    if (!isbn) return null;
+                    const cleanIsbn = isbn.toString().replace(/[-\s]/g, '');
                     const found = this.mangaCatalog.find(item => {
-                        const itemISBN = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '');
-                        return itemISBN === searchISBN && itemISBN !== "";
+                        const iIsbn = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '');
+                        return iIsbn === cleanIsbn && iIsbn !== "";
                     });
-                    if (found) {
-                        return {
-                            title: this.getVal(found, '標題'),
-                            subtitle: this.getVal(found, '副標題'),
-                            author: this.getVal(found, '著'),
-                            series: this.getVal(found, '類'),
-                            image: this.getVal(found, 'image'),
-                            isbnParam: (this.getVal(found, 'ISBN') || '').toString().trim()
-                        };
-                    }
-                    return null;
+                    return found ? {
+                        title: this.getVal(found, '標題'), subtitle: this.getVal(found, '副標題'),
+                        author: this.getVal(found, '著'), series: this.getVal(found, '類'),
+                        image: this.getVal(found, 'image'), isbnParam: this.getVal(found, 'ISBN').trim()
+                    } : null;
                 },
-                selectMovie(movie) {
-                    this.selectedMovie = movie;
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                },
+                selectMovie(m) { this.selectedMovie = m; window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 async init() {
                     try {
-                        const [movieRes, mangaRes] = await Promise.all([
+                        const [mRes, catalogRes] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫"),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP")
                         ]);
-                        this.mangaCatalog = await mangaRes.json();
-                        const movieData = await movieRes.json();
-                        this.movies = movieData.map(item => {
-                            const rawDate = this.getVal(item, 'JP Release Date');
-                            // Extract year only for hidden sorting logic, keep rawDate for display
+                        this.mangaCatalog = await catalogRes.json();
+                        const data = await mRes.json();
+                        this.movies = data.map(i => {
+                            const rawDate = this.getVal(i, 'JP Release Date').toString();
                             const yearMatch = rawDate.match(/\d{4}/);
                             return {
-                                id: this.getVal(item, 'Media ID'),
-                                jpTitle: this.getVal(item, 'JP Title'),
-                                hkTitle: this.getVal(item, 'HK Title'),
-                                enTitle: this.getVal(item, 'EN Title'),
-                                jpDate: rawDate.toString(), 
-                                jpYear: yearMatch ? yearMatch[0] : '0',
-                                hkDate: this.getVal(item, 'HK Release Date').toString(),
-                                jpImage: this.getVal(item, 'JP Image'),
-                                hkImage: this.getVal(item, 'HK Image'),
-                                mangaRaw: this.getVal(item, 'Manga ISBN'),
-                                filmComicRaw: this.getVal(item, 'Film Comics'),
-                                searchStr: `${this.getVal(item, 'JP Title')} ${this.getVal(item, 'HK Title')}`.toLowerCase()
+                                id: this.getVal(i, 'Media ID'), jpTitle: this.getVal(i, 'JP Title'),
+                                hkTitle: this.getVal(i, 'HK Title'), enTitle: this.getVal(i, 'EN Title'),
+                                jpDate: rawDate, jpYear: yearMatch ? yearMatch[0] : '',
+                                hkDate: this.getVal(i, 'HK Release Date').toString(),
+                                jpImage: this.getVal(i, 'JP Image'), hkImage: this.getVal(i, 'HK Image'),
+                                mangaRaw: this.getVal(i, 'Manga ISBN'), filmComicRaw: this.getVal(i, 'Film Comics'),
+                                searchStr: `${this.getVal(i, 'JP Title')} ${this.getVal(i, 'HK Title')}`.toLowerCase()
                             };
                         });
-                    } catch (e) { console.error(e); }
-                    finally { this.loading = false; }
+                    } catch (e) { console.error(e); } finally { this.loading = false; }
                 }
             },
             mounted() { this.init(); }
