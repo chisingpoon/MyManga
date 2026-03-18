@@ -121,11 +121,11 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Author</span><span class="font-bold text-slate-700">{{ hkDetail.Author }}</span></div>
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Publisher</span><span class="font-bold text-slate-700">{{ hkDetail.Publisher }}</span></div>
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-blue-600">{{ hkDetail.ISBN }}</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">First Release Date</span><span class="font-bold text-slate-700">{{ hkDetail.IssueDate }}</span></div>
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Price</span><span class="font-bold text-slate-700">{{ hkDetail.Price }}</span></div>
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Pages</span><span class="font-bold text-slate-700">{{ hkDetail.Page }}</span></div>
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Size</span><span class="font-bold text-slate-700">{{ hkDetail.Size }}</span></div>
-                                    <div class="flex justify-between border-b pb-1 md:col-span-2"><span class="text-slate-400 font-black text-[10px] uppercase">First Release Date</span><span class="font-bold text-slate-700">{{ hkDetail.IssueDate }}</span></div>
+                                    <div class="flex justify-between border-b pb-1 md:col-span-2"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-blue-600">{{ hkDetail.ISBN }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -142,11 +142,11 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Author</span><span class="font-bold text-slate-700">{{ jpDetail.著 }}</span></div>
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Pages</span><span class="font-bold text-slate-700">{{ jpDetail.頁 }}</span></div>
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-red-600">{{ jpDetail.ISBN }}</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">First Release Date</span><span class="font-bold text-slate-700">{{ jpDetail.初版発行日 }}</span></div>
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Price</span><span class="font-bold text-slate-700">{{ jpDetail.定価 }}</span></div>
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Size</span><span class="font-bold text-slate-700">{{ jpDetail.判型 }}</span></div>
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Series</span><span class="font-bold text-slate-700">{{ jpDetail.類 }}</span></div>
-                                    <div class="flex justify-between border-b pb-1 md:col-span-2"><span class="text-slate-400 font-black text-[10px] uppercase">First Release Date</span><span class="font-bold text-slate-700">{{ jpDetail.初版発行日 }}</span></div>
+                                    <div class="flex justify-between border-b pb-1 md:col-span-2"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-red-600">{{ jpDetail.ISBN }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -265,19 +265,28 @@ createApp({
             const isbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
             
             return this.db.contents.filter(c => c.ISBN == isbn && c.作品番).map((c, index) => {
-                // Find reference in "Collection" series (Big volumes)
                 const collectionRecord = this.db.contents.find(item => 
                     item.作品番 === c.作品番 && (item.類 === '大長編大全集' || item.類 === '大全集')
                 );
+                
                 let collectionLink = null;
                 let collectionVol = '-';
                 let collectionCategory = '';
+
                 if (collectionRecord) {
                     collectionVol = collectionRecord.巻;
                     collectionCategory = collectionRecord.類;
-                    const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
-                    if (hkMatch) collectionLink = `?region=${this.region}&isbn=${hkMatch.ISBN}`;
+                    
+                    if (this.region === 'HK') {
+                        // Find HK ISBN based on the JP ISBN found in collectionRecord
+                        const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
+                        if (hkMatch) collectionLink = `?region=HK&isbn=${hkMatch.ISBN}`;
+                    } else {
+                        // Region is JP, use JP ISBN directly
+                        collectionLink = `?region=JP&isbn=${collectionRecord.ISBN}`;
+                    }
                 }
+
                 return {
                     ...c, 
                     UniqueKey: `${c.ISBN}-${index}`,
