@@ -92,6 +92,7 @@
                                 <th class="sticky-col-2">法寶名稱</th>
                                 <th>港譯名稱</th>
                                 <th>初出作品番</th>
+                                <th>作品名稱</th>
                                 <th>收錄於 (港版書籍連結)</th>
                             </tr>
                         </thead>
@@ -101,6 +102,17 @@
                                 <td class="sticky-col-2 font-black text-slate-900 col-wrap">{{ item.名 }}</td>
                                 <td class="font-bold text-indigo-600">{{ item.港譯名 }}</td>
                                 <td class="font-mono text-[13px] text-slate-500">{{ getDisplayWork(item) }}</td>
+                                <td class="col-wrap">
+                                    <div class="text-[13px] font-bold text-slate-700 leading-tight">
+                                        {{ getDisplayWork(item).split(' (')[0] }}
+                                    </div>
+                                    <div v-if="getDisplayWork(item).includes('(')" class="text-[11px] text-slate-400 font-medium mt-1">
+                                        {{ getDisplayWork(item).split(' (')[1].replace(')', '') }}
+                                    </div>
+                                    <div v-else class="text-[11px] text-slate-400 font-medium">
+                                        {{ getDisplayWork(item) }}
+                                    </div>
+                                </td>
                                 <td>
                                     <div class="flex flex-wrap items-center">
                                         <a v-for="link in getBookLinks(item.初出作品番)" 
@@ -200,12 +212,17 @@
                     if (item.初出作品類 === 'manga') {
                         const workId = item.初出作品番?.toString().trim();
                         const workMatch = this.fullWorksList.find(w => w.初出作品番?.toString().trim() === workId);
+                        
                         if (workMatch) {
+                            const title = workMatch.初出作品名 || ''; // Get the story title
                             const magazine = workMatch.初出掲載誌 || '';
                             const issue = workMatch.初出掲載号 || '';
-                            return `${magazine} ${issue}`.trim();
+                            
+                            // Format: Story Title (Magazine Issue)
+                            return `${title} (${magazine} ${issue})`.trim();
                         }
                     }
+                    // Fallback to original "初出" if not manga or no match found
                     return item.初出;
                 },
                 getBookLinks(workId) {
