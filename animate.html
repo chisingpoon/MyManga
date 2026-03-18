@@ -33,7 +33,6 @@
         .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
         .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         
-        /* Data Card Vertical Styling */
         .data-card { transition: all 0.2s ease; border: 2px solid transparent; text-align: left; }
         .data-card:hover { border-color: #4f46e5; background-color: #ffffff; transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
 
@@ -67,8 +66,8 @@
                     <div class="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
                         <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱..." class="flex-1 bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold outline-none focus:border-indigo-500 shadow-sm">
                         <select v-model="sortOrder" class="bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-sm font-black uppercase outline-none cursor-pointer focus:border-indigo-500 shadow-sm">
-                            <option value="desc">最新優先 (Newest)</option>
-                            <option value="asc">年份由舊到新 (Oldest)</option>
+                            <option value="desc">最新優先 (Year Desc)</option>
+                            <option value="asc">年代順 (Year Asc)</option>
                         </select>
                     </div>
                 </div>
@@ -106,10 +105,10 @@
                     <div class="flex-1 bg-white rounded-[2.5rem] p-10 md:p-16 border border-slate-200 shadow-sm relative">
                         <div class="mb-12">
                             <span class="text-indigo-600 font-black text-sm uppercase tracking-[0.3em] mb-4 block">Year {{ selectedMovie.jpYear || 'TBA' }}</span>
-                            <h2 class="text-5xl font-black text-slate-900 mb-6 leading-tight">{{ selectedMovie.hkTitle || selectedMovie.jpTitle }}</h2>
-                            <div class="flex flex-wrap gap-x-8 gap-y-2 text-xl font-bold italic text-slate-400">
-                                <p>{{ selectedMovie.jpTitle }}</p>
-                                <p class="text-slate-300 not-italic font-medium">{{ selectedMovie.enTitle }}</p>
+                            <h2 class="text-5xl font-black text-slate-900 mb-6 leading-tight">{{ selectedMovie.jpTitle }}</h2>
+                            <div class="space-y-2">
+                                <p class="text-2xl font-bold text-slate-500 italic">{{ selectedMovie.hkTitle }}</p>
+                                <p class="text-xl font-medium text-slate-300">{{ selectedMovie.enTitle }}</p>
                             </div>
                         </div>
 
@@ -119,33 +118,27 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h5 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">Manga Record (JP)</h5>
-                                
+                            <div class="flex flex-col">
                                 <a v-if="mappedManga" 
                                    :href="'manga-database.html?region=JP&ISBN=' + mappedManga.isbnValue + '&series=' + encodeURIComponent(mappedManga.series)" 
-                                   class="data-card block bg-slate-50 rounded-[2.5rem] border border-slate-100 overflow-hidden">
-                                    
+                                   class="data-card block bg-slate-50 rounded-[2.5rem] border border-slate-100 overflow-hidden h-full">
                                     <div class="aspect-[16/9] bg-slate-200">
                                         <img :src="mappedManga.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
                                     </div>
-
                                     <div class="p-8">
                                         <p class="font-black text-slate-900 text-xl leading-tight mb-2">{{ mappedManga.title }}</p>
                                         <p v-if="mappedManga.subtitle" class="text-sm text-slate-500 font-bold mb-4 italic">{{ mappedManga.subtitle }}</p>
                                         <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
                                     </div>
                                 </a>
-
-                                <div v-else class="h-full min-h-[300px] p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-50">
+                                <div v-else class="min-h-[300px] p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-50">
                                     <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">No Linked Manga</p>
                                 </div>
                             </div>
 
-                            <div>
-                                <h5 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">Film Comic Record</h5>
-                                <div class="h-full min-h-[300px] p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-50">
-                                    <p class="text-[10px] text-slate-400 font-black tracking-widest uppercase">Coming Soon</p>
+                            <div class="flex flex-col">
+                                <div class="min-h-[300px] p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-50">
+                                    <p class="text-[10px] text-slate-400 font-black tracking-widest uppercase">Film Comic Link Coming Soon</p>
                                 </div>
                             </div>
                         </div>
@@ -172,11 +165,21 @@
                 sortedMovies() {
                     const q = this.searchQuery.toLowerCase().trim();
                     let filtered = this.movies;
-                    if (q) filtered = this.movies.filter(m => m.searchStr.includes(q));
+                    
+                    if (q) {
+                        filtered = this.movies.filter(m => m.searchStr.includes(q));
+                    }
+
                     return [...filtered].sort((a, b) => {
-                        const dateA = a.jpDate || '0000-00-00';
-                        const dateB = b.jpDate || '0000-00-00';
-                        return this.sortOrder === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+                        // Use full date for precise sorting, fallback to year
+                        const valA = a.jpDate || a.jpYear || '0000-00-00';
+                        const valB = b.jpDate || b.jpYear || '0000-00-00';
+                        
+                        if (this.sortOrder === 'asc') {
+                            return valA.localeCompare(valB);
+                        } else {
+                            return valB.localeCompare(valA);
+                        }
                     });
                 },
                 mappedManga() {
