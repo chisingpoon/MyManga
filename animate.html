@@ -98,62 +98,46 @@
 
                 <div class="flex flex-col lg:flex-row gap-16">
                     <div class="w-full lg:w-[400px] space-y-10">
-                        <div class="space-y-3">
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Japan Poster</p>
-                            <img :src="selectedMovie.jpImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
-                        </div>
-                        <div v-if="selectedMovie.hkImage" class="space-y-3">
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Hong Kong Poster</p>
-                            <img :src="selectedMovie.hkImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
-                        </div>
+                        <img :src="selectedMovie.jpImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
+                        <img v-if="selectedMovie.hkImage" :src="selectedMovie.hkImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
                     </div>
 
                     <div class="flex-1 bg-white rounded-[2.5rem] p-10 md:p-16 border border-slate-200 shadow-sm relative">
                         <div class="mb-12">
                             <span class="text-indigo-600 font-black text-sm uppercase tracking-[0.3em] mb-4 block">Year {{ selectedMovie.jpYear || 'TBA' }}</span>
                             <h2 class="text-5xl font-black text-slate-900 mb-6 leading-tight">{{ selectedMovie.hkTitle || selectedMovie.jpTitle }}</h2>
-                            <div class="flex flex-wrap gap-x-8 gap-y-2 text-xl font-bold">
-                                <p class="text-slate-400 italic">{{ selectedMovie.jpTitle }}</p>
-                                <p class="text-slate-300">{{ selectedMovie.enTitle }}</p>
+                            <div class="flex flex-wrap gap-x-8 gap-y-2 text-xl font-bold italic text-slate-400">
+                                <p>{{ selectedMovie.jpTitle }}</p>
+                                <p class="text-slate-300 not-italic font-medium">{{ selectedMovie.enTitle }}</p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 py-12 border-y border-slate-100 mb-12 text-left">
-                            <div>
-                                <h4 class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2">日本公映日期</h4>
-                                <p class="text-2xl font-black text-slate-700">{{ selectedMovie.jpDate || '-' }}</p>
-                            </div>
-                            <div>
-                                <h4 class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2">香港公映日期</h4>
-                                <p class="text-2xl font-black text-indigo-600">{{ selectedMovie.hkDate || '-' }}</p>
-                            </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 py-12 border-y border-slate-100 mb-12">
+                            <div><h4 class="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-2">日本公映日期</h4><p class="text-2xl font-black text-slate-700">{{ selectedMovie.jpDate || '-' }}</p></div>
+                            <div><h4 class="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-2">香港公映日期</h4><p class="text-2xl font-black text-indigo-600">{{ selectedMovie.hkDate || '-' }}</p></div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
-                                <h5 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest text-left">Manga Record (JP)</h5>
+                                <h5 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">Manga Record (JP)</h5>
                                 
                                 <a v-if="mappedManga" 
                                    :href="'manga-database.html?region=JP&ISBN=' + mappedManga.isbnValue" 
                                    class="data-card block p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:shadow-lg transition-all">
                                     <p class="font-black text-slate-900 text-xl leading-tight mb-2">{{ mappedManga.title }}</p>
                                     <p v-if="mappedManga.subtitle" class="text-sm text-slate-500 font-bold mb-4 italic">{{ mappedManga.subtitle }}</p>
-                                    <div class="flex items-center gap-2">
-                                        <div class="h-1 w-6 bg-indigo-500 rounded-full"></div>
-                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
-                                    </div>
+                                    <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
                                 </a>
 
-                                <div v-else class="p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center">
-                                    <svg class="w-8 h-8 text-slate-200 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                <div v-else class="p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-50">
                                     <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">No Linked Manga</p>
                                 </div>
                             </div>
 
                             <div>
-                                <h5 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest text-left">Film Comic Record</h5>
-                                <div class="p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center">
-                                    <p class="text-[10px] text-slate-300 font-black tracking-widest">COMING SOON</p>
+                                <h5 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">Film Comic Record</h5>
+                                <div class="p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center opacity-50">
+                                    <p class="text-[10px] text-slate-400 font-black tracking-widest uppercase">Coming Soon</p>
                                 </div>
                             </div>
                         </div>
@@ -188,14 +172,15 @@
                     });
                 },
                 mappedManga() {
-                    if (!this.selectedMovie || !this.selectedMovie.mangaISBN) return null;
+                    if (!this.selectedMovie || !this.selectedMovie.mangaRaw) return null;
                     
-                    const isbnToMatch = this.selectedMovie.mangaISBN.toString().trim();
+                    // Normalize the ISBN from the Animate sheet (Remove dashes and spaces)
+                    const searchISBN = this.selectedMovie.mangaRaw.toString().replace(/[-\s]/g, '');
                     
-                    // Look through the manga catalog
+                    // Find in the 出版目録JP sheet
                     const found = this.mangaCatalog.find(item => {
-                        const itemISBN = (this.getVal(item, 'ISBN') || '').toString().trim();
-                        return itemISBN === isbnToMatch;
+                        const itemISBN = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '');
+                        return itemISBN === searchISBN && itemISBN !== "";
                     });
 
                     if (found) {
@@ -203,7 +188,7 @@
                             title: this.getVal(found, '標題'),
                             subtitle: this.getVal(found, '副標題'),
                             author: this.getVal(found, '著'),
-                            isbnValue: isbnToMatch
+                            isbnValue: searchISBN
                         };
                     }
                     return null;
@@ -226,8 +211,8 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP")
                         ]);
                         
-                        const movieData = await movieRes.json();
                         this.mangaCatalog = await mangaRes.json();
+                        const movieData = await movieRes.json();
 
                         this.movies = movieData.map(item => {
                             const fullDate = this.getVal(item, 'JP Release Date');
@@ -243,16 +228,13 @@
                                 hkDate: this.getVal(item, 'HK Release Date'),
                                 jpImage: this.getVal(item, 'JP Image'),
                                 hkImage: this.getVal(item, 'HK Image'),
-                                mangaISBN: this.getVal(item, 'Manga') // Assuming column is named Manga
+                                mangaRaw: this.getVal(item, 'Manga ISBN') // Changed to match your prompt's column name
                             };
                             obj.searchStr = `${obj.jpTitle} ${obj.hkTitle} ${obj.enTitle} ${obj.id}`.toLowerCase();
                             return obj;
                         });
-                    } catch (e) { 
-                        console.error("Initialization Error:", e); 
-                    } finally { 
-                        this.loading = false; 
-                    }
+                    } catch (e) { console.error("Data Load Error:", e); }
+                    finally { this.loading = false; }
                 }
             },
             mounted() { this.init(); }
