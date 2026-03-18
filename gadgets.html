@@ -89,19 +89,17 @@
                                 <td class="sticky-col-1 font-mono text-slate-400 text-[13px]">{{ item.法寶編號 }}</td>
                                 <td class="sticky-col-2 font-black text-slate-900 col-wrap">{{ item.名 }}</td>
                                 <td class="font-bold text-indigo-600">{{ item.港譯名 }}</td>
-                                
                                 <td class="text-[13px] text-slate-700 font-medium">
-                                    {{ getMappedWork(item).subTitleJp || '-' }}
+                                    {{ getMappedWork(item).subTitleJp }}
                                 </td>
                                 
                                 <td class="text-[13px] text-indigo-600 font-bold">
-                                    {{ getMappedWork(item).subTitleHk || '-' }}
+                                    {{ getMappedWork(item).subTitleHk }}
                                 </td>
-                    
-                                <td class="font-mono text-[12px] text-slate-500">
+                                
+                                <td class="font-mono text-[12px] text-slate-500 bg-slate-50/50">
                                     {{ getMappedWork(item).magazineInfo }}
                                 </td>
-                    
                                 <td>
                                     <div class="flex flex-wrap items-center">
                                         <a v-for="link in getBookLinks(item.初出作品番)" 
@@ -192,37 +190,60 @@
                         this.loading = false; 
                     }
                 },
-            
-                // Core mapping function
+                // Core mapping function with data type safety
                 getMappedWork(item) {
-                    const workId = (item.初出作品番 || '').toString().trim();
-                    if (!workId) return { subTitleJp: '', subTitleHk: '', magazineInfo: item.初出 || '-' };
-            
-                    // Find match in 作品完整列表
-                    const match = this.fullWorksList.find(w => (w.初出作品番 || '').toString().trim() === workId);
-            
+                    // 1. Force the ID to a string and trim it
+                    const workId = item.初出作品番 ? item.初出作品番.toString().trim() : '';
+                    
+                    if (!workId) {
+                        return { subTitleJp: '', subTitleHk: '', magazineInfo: item.初出 || '-' };
+                    }
+                
+                    // 2. Find match in 作品完整列表 using strict string comparison
+                    const match = this.fullWorksList.find(w => {
+                        const targetId = w.初出作品番 ? w.初出作品番.toString().trim() : '';
+                        return targetId === workId;
+                    });
+                
                     if (match) {
+                        // 3. Concat Magazine and Issue
+                        const mag = match.初出掲載誌 || '';
+                        const issue = match.初出掲載号 || '';
                         return {
                             subTitleJp: match.全集副題 || '',
                             subTitleHk: match.全集副題香港譯名 || '',
-                            magazineInfo: `${match.初出掲載誌 || ''} ${match.初出掲載号 || ''}`.trim() || '-'
+                            magazineInfo: `${mag} ${issue}`.trim() || '-'
                         };
                     }
                     
-                    // Fallback if no match found in Works List
-                    return { subTitleJp: '', subTitleHk: '', magazineInfo: item.初出 || '-' };
+                    // 4. Fallback: If no match found, show the ID so we know why it failed
+                    return { 
+                        subTitleJp: 'ID未匹配', 
+                        subTitleHk: 'ID未匹配', 
+                        magazineInfo: `ID: ${workId}` 
+                    };
                 },
-            
+                
                 getBookLinks(workId) {
                     if (!workId) return [];
                     const idStr = workId.toString().trim();
-                    const matches = this.contents.filter(c => (c.作品番 || '').toString().trim() === idStr);
+                    
+                    // Match against '作品番' in the '書籍收錄作品' sheet
+                    const matches = this.contents.filter(c => {
+                        const contentId = c.作品番 ? c.作品番.toString().trim() : '';
+                        return contentId === idStr;
+                    });
                     
                     const links = [];
                     matches.forEach(m => {
                         if (!m.ISBN) return;
-                        const isbnJp = m.ISBN.trim();
-                        const hkInfo = this.publishHk.find(h => h.ISBN_JP === isbnJp || h.ISBN === isbnJp);
+                        const isbnJp = m.ISBN.toString().trim();
+                        const hkInfo = this.publishHk.find(h => {
+                            const h_isbn_jp = h.ISBN_JP ? h.ISBN_JP.toString().trim() : '';
+                            const h_isbn = h.ISBN ? h.ISBN.toString().trim() : '';
+                            return h_isbn_jp === isbnJp || h_isbn === isbnJp;
+                        });
+                
                         if (hkInfo) {
                             links.push({
                                 label: `${m.類}${m.卷 || m.巻 || ''}`,
@@ -232,8 +253,7 @@
                         }
                     });
                     return links;
-                },
-            
+                },         
                 getLinkColor(type) {
                     if (!type) return 'bg-slate-400';
                     const t = type.toString();
