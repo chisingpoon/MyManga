@@ -9,10 +9,9 @@
     <style>
         [v-cloak] { display: none; }
         body { 
-            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+            -webkit-user-select: none; -moz-user-select: none; user-select: none;
             min-height: 100vh; background-color: #f8fafc; margin: 0; padding: 0; 
             font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
-            scroll-behavior: smooth;
         }
         .bg-grid {
             background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
@@ -41,14 +40,11 @@
             th.sticky-col-2 { background: #f8fafc; z-index: 40; }
         }
 
-        .row-focused { background-color: #f5f8ff !important; }
         .gadget-link { display: inline-flex; align-items: center; font-size: 11px; font-weight: 900; color: white !important; padding: 4px 10px; border-radius: 6px; margin: 2px; text-decoration: none !important; transition: 0.2s; white-space: nowrap; }
-        .gadget-link:hover { transform: translateY(-1.5px); filter: brightness(110%); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .col-wrap { min-width: 150px; max-width: 300px; word-break: break-word; }
-        .clear-search-btn { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; }
     </style>
 </head>
-<body class="bg-grid" oncontextmenu="return false;">
+<body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
@@ -58,7 +54,7 @@
         <nav class="top-nav">
             <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-indigo-600 transition-colors">
+                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
                     <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadget Archive</h1>
@@ -74,13 +70,7 @@
             <div class="main-card">
                 <div class="p-6 border-b border-slate-100 flex items-center justify-between gap-4">
                     <div class="relative w-full max-w-xl">
-                        <input type="text" v-model="searchQuery" placeholder="搜尋法寶名稱 (日文/港譯)..." class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500">
-                        <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </div>
-                    </div>
-                    <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                        Showing {{ filteredGadgets.length }} Gadgets
+                        <input type="text" v-model="searchQuery" placeholder="搜尋法寶名稱..." class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-4 text-base font-bold outline-none focus:border-indigo-500">
                     </div>
                 </div>
 
@@ -92,27 +82,27 @@
                                 <th class="sticky-col-2">法寶名稱</th>
                                 <th>港譯名稱</th>
                                 <th>初出作品番</th>
-                                <th>作品名稱</th>
                                 <th>收錄於 (港版書籍連結)</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="item in paginatedData" :key="item.法寶編號" @click="activeRow = item.法寶編號" :class="{'row-focused': activeRow === item.法寶編號}">
+                            <tr v-for="item in paginatedData" :key="item.法寶編號">
                                 <td class="sticky-col-1 font-mono text-slate-400 text-[13px]">{{ item.法寶編號 }}</td>
                                 <td class="sticky-col-2 font-black text-slate-900 col-wrap">{{ item.名 }}</td>
                                 <td class="font-bold text-indigo-600">{{ item.港譯名 }}</td>
-                                <td class="font-mono text-[13px] text-slate-500">{{ getDisplayWork(item) }}</td>
+                                
                                 <td class="col-wrap">
-                                    <div class="text-[13px] font-bold text-slate-700 leading-tight">
-                                        {{ getDisplayWork(item).split(' (')[0] }}
+                                    <div v-if="getWorkData(item).title" class="text-[13px] font-bold text-slate-700 leading-tight">
+                                        {{ getWorkData(item).title }}
                                     </div>
-                                    <div v-if="getDisplayWork(item).includes('(')" class="text-[11px] text-slate-400 font-medium mt-1">
-                                        {{ getDisplayWork(item).split(' (')[1].replace(')', '') }}
+                                    <div v-if="getWorkData(item).extra" class="text-[11px] text-slate-400 font-medium mt-1">
+                                        {{ getWorkData(item).extra }}
                                     </div>
-                                    <div v-else class="text-[11px] text-slate-400 font-medium">
-                                        {{ getDisplayWork(item) }}
+                                    <div v-if="!getWorkData(item).title" class="text-[13px] text-slate-500">
+                                        {{ item.初出 }}
                                     </div>
                                 </td>
+
                                 <td>
                                     <div class="flex flex-wrap items-center">
                                         <a v-for="link in getBookLinks(item.初出作品番)" 
@@ -131,14 +121,7 @@
                     </table>
                 </div>
 
-                <div class="bg-slate-50 p-8 flex justify-center">
-                    <div class="flex gap-2">
-                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
-                            :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-500 border border-slate-200'" 
-                            class="w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs transition-all">{{ p }}</button>
-                    </div>
                 </div>
-            </div>
         </main>
     </div>
 
@@ -153,11 +136,10 @@
                     searchTimeout: null,
                     currentPage: 1,
                     itemsPerPage: 50,
-                    activeRow: null,
                     gadgets: [],
                     contents: [],
                     publishHk: [],
-                    fullWorksList: [] // Merged correctly here
+                    fullWorksList: []
                 }
             },
             watch: {
@@ -175,21 +157,12 @@
                     if (!q) return this.gadgets;
                     return this.gadgets.filter(g => 
                         (g.名 || '').toLowerCase().includes(q) || 
-                        (g.港譯名 || '').toLowerCase().includes(q) ||
-                        (g.法寶編號 || '').toString().includes(q)
+                        (g.港譯名 || '').toLowerCase().includes(q)
                     );
                 },
-                totalPages() { return Math.ceil(this.filteredGadgets.length / this.itemsPerPage) || 1; },
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.filteredGadgets.slice(start, start + this.itemsPerPage);
-                },
-                paginationRange() {
-                    const current = this.currentPage, last = this.totalPages, range = [];
-                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
-                    const res = []; let l;
-                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
-                    return res;
                 }
             },
             methods: {
@@ -206,30 +179,28 @@
                         this.publishHk = h;
                         this.fullWorksList = w;
                         this.loading = false;
-                    } catch (e) { console.error("Data Load Error:", e); }
+                    } catch (e) { 
+                        console.error("Data Load Error:", e);
+                        this.loading = false; // Stop loading even if there's an error
+                    }
                 },
-                getDisplayWork(item) {
+                getWorkData(item) {
                     if (item.初出作品類 === 'manga') {
                         const workId = item.初出作品番?.toString().trim();
-                        const workMatch = this.fullWorksList.find(w => w.初出作品番?.toString().trim() === workId);
-                        
-                        if (workMatch) {
-                            const title = workMatch.初出作品名 || ''; // Get the story title
-                            const magazine = workMatch.初出掲載誌 || '';
-                            const issue = workMatch.初出掲載号 || '';
-                            
-                            // Format: Story Title (Magazine Issue)
-                            return `${title} (${magazine} ${issue})`.trim();
+                        const match = this.fullWorksList.find(w => w.初出作品番?.toString().trim() === workId);
+                        if (match) {
+                            return {
+                                title: match.初出作品名 || '',
+                                extra: `${match.初出掲載誌 || ''} ${match.初出掲載号 || ''}`.trim()
+                            };
                         }
                     }
-                    // Fallback to original "初出" if not manga or no match found
-                    return item.初出;
+                    return { title: null, extra: null };
                 },
                 getBookLinks(workId) {
                     if (!workId) return [];
                     const idStr = workId.toString().trim();
-                    const matches = this.contents.filter(c => c.作品番?.toString().trim() === idStr);
-                    
+                    const matches = this.contents.filter(c => (c.作品番 || '').toString().trim() === idStr);
                     const links = [];
                     matches.forEach(m => {
                         if (!m.ISBN) return;
@@ -246,17 +217,9 @@
                     return links;
                 },
                 getLinkColor(type) {
-                    if (!type) return 'bg-slate-500';
-                    if (type.includes('45卷') || type.includes('カラー') || type.includes('プラス')) return 'bg-emerald-500';
-                    if (type.includes('大全集')) return 'bg-indigo-600';
-                    if (type.includes('0卷')) return 'bg-slate-700';
-                    if (type.includes('ドラミ')) return 'bg-rose-400';
-                    if (type.includes('文庫')) return 'bg-amber-500';
-                    if (type.includes('ぴっか')) return 'bg-purple-500';
-                    if (type.includes('とっておき')) return 'bg-cyan-600';
+                    if (type?.includes('45卷')) return 'bg-emerald-500';
                     return 'bg-slate-400';
-                },
-                changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                }
             },
             mounted() { this.init(); }
         }).mount('#app')
