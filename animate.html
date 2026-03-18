@@ -67,13 +67,13 @@
         
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Loading Aminate Archive...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Loading Animate Archive...</p>
         </div>
 
         <nav class="top-nav">
             <div class="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-x2xl flex items-center justify-center text-white shadow-xl">
+                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
                     <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Animate Archive</h1>
@@ -143,7 +143,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="relative">
                                 <div class="badge">原作/改編漫畫</div>
-                                <a v-if="mappedManga" :href="'manga-database.html?region=JP&isbn=' + mappedManga.isbnParam + '&series=' + encodeURIComponent(mappedManga.series)" target="_blank" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                                <a v-if="mappedManga" :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(mappedManga.isbnParam.trim()) + '&series=' + encodeURIComponent(mappedManga.series.trim())" target="_blank" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
                                     <div class="image-container"><img :src="mappedManga.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover"></div>
                                     <div class="text-container">
                                         <p class="font-black text-slate-900 text-base line-clamp-1">{{ mappedManga.title }}</p>
@@ -160,7 +160,7 @@
 
                             <div class="relative">
                                 <div class="badge">電影漫畫</div>
-                                <a v-if="mappedFilmComic" :href="'manga-database.html?region=JP&isbn=' + mappedFilmComic.isbnParam + '&series=' + encodeURIComponent(mappedFilmComic.series)" target="_blank" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                                <a v-if="mappedFilmComic" :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(mappedFilmComic.isbnParam.trim()) + '&series=' + encodeURIComponent(mappedFilmComic.series.trim())" target="_blank" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
                                     <div class="image-container"><img :src="mappedFilmComic.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover"></div>
                                     <div class="text-container">
                                         <p class="font-black text-slate-900 text-base line-clamp-1">{{ mappedFilmComic.title }}</p>
