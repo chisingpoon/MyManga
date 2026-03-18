@@ -18,6 +18,28 @@
         /* Smooth Transition between Grid and Detail */
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+        .top-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        /* Ensure the layout matches the 1920px max-width container of your other page */
+        main {
+            max-width: 1920px !important;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Matching the search input style from your reference */
+        input::placeholder {
+            color: #cbd5e1;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body class="bg-grid min-h-screen pb-20">
@@ -27,20 +49,29 @@
             <div class="w-10 h-10 border-4 border-slate-200 border-t-purple-600 rounded-full animate-spin"></div>
         </div>
 
-        <nav class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200">
-            <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <button v-if="selectedMovie" @click="selectedMovie = null" class="p-2 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+        <nav class="top-nav">
+            <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <button v-if="selectedMovie" @click="selectedMovie = null" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-black transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                        </svg>
                     </button>
-                    <a v-else href="index.html" class="p-2 bg-slate-900 rounded-xl text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    
+                    <a v-else href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-black transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
                     </a>
-                    <h1 class="font-black text-xl tracking-tighter uppercase">{{ selectedMovie ? '作品詳情' : '電影動畫作品' }}</h1>
+        
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">
+                        {{ selectedMovie ? '作品詳情' : '電影動畫作品' }}
+                    </h1>
                 </div>
                 
-                <div v-if="!selectedMovie" class="relative w-64 md:w-80">
-                    <input type="text" v-model="searchQuery" placeholder="搜尋..." class="w-full bg-slate-100 border-none rounded-xl px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-purple-500 outline-none">
+                <div v-if="!selectedMovie" class="relative w-64 md:w-96">
+                    <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱..." 
+                           class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold outline-none focus:border-indigo-500 transition-all">
                 </div>
             </div>
         </nav>
