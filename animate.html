@@ -8,23 +8,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
-        
-        /* Disable text selection and copying */
         body { 
-            -webkit-user-select: none; 
-            -moz-user-select: none; 
-            -ms-user-select: none; 
-            user-select: none;
+            -webkit-user-select: none; user-select: none;
             min-height: 100vh; background-color: #f8fafc; margin: 0; padding: 0; 
             font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
         }
-
         .bg-grid {
             background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
                               linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
             background-size: 40px 40px;
         }
-        
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         
         .loader-wrapper {
@@ -40,7 +33,6 @@
         .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
         .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         
-        /* Fixed 70/30 Data Card */
         .data-card { 
             display: flex; flex-direction: column;
             transition: all 0.2s ease; border: 2px solid transparent; 
@@ -49,7 +41,7 @@
         .data-card:hover { border-color: #4f46e5; background-color: #ffffff; transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
 
         .image-container { height: 70%; width: 100%; background: #e2e8f0; overflow: hidden; }
-        .text-container { height: 30%; width: 100%; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; justify-content: center; }
+        .text-container { height: 30%; width: 100%; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; justify-content: start; }
 
         .badge {
             position: absolute; top: 12px; left: 12px;
@@ -114,7 +106,7 @@
                         </div>
                         <div class="p-6">
                             <h3 class="font-black text-slate-900 line-clamp-2 mb-2 leading-tight min-h-[3rem]">{{ movie.jpTitle }}</h3>
-                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">{{ movie.jpDate || 'Coming Soon' }}</p>
+                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">{{ movie.jpDate }}</p>
                         </div>
                     </div>
                 </div>
@@ -162,8 +154,8 @@
                                     </div>
                                     <div class="text-container">
                                         <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2">{{ mappedManga.title }}</p>
-                                        <p v-if="mappedManga.subtitle" class="text-[12px] text-slate-500 font-bold mb-2 italic line-clamp-1">{{ mappedManga.subtitle }}</p>
-                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest mt-auto">{{ mappedManga.author }}</p>
+                                        <p v-if="mappedManga.subtitle" class="text-[12px] text-slate-500 font-bold italic line-clamp-1">{{ mappedManga.subtitle }}</p>
+                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
                                     </div>
                                     <div class="hover-hint">Click for Details</div>
                                 </a>
@@ -184,8 +176,8 @@
                                     </div>
                                     <div class="text-container">
                                         <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2">{{ mappedFilmComic.title }}</p>
-                                        <p v-if="mappedFilmComic.subtitle" class="text-[12px] text-slate-500 font-bold mb-2 italic line-clamp-1">{{ mappedFilmComic.subtitle }}</p>
-                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest mt-auto">{{ mappedFilmComic.author }}</p>
+                                        <p v-if="mappedFilmComic.subtitle" class="text-[12px] text-slate-500 font-bold italic line-clamp-1">{{ mappedFilmComic.subtitle }}</p>
+                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedFilmComic.author }}</p>
                                     </div>
                                     <div class="hover-hint">Click for Details</div>
                                 </a>
@@ -245,11 +237,11 @@
                     if (found) {
                         return {
                             title: this.getVal(found, '標題'),
-                            subtitle: this.getVal(found, '副標題'), // Added Subtitle logic
+                            subtitle: this.getVal(found, '副標題'),
                             author: this.getVal(found, '著'),
                             series: this.getVal(found, '類'),
                             image: this.getVal(found, 'image'),
-                            isbnParam: this.getVal(found, 'ISBN').trim()
+                            isbnParam: (this.getVal(found, 'ISBN') || '').toString().trim()
                         };
                     }
                     return null;
@@ -267,21 +259,22 @@
                         this.mangaCatalog = await mangaRes.json();
                         const movieData = await movieRes.json();
                         this.movies = movieData.map(item => {
-                            const rawDateStr = this.getVal(item, 'JP Release Date');
-                            const yearMatch = rawDateStr.match(/\d{4}/);
+                            const rawDate = this.getVal(item, 'JP Release Date');
+                            // Extract year only for hidden sorting logic, keep rawDate for display
+                            const yearMatch = rawDate.match(/\d{4}/);
                             return {
                                 id: this.getVal(item, 'Media ID'),
                                 jpTitle: this.getVal(item, 'JP Title'),
                                 hkTitle: this.getVal(item, 'HK Title'),
                                 enTitle: this.getVal(item, 'EN Title'),
-                                jpDate: rawDateStr,
-                                jpYear: yearMatch ? yearMatch[0] : '',
-                                hkDate: this.getVal(item, 'HK Release Date'),
+                                jpDate: rawDate.toString(), 
+                                jpYear: yearMatch ? yearMatch[0] : '0',
+                                hkDate: this.getVal(item, 'HK Release Date').toString(),
                                 jpImage: this.getVal(item, 'JP Image'),
                                 hkImage: this.getVal(item, 'HK Image'),
                                 mangaRaw: this.getVal(item, 'Manga ISBN'),
                                 filmComicRaw: this.getVal(item, 'Film Comics'),
-                                searchStr: `${this.getVal(item, 'JP Title')} ${this.getVal(item, 'HK Title')} ${this.getVal(item, 'Media ID')}`.toLowerCase()
+                                searchStr: `${this.getVal(item, 'JP Title')} ${this.getVal(item, 'HK Title')}`.toLowerCase()
                             };
                         });
                     } catch (e) { console.error(e); }
