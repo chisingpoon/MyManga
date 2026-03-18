@@ -33,6 +33,9 @@
         .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
         .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         
+        .data-card { transition: all 0.2s ease; border: 2px solid transparent; }
+        .data-card:hover { border-color: #4f46e5; background-color: #f5f3ff; transform: scale(1.02); }
+
         .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
     </style>
@@ -53,9 +56,7 @@
                             <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     </a>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">
-                        Animate Archive
-                    </h1>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Animate Archive</h1>
                 </div>
             </div>
         </nav>
@@ -64,22 +65,15 @@
             <main v-if="!selectedMovie" key="grid" class="max-w-[1920px] mx-auto px-6 pt-10">
                 <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <h2 class="text-4xl font-black text-slate-900">電影動畫作品</h2>
-                    
                     <div class="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
                         <div class="relative flex-1">
-                            <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱 (中/日)..." 
-                                   class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold focus:border-indigo-500 outline-none shadow-sm">
+                            <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱 (中/日)..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold focus:border-indigo-500 outline-none shadow-sm">
                         </div>
-
                         <div class="relative min-w-[180px]">
-                            <select v-model="sortOrder" 
-                                    class="w-full appearance-none bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-sm font-black uppercase tracking-wider text-slate-600 focus:border-indigo-500 outline-none shadow-sm cursor-pointer">
+                            <select v-model="sortOrder" class="w-full appearance-none bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-sm font-black uppercase tracking-wider text-slate-600 focus:border-indigo-500 outline-none shadow-sm cursor-pointer">
                                 <option value="desc">最新優先 (Newest)</option>
                                 <option value="asc">年份由舊到新 (Oldest)</option>
                             </select>
-                            <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -103,9 +97,7 @@
             <main v-else key="detail" class="max-w-[1920px] mx-auto px-6 pt-6 pb-20">
                 <div class="mb-8">
                     <button @click="selectedMovie = null" class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-indigo-600 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/>
-                        </svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
                         Back to Animates and Movies Listing
                     </button>
                 </div>
@@ -126,9 +118,9 @@
                         <div class="mb-12">
                             <span class="text-indigo-600 font-black text-sm uppercase tracking-[0.3em] mb-4 block">Year {{ selectedMovie.jpYear || 'TBA' }}</span>
                             <h2 class="text-5xl font-black text-slate-900 mb-6 leading-tight">{{ selectedMovie.hkTitle || selectedMovie.jpTitle }}</h2>
-                            <div class="flex flex-wrap gap-x-8 gap-y-2">
-                                <p class="text-xl text-slate-400 font-bold italic">{{ selectedMovie.jpTitle }}</p>
-                                <p class="text-xl text-slate-300 font-medium">{{ selectedMovie.enTitle }}</p>
+                            <div class="flex flex-wrap gap-x-8 gap-y-2 text-xl font-bold">
+                                <p class="text-slate-400 italic">{{ selectedMovie.jpTitle }}</p>
+                                <p class="text-slate-300">{{ selectedMovie.enTitle }}</p>
                             </div>
                         </div>
 
@@ -144,13 +136,24 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
-                                <h5 class="text-xs font-black uppercase text-slate-400 mb-2">Manga Record</h5>
-                                <p class="text-[10px] text-slate-300 font-bold italic">Liking Logic Coming Soon...</p>
+                            <div>
+                                <h5 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">Manga Record (JP)</h5>
+                                <a v-if="mappedManga" :href="'manga-database.html?region=JP&isbn=' + mappedManga.ISBN" 
+                                   class="data-card block p-6 bg-slate-50 rounded-[2rem] border border-slate-100 cursor-pointer">
+                                    <p class="font-black text-slate-900 text-lg leading-tight mb-1">{{ mappedManga['標題'] }}</p>
+                                    <p class="text-sm text-slate-500 font-bold mb-3 italic">{{ mappedManga['副標題'] }}</p>
+                                    <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga['著'] }}</p>
+                                </a>
+                                <div v-else class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
+                                    <p class="text-[10px] text-slate-300 font-bold italic">No Manga Link Found</p>
+                                </div>
                             </div>
-                            <div class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
-                                <h5 class="text-xs font-black uppercase text-slate-400 mb-2">Film Comic Record</h5>
-                                <p class="text-[10px] text-slate-300 font-bold italic">Liking Logic Coming Soon...</p>
+
+                            <div>
+                                <h5 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">Film Comic Record</h5>
+                                <div class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
+                                    <p class="text-[10px] text-slate-300 font-bold italic">Film Comic Link Logic Coming Soon...</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -166,31 +169,28 @@
                 return {
                     loading: true,
                     searchQuery: '',
-                    sortOrder: 'desc', // Default to newest
+                    sortOrder: 'desc',
                     movies: [],
+                    mangaCatalog: [], // To store 出版目録JP
                     selectedMovie: null
                 }
             },
             computed: {
                 sortedMovies() {
-                    // First filter by search
                     const q = this.searchQuery.toLowerCase().trim();
                     let filtered = this.movies;
-                    if (q) {
-                        filtered = this.movies.filter(m => m.searchStr.includes(q));
-                    }
-
-                    // Then sort by JP Date
+                    if (q) filtered = this.movies.filter(m => m.searchStr.includes(q));
                     return [...filtered].sort((a, b) => {
                         const dateA = a.jpDate || '0000-00-00';
                         const dateB = b.jpDate || '0000-00-00';
-                        
-                        if (this.sortOrder === 'asc') {
-                            return dateA.localeCompare(dateB);
-                        } else {
-                            return dateB.localeCompare(dateA);
-                        }
+                        return this.sortOrder === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
                     });
+                },
+                mappedManga() {
+                    if (!this.selectedMovie || !this.selectedMovie.mangaISBN) return null;
+                    const isbn = this.selectedMovie.mangaISBN.trim();
+                    // Search in the JP Catalog for a matching ISBN
+                    return this.mangaCatalog.find(book => (book.ISBN || '').toString().trim() === isbn);
                 }
             },
             methods: {
@@ -200,17 +200,21 @@
                 },
                 async init() {
                     try {
-                        const res = await fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫");
-                        const data = await res.json();
-                        this.movies = data.map(item => {
+                        const [movieRes, mangaRes] = await Promise.all([
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫"),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP")
+                        ]);
+                        
+                        const movieData = await movieRes.json();
+                        this.mangaCatalog = await mangaRes.json();
+
+                        this.movies = movieData.map(item => {
                             const get = (key) => {
                                 const k = Object.keys(item).find(x => x.trim() === key);
                                 return k ? item[k] : '';
                             };
-                            
                             const fullDate = get('JP Release Date');
                             const yearMatch = fullDate.match(/\d{4}/);
-                            
                             const obj = {
                                 id: get('Media ID'),
                                 jpTitle: get('JP Title'),
@@ -220,7 +224,8 @@
                                 jpYear: yearMatch ? yearMatch[0] : '',
                                 hkDate: get('HK Release Date'),
                                 jpImage: get('JP Image'),
-                                hkImage: get('HK Image')
+                                hkImage: get('HK Image'),
+                                mangaISBN: get('Manga') // Key to 出版目録JP
                             };
                             obj.searchStr = `${obj.jpTitle} ${obj.hkTitle} ${obj.enTitle} ${obj.id}`.toLowerCase();
                             return obj;
