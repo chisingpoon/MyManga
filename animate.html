@@ -3,50 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>電影動畫作品記錄 | Doraemon Archive</title>
+    <title>Master Archive | 電影動畫作品</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
-        body { -webkit-user-select: none; user-select: none; background-color: #f8fafc; font-family: system-ui, sans-serif; }
-        .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
+        body { 
+            -webkit-user-select: none; user-select: none;
+            min-height: 100vh; background-color: #f8fafc; margin: 0; padding: 0; 
+            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
+        }
+        .bg-grid {
+            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
+                              linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        /* Match Gadget Archive Nav */
+        .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         
-        /* Card Hover Effect */
-        .movie-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .movie-card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        
-        /* Smooth Transition between Grid and Detail */
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        /* Loader Style */
+        .loader-wrapper {
+            position: fixed; inset: 0; background: #f8fafc;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5;
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .top-nav {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid #e2e8f0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        /* Movie Card Specifics */
+        .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         
-        /* Ensure the layout matches the 1920px max-width container of your other page */
-        main {
-            max-width: 1920px !important;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        /* Matching the search input style from your reference */
-        input::placeholder {
-            color: #cbd5e1;
-            font-weight: 700;
-        }
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
     </style>
 </head>
-<body class="bg-grid min-h-screen pb-20">
+<body class="bg-grid">
     <div id="app" v-cloak>
         
-        <div v-if="loading" class="fixed inset-0 bg-slate-50 z-50 flex items-center justify-center">
-            <div class="w-10 h-10 border-4 border-slate-200 border-t-purple-600 rounded-full animate-spin"></div>
+        <div v-if="loading" class="loader-wrapper">
+            <div class="spinner"></div>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Loading Animate Database...</p>
         </div>
 
         <nav class="top-nav">
@@ -63,82 +62,81 @@
                             <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     </a>
-        
+
                     <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">
-                        {{ selectedMovie ? '作品詳情' : '電影動畫作品' }}
+                        {{ selectedMovie ? 'Animate Record' : 'Animate Archive' }}
                     </h1>
-                </div>
-                
-                <div v-if="!selectedMovie" class="relative w-64 md:w-96">
-                    <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱..." 
-                           class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold outline-none focus:border-indigo-500 transition-all">
                 </div>
             </div>
         </nav>
 
         <transition name="fade" mode="out-in">
-            <main v-if="!selectedMovie" key="grid" class="max-w-7xl mx-auto px-6 pt-12">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    <div v-for="movie in filteredMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card bg-white rounded-[2rem] overflow-hidden border border-slate-200 flex flex-col shadow-sm">
+            <main v-if="!selectedMovie" key="grid" class="max-w-[1920px] mx-auto px-6 pt-10">
+                <div class="mb-10 flex items-center justify-between">
+                    <h2 class="text-4xl font-black text-slate-900">電影動畫作品</h2>
+                    
+                    <div class="relative w-full max-w-md">
+                        <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱 (中/日)..." 
+                               class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold focus:border-indigo-500 outline-none shadow-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                    <div v-for="movie in filteredMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card bg-white rounded-[1.5rem] overflow-hidden border border-slate-200 flex flex-col shadow-sm">
                         <div class="aspect-[3/4] bg-slate-100 relative">
-                            <img :src="movie.jpImage || movie.hkImage" class="w-full h-full object-cover" loading="lazy">
-                            <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] font-black px-2 py-1 rounded-md">{{ movie.id }}</div>
+                            <img :src="movie.jpImage || movie.hkImage || 'https://placehold.co/600x800?text=No+Poster'" class="w-full h-full object-cover">
+                            <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] font-black px-2 py-1 rounded-md tracking-widest">{{ movie.id }}</div>
                         </div>
                         <div class="p-6">
-                            <h3 class="font-black text-slate-900 line-clamp-2 mb-2 leading-tight">{{ movie.jpTitle }}</h3>
-                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{{ movie.jpDate }}</p>
+                            <h3 class="font-black text-slate-900 line-clamp-2 mb-2 leading-tight min-h-[3rem]">{{ movie.jpTitle }}</h3>
+                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">{{ movie.jpDate || 'Coming Soon' }}</p>
                         </div>
                     </div>
                 </div>
             </main>
 
-            <main v-else key="detail" class="max-w-7xl mx-auto px-6 pt-12 pb-20">
-                <div class="flex flex-col lg:flex-row gap-12">
-                    
-                    <div class="w-full lg:w-1/3 space-y-8">
-                        <div class="space-y-4">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">日本版海報</label>
-                            <img :src="selectedMovie.jpImage" class="w-full rounded-[2.5rem] shadow-2xl border-8 border-white">
+            <main v-else key="detail" class="max-w-[1920px] mx-auto px-6 pt-12 pb-20">
+                <div class="flex flex-col lg:flex-row gap-16">
+                    <div class="w-full lg:w-[400px] space-y-10">
+                        <div class="space-y-3">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Japan Poster</p>
+                            <img :src="selectedMovie.jpImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
                         </div>
-                        <div v-if="selectedMovie.hkImage" class="space-y-4">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">香港版海報</label>
-                            <img :src="selectedMovie.hkImage" class="w-full rounded-[2.5rem] shadow-2xl border-8 border-white">
+                        <div v-if="selectedMovie.hkImage" class="space-y-3">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Hong Kong Poster</p>
+                            <img :src="selectedMovie.hkImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
                         </div>
                     </div>
 
-                    <div class="w-full lg:w-2/3 bg-white rounded-[3rem] p-8 md:p-16 border border-slate-100 shadow-sm">
+                    <div class="flex-1 bg-white rounded-[2.5rem] p-10 md:p-16 border border-slate-200 shadow-sm relative">
                         <div class="mb-12">
-                            <p class="text-purple-600 font-black text-sm uppercase tracking-widest mb-4">{{ selectedMovie.id }}</p>
-                            <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">{{ selectedMovie.hkTitle || selectedMovie.jpTitle }}</h2>
-                            <div class="space-y-2">
+                            <span class="text-indigo-600 font-black text-sm uppercase tracking-[0.3em] mb-4 block">{{ selectedMovie.id }}</span>
+                            <h2 class="text-5xl font-black text-slate-900 mb-6 leading-tight">{{ selectedMovie.hkTitle || selectedMovie.jpTitle }}</h2>
+                            <div class="flex flex-wrap gap-x-8 gap-y-2">
                                 <p class="text-xl text-slate-400 font-bold italic">{{ selectedMovie.jpTitle }}</p>
-                                <p class="text-slate-400 font-medium">{{ selectedMovie.enTitle }}</p>
+                                <p class="text-xl text-slate-300 font-medium">{{ selectedMovie.enTitle }}</p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12 py-10 border-y border-slate-100">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 py-12 border-y border-slate-100 mb-12">
                             <div>
-                                <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2">日本上映日期</h4>
-                                <p class="text-xl font-black text-slate-700">{{ selectedMovie.jpDate || '-' }}</p>
+                                <h4 class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2">日本公映日期</h4>
+                                <p class="text-2xl font-black text-slate-700">{{ selectedMovie.jpDate || '-' }}</p>
                             </div>
                             <div>
-                                <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2">香港上映日期</h4>
-                                <p class="text-xl font-black text-indigo-600">{{ selectedMovie.hkDate || '-' }}</p>
+                                <h4 class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2">香港公映日期</h4>
+                                <p class="text-2xl font-black text-indigo-600">{{ selectedMovie.hkDate || '-' }}</p>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
-                                <h5 class="text-xs font-black uppercase tracking-widest mb-4 text-slate-900 flex items-center gap-2">
-                                    <span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Manga
-                                </h5>
-                                <p class="text-slate-300 text-[10px] font-black uppercase italic tracking-widest">Connecting Data...</p>
+                            <div class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
+                                <h5 class="text-xs font-black uppercase text-slate-400 mb-2">Manga Record</h5>
+                                <p class="text-[10px] text-slate-300 font-bold italic">Liking Logic Coming Soon...</p>
                             </div>
-                            <div class="p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
-                                <h5 class="text-xs font-black uppercase tracking-widest mb-4 text-slate-900 flex items-center gap-2">
-                                    <span class="w-2 h-2 bg-amber-500 rounded-full"></span> Film Comics
-                                </h5>
-                                <p class="text-slate-300 text-[10px] font-black uppercase italic tracking-widest">Connecting Data...</p>
+                            <div class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
+                                <h5 class="text-xs font-black uppercase text-slate-400 mb-2">Film Comic Record</h5>
+                                <p class="text-[10px] text-slate-300 font-bold italic">Liking Logic Coming Soon...</p>
                             </div>
                         </div>
                     </div>
@@ -190,7 +188,7 @@
                                 jpImage: get('JP Image'),
                                 hkImage: get('HK Image')
                             };
-                            obj.searchStr = `${obj.jpTitle} ${obj.hkTitle} ${obj.id}`.toLowerCase();
+                            obj.searchStr = `${obj.jpTitle} ${obj.hkTitle} ${obj.enTitle} ${obj.id}`.toLowerCase();
                             return obj;
                         });
                     } catch (e) { console.error(e); }
