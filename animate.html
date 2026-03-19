@@ -41,14 +41,39 @@
         .image-container { height: 60%; width: 100%; background: #e2e8f0; overflow: hidden; }
         .text-container { height: 40%; width: 100%; padding: 1.25rem; display: flex; flex-direction: column; justify-content: start; gap: 0.35rem; line-height: 1.4; }
 
-        /* Enlarged Badge for Manga/Film Comic Cards */
+        /* Smooth Fade for Image/Text Swap */
+        .fade-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Unified Glass Style for Badge and Toggle */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
         .badge {
             position: absolute; top: 12px; left: 12px;
-            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px);
-            color: white; font-size: 11px; font-weight: 900; padding: 5px 14px;
+            color: white; font-size: 10px; font-weight: 900; padding: 6px 14px;
             border-radius: 8px; letter-spacing: 0.05em; z-index: 30;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255,255,255,0.1);
+            text-transform: uppercase;
+        }
+        
+        .toggle-panel {
+            position: absolute; top: 12px; right: 12px;
+            padding: 3px; border-radius: 10px; z-index: 50;
+            display: flex; gap: 2px;
+        }
+        
+        .toggle-btn {
+            text-[9px] px-3 py-1.5 rounded-md font-black transition-all duration-200 uppercase;
         }
 
         .hover-hint {
@@ -150,48 +175,55 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="relative">
-                                <div class="badge">原作/改編漫畫</div>
-                                    <div v-if="mappedManga" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
-                                        <div v-if="mappedManga.hasHk" class="absolute top-12 right-3 z-50 flex bg-white/90 p-1 rounded-xl border shadow-sm">
-                                            <button @click.stop.prevent="mangaTab = 'JP'" :class="mangaTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="text-[10px] px-3 py-1 rounded-lg font-black transition-all">JP</button>
-                                            <button @click.stop.prevent="mangaTab = 'HK'" :class="mangaTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="text-[10px] px-3 py-1 rounded-lg font-black transition-all">HK</button>
-                                        </div>
-                                        <a :href="generateUrl(mappedManga.current)" target="_blank" class="contents">
-                                            <div class="image-container">
-                                                <img :src="mappedManga.current.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
-                                            </div>
-                                            <div class="text-container">
-                                                <p class="font-black text-slate-900 text-lg leading-tight">{{ mappedManga.current.title }}</p>
-                                                <p class="text-xs font-bold italic text-slate-500 line-clamp-2">{{ mappedManga.current.subtitle }}</p>
-                                                <p class="text-xs font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.current.author }}</p>
-                                            </div>
-                                        </a>
+                                <div class="badge glass-panel">原作/改編漫畫</div>
+                                <div v-if="mappedManga" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                                    <div v-if="mappedManga.hasHk" class="toggle-panel glass-panel">
+                                        <button @click.stop.prevent="mangaTab = 'JP'" :class="mangaTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'" class="text-[9px] px-3 py-1 rounded-lg font-black transition-all">JP</button>
+                                        <button @click.stop.prevent="mangaTab = 'HK'" :class="mangaTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'" class="text-[9px] px-3 py-1 rounded-lg font-black transition-all">HK</button>
                                     </div>
-                                <div v-else class="data-card bg-slate-50 rounded-[1.5rem] border-2 border-dashed border-slate-200 flex items-center justify-center opacity-60">
-                                    <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest">No Linked Manga</p>
+                                    <a :href="generateUrl(mappedManga.current)" target="_blank" :key="mangaTab" class="contents fade-content">
+                                        <div class="image-container"><img :src="mappedManga.current.image" class="w-full h-full object-cover"></div>
+                                        <div class="text-container">
+                                            <p class="font-black text-slate-900 text-lg leading-tight">{{ mappedManga.current.title }}</p>
+                                            <p class="text-xs font-bold italic text-slate-500 line-clamp-2">{{ mappedManga.current.subtitle }}</p>
+                                            <p class="text-xs font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.current.author }}</p>
+                                        </div>
+                                    </a>
                                 </div>
                             </div>
 
                             <div class="relative">
-                                <div class="badge">電影漫畫</div>
-                                    <div v-if="mappedFilmComic" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100 relative">
-                                        <div v-if="mappedFilmComic.hasHk" class="absolute top-12 right-3 z-50 flex bg-white/90 p-1 rounded-xl border shadow-sm">
-                                            <button @click.stop.prevent="fcTab = 'JP'" :class="fcTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="text-[10px] px-3 py-1 rounded-lg font-black transition-all">JP</button>
-                                            <button @click.stop.prevent="fcTab = 'HK'" :class="fcTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="text-[10px] px-3 py-1 rounded-lg font-black transition-all">HK</button>
-                                        </div>
-                                        <a :href="generateUrl(mappedFilmComic.current)" target="_blank" class="flex flex-col h-full">
-                                            <div class="image-container">
-                                                <img :src="mappedFilmComic.current.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
-                                            </div>
-                                            <div class="text-container">
-                                                <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2">{{ mappedFilmComic.current.title }}</p>
-                                                <p class="text-xs font-black text-indigo-600 uppercase tracking-widest mt-auto">{{ mappedFilmComic.current.author }}</p>
-                                            </div>
-                                        </a>
+                                <div class="badge glass-panel">電影漫畫</div>
+                                
+                                <div v-if="mappedFilmComic" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100 relative">
+                                    
+                                    <div v-if="mappedFilmComic.hasHk" class="toggle-panel glass-panel">
+                                        <button @click.stop.prevent="fcTab = 'JP'" 
+                                                :class="fcTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'" 
+                                                class="text-[9px] px-3 py-1 rounded-lg font-black transition-all">JP</button>
+                                        <button @click.stop.prevent="fcTab = 'HK'" 
+                                                :class="fcTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'" 
+                                                class="text-[9px] px-3 py-1 rounded-lg font-black transition-all">HK</button>
                                     </div>
                             
-                                <div v-else class="data-card bg-slate-50 rounded-[1.5rem] border-2 border-dashed border-slate-200 flex items-center justify-center opacity-60">
-                                    <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest">No Linked Film Comic</p>
+                                    <a :href="generateUrl(mappedFilmComic.current)" target="_blank" :key="fcTab" class="flex flex-col h-full fade-content">
+                                        <div class="image-container">
+                                            <img :src="mappedFilmComic.current.image || 'https://placehold.co/600x400?text=No+Cover'" 
+                                                 class="w-full h-full object-cover">
+                                        </div>
+                                        <div class="text-container">
+                                            <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2">
+                                                {{ mappedFilmComic.current.title }}
+                                            </p>
+                                            <p v-if="mappedFilmComic.current.subtitle" class="text-xs font-bold italic text-slate-500 line-clamp-1">
+                                                {{ mappedFilmComic.current.subtitle }}
+                                            </p>
+                                            <p class="text-xs font-black text-indigo-600 uppercase tracking-widest mt-auto">
+                                                {{ mappedFilmComic.current.author }}
+                                            </p>
+                                        </div>
+                                        <div class="hover-hint">View {{ fcTab }} Detail</div>
+                                    </a>
                                 </div>
                             </div>
                         </div>
