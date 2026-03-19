@@ -345,23 +345,33 @@ createApp({
         },
         checkUrlParameters() {
             const urlParams = new URLSearchParams(window.location.search);
-            const urlRegion = urlParams.get('region')?.toUpperCase();
-            const urlIsbn = urlParams.get('isbn');
+            const urlRegion = urlParams.get('region')?.toUpperCase().trim();
+            // Clean ISBN: Remove any non-numeric characters (like trailing underscores or spaces)
+            const urlIsbn = urlParams.get('isbn')?.replace(/\D/g, '').trim();
             const urlSeries = urlParams.get('series')?.trim();
+
             if (urlRegion === 'JP' || urlRegion === 'HK') this.region = urlRegion;
+
             if (urlIsbn) {
-                const book = this.db.hk.find(b => b.ISBN === urlIsbn) || this.db.jp.find(b => b.ISBN === urlIsbn);
+                // Search both HK and JP databases for the cleaned ISBN
+                const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === urlIsbn) || 
+                             this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === urlIsbn);
+                
                 if (book) {
                     this.selectedBook = book;
-                    this.selectedSeries = book.Title || book.類;
+                    // Ensure we capture the series name correctly based on the found book
+                    this.selectedSeries = (this.region === 'HK' ? book.Title : book.類) || urlSeries;
                     this.view = 'detail';
                     return;
                 }
             } 
+
             if (urlSeries) {
+                // If a series is provided but no specific book was found/requested
                 this.selectedSeries = urlSeries;
                 this.view = 'books';
             } else {
+                // Default fallback
                 this.view = 'series';
                 this.selectedBook = null;
                 this.selectedSeries = null;
