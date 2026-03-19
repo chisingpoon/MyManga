@@ -152,9 +152,13 @@
                             <div class="relative">
                                 <div class="badge">原作/改編漫畫</div>
                                     <div v-if="mappedManga" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
-                                        <div v-if="mappedManga.hk" class="absolute top-12 right-3 z-50 flex bg-white/80 backdrop-blur p-1 rounded-lg border border-slate-200 shadow-sm">
-                                            <button @click.prevent="mappedManga.activeTab = 'JP'" :class="mappedManga.activeTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="text-[9px] px-2 py-1 rounded font-black transition-all">JP</button>
-                                            <button @click.prevent="mappedManga.activeTab = 'HK'" :class="mappedManga.activeTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="text-[9px] px-2 py-1 rounded font-black transition-all">HK</button>
+                                        <div v-if="mappedManga.hk" class="absolute top-12 right-3 z-50 flex bg-white/90 p-1 rounded-xl border shadow-sm">
+                                            <button @click.stop.prevent="mappedManga.activeTab = 'JP'" 
+                                                    :class="mappedManga.activeTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" 
+                                                    class="text-[10px] px-3 py-1 rounded-lg font-black transition-all">JP</button>
+                                            <button @click.stop.prevent="mappedManga.activeTab = 'HK'" 
+                                                    :class="mappedManga.activeTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" 
+                                                    class="text-[10px] px-3 py-1 rounded-lg font-black transition-all">HK</button>
                                         </div>
                                     
                                         <a :href="generateUrl(mappedManga[mappedManga.activeTab.toLowerCase()])" target="_blank" class="contents">
@@ -179,17 +183,13 @@
                                 
                                 <div v-if="mappedFilmComic" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100 relative">
                                     
-                                    <div v-if="mappedFilmComic.hk" class="absolute top-12 right-3 z-50 flex bg-white/90 backdrop-blur-md p-1 rounded-xl border border-slate-200 shadow-sm">
-                                        <button @click.prevent="mappedFilmComic.activeTab = 'JP'" 
-                                                :class="mappedFilmComic.activeTab === 'JP' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'" 
-                                                class="text-[9px] px-2.5 py-1 rounded-lg font-black transition-all duration-200 uppercase tracking-tighter">
-                                            JP
-                                        </button>
-                                        <button @click.prevent="mappedFilmComic.activeTab = 'HK'" 
-                                                :class="mappedFilmComic.activeTab === 'HK' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'" 
-                                                class="text-[9px] px-2.5 py-1 rounded-lg font-black transition-all duration-200 uppercase tracking-tighter">
-                                            HK
-                                        </button>
+                                    <div v-if="mappedFilmComic.hk" class="absolute top-12 right-3 z-50 flex bg-white/90 p-1 rounded-xl border shadow-sm">
+                                        <button @click.stop.prevent="mappedFilmComic.activeTab = 'JP'" 
+                                                :class="mappedFilmComic.activeTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" 
+                                                class="text-[10px] px-3 py-1 rounded-lg font-black transition-all">JP</button>
+                                        <button @click.stop.prevent="mappedFilmComic.activeTab = 'HK'" 
+                                                :class="mappedFilmComic.activeTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" 
+                                                class="text-[10px] px-3 py-1 rounded-lg font-black transition-all">HK</button>
                                     </div>
                             
                                     <a :href="generateUrl(mappedFilmComic[mappedFilmComic.activeTab.toLowerCase()])" target="_blank" class="flex flex-col h-full">
@@ -278,7 +278,6 @@
                     if (!isbn) return null;
                     const cleanIsbn = isbn.toString().replace(/[-\s]/g, '').trim();
                     
-                    // 1. Find JP Record
                     const jpFound = this.mangaCatalog.find(item => {
                         const iIsbn = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '').trim();
                         return iIsbn === cleanIsbn && iIsbn !== "";
@@ -286,40 +285,38 @@
                 
                     if (!jpFound) return null;
                 
-                    // 2. Find HK Record (Matching by ISBN_JP)
                     const hkMatches = this.hkCatalog.filter(item => {
                         const hkIsbnJp = (this.getVal(item, 'ISBN_JP') || '').toString().replace(/[-\s]/g, '').trim();
                         return hkIsbnJp === cleanIsbn && hkIsbnJp !== "";
                     });
                 
-                    // Sort by IssueDate desc and get the first one
                     let hkFound = null;
                     if (hkMatches.length > 0) {
-                        hkFound = hkMatches.sort((a, b) => {
-                            return new Date(this.getVal(b, 'IssueDate')) - new Date(this.getVal(a, 'IssueDate'));
+                        hkFound = [...hkMatches].sort((a, b) => {
+                            const dateA = new Date(this.getVal(a, 'IssueDate'));
+                            const dateB = new Date(this.getVal(b, 'IssueDate'));
+                            return dateB - dateA;
                         })[0];
                     }
                 
-                    // 3. Return combined object with a toggle state
+                    // CRITICAL: Return a reactive-friendly object
                     return {
-                        activeTab: 'JP', // Default tab
+                        activeTab: 'JP', 
                         jp: {
                             title: this.getVal(jpFound, '標題'),
                             subtitle: this.getVal(jpFound, '副標題'),
                             author: this.getVal(jpFound, '著'),
-                            series: (this.getVal(jpFound, '類') || '').trim(),
                             image: this.getVal(jpFound, 'image'),
                             isbnParam: (this.getVal(jpFound, 'ISBN') || '').trim(),
-                            region: 'JP'
+                            series: (this.getVal(jpFound, '類') || '').trim()
                         },
                         hk: hkFound ? {
                             title: this.getVal(hkFound, 'Title'),
                             subtitle: this.getVal(hkFound, 'Subtitle'),
                             author: this.getVal(hkFound, 'Author'),
-                            series: (this.getVal(hkFound, 'Title') || '').trim(), // HK use Title as Series usually
                             image: this.getVal(hkFound, 'Image'),
                             isbnParam: (this.getVal(hkFound, 'ISBN') || '').trim(),
-                            region: 'HK'
+                            series: (this.getVal(hkFound, 'Title') || '').trim()
                         } : null
                     };
                 },
