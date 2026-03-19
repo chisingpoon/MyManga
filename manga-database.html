@@ -235,6 +235,19 @@
                         {{ refreshing ? 'Syncing...' : 'Force Data Refresh' }}
                     </button>
                 </footer>
+                <div v-if="!loading" class="fixed bottom-4 right-4 z-50 max-w-xs bg-slate-900/90 text-white p-4 rounded-2xl text-[10px] font-mono shadow-2xl backdrop-blur-md border border-white/20">
+                    <p class="font-black text-indigo-400 mb-2 border-b border-white/10 pb-1 uppercase">Mobile Debugger</p>
+                    <div class="space-y-1">
+                        <p>URL Region: <span class="text-emerald-400">{{ debugInfo.urlRegion || 'NONE' }}</span></p>
+                        <p>URL ISBN: <span class="text-emerald-400">{{ debugInfo.urlIsbn || 'NONE' }}</span></p>
+                        <p>URL Series: <span class="text-emerald-400">{{ debugInfo.urlSeries || 'NONE' }}</span></p>
+                        <hr class="my-2 opacity-20">
+                        <p>DB Books (HK/JP): {{ db.hk.length }} / {{ db.jp.length }}</p>
+                        <p>Match Found: <span :class="selectedBook ? 'text-emerald-400' : 'text-red-400'">{{ selectedBook ? 'YES' : 'NO' }}</span></p>
+                        <p v-if="selectedBook">Current View: {{ view }}</p>
+                    </div>
+                    <button @click="forceRefresh" class="mt-3 w-full bg-white/10 hover:bg-white/20 py-1 rounded uppercase font-black">Retry Sync</button>
+                </div>
             </div>
         </main>
     </div>
@@ -252,7 +265,8 @@ createApp({
             selectedBook: null,
             seriesSearchQuery: '', 
             tableQuery: '', 
-            db: { hk: [], jp: [], contents: [], master: [] }
+            db: { hk: [], jp: [], contents: [], master: [] },
+            debugInfo: { urlRegion: '', urlIsbn: '', urlSeries: '' }
         }
     },
     computed: {
@@ -360,34 +374,35 @@ createApp({
         checkUrlParameters() {
             const urlParams = new URLSearchParams(window.location.search);
             
-            // 1. Get and Clean Parameters
-            const urlRegion = (urlParams.get('region') || '').toUpperCase().trim();
-            const rawIsbn = (urlParams.get('isbn') || '').toString().replace(/\D/g, '').trim();
-            const urlSeries = (urlParams.get('series') || '').trim();
+            // 1. Capture and Clean
+            this.debugInfo.urlRegion = (urlParams.get('region') || '').toUpperCase().trim();
+            this.debugInfo.urlIsbn = (urlParams.get('isbn') || '').toString().trim();
+            this.debugInfo.urlSeries = (urlParams.get('series') || '').trim();
         
-            // 2. Force Region if specified
-            if (urlRegion === 'JP' || urlRegion === 'HK') {
-                this.region = urlRegion;
+            const cleanIsbn = this.debugInfo.urlIsbn.replace(/\D/g, '');
+        
+            // 2. Set Region
+            if (this.debugInfo.urlRegion === 'JP' || this.debugInfo.urlRegion === 'HK') {
+                this.region = this.debugInfo.urlRegion;
             }
         
-            // 3. Search for Book (Deep Search)
-            if (rawIsbn) {
-                // We look in BOTH HK and JP arrays regardless of the current 'this.region'
-                const foundBook = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === rawIsbn) || 
-                                  this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === rawIsbn);
+            // 3. Try to find the book
+            if (cleanIsbn) {
+                // We log exactly what we are searching for
+                const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn) || 
+                             this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn);
                 
-                if (foundBook) {
-                    this.selectedBook = foundBook;
-                    // Determine series name based on which database the book came from
-                    this.selectedSeries = (foundBook.Title || foundBook.類 || urlSeries);
+                if (book) {
+                    this.selectedBook = book;
+                    this.selectedSeries = (this.region === 'HK' ? book.Title : book.類) || this.debugInfo.urlSeries;
                     this.view = 'detail';
-                    return; // Success, stop here
+                    return;
                 }
             } 
         
-            // 4. Fallback to Series View
-            if (urlSeries) {
-                this.selectedSeries = urlSeries;
+            // 4. Fallback
+            if (this.debugInfo.urlSeries) {
+                this.selectedSeries = this.debugInfo.urlSeries;
                 this.view = 'books';
             } else {
                 this.view = 'series';
