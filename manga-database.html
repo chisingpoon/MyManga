@@ -329,49 +329,67 @@ createApp({
     },
     methods: {
         async init() {
-            const cached = localStorage.getItem('manga_db_v3');
-            if (cached) { this.db = JSON.parse(cached); this.loading = false; this.checkUrlParameters(); this.loading = false; }
+            this.loading = true;
             try {
+                // Try to load cache first so the UI isn't empty
+                const cached = localStorage.getItem('manga_db_v3');
+                if (cached) { 
+                    this.db = JSON.parse(cached); 
+                }
+        
+                // Fetch fresh data
                 const [hk, jp, contents, master] = await Promise.all([
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json()),
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
                 ]);
+        
                 this.db = { hk, jp, contents, master };
                 localStorage.setItem('manga_db_v3', JSON.stringify(this.db));
+                
+                // CRITICAL: Check URL only after fresh data is in this.db
                 this.checkUrlParameters();
-            } catch (e) { console.error("Sync Error:", e); } finally { this.loading = false; }
+        
+            } catch (e) { 
+                console.error("Sync Error:", e); 
+            } finally { 
+                this.loading = false; 
+            }
         },
         checkUrlParameters() {
             const urlParams = new URLSearchParams(window.location.search);
-            const urlRegion = urlParams.get('region')?.toUpperCase().trim();
-            // Clean ISBN: Remove any non-numeric characters (like trailing underscores or spaces)
-            const urlIsbn = urlParams.get('isbn')?.replace(/\D/g, '').trim();
-            const urlSeries = urlParams.get('series')?.trim();
-
-            if (urlRegion === 'JP' || urlRegion === 'HK') this.region = urlRegion;
-
-            if (urlIsbn) {
-                // Search both HK and JP databases for the cleaned ISBN
-                const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === urlIsbn) || 
-                             this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === urlIsbn);
+            
+            // 1. Get and Clean Parameters
+            const urlRegion = (urlParams.get('region') || '').toUpperCase().trim();
+            const rawIsbn = (urlParams.get('isbn') || '').toString().replace(/\D/g, '').trim();
+            const urlSeries = (urlParams.get('series') || '').trim();
+        
+            // 2. Force Region if specified
+            if (urlRegion === 'JP' || urlRegion === 'HK') {
+                this.region = urlRegion;
+            }
+        
+            // 3. Search for Book (Deep Search)
+            if (rawIsbn) {
+                // We look in BOTH HK and JP arrays regardless of the current 'this.region'
+                const foundBook = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === rawIsbn) || 
+                                  this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === rawIsbn);
                 
-                if (book) {
-                    this.selectedBook = book;
-                    // Ensure we capture the series name correctly based on the found book
-                    this.selectedSeries = (this.region === 'HK' ? book.Title : book.類) || urlSeries;
+                if (foundBook) {
+                    this.selectedBook = foundBook;
+                    // Determine series name based on which database the book came from
+                    this.selectedSeries = (foundBook.Title || foundBook.類 || urlSeries);
                     this.view = 'detail';
-                    return;
+                    return; // Success, stop here
                 }
             } 
-
+        
+            // 4. Fallback to Series View
             if (urlSeries) {
-                // If a series is provided but no specific book was found/requested
                 this.selectedSeries = urlSeries;
                 this.view = 'books';
             } else {
-                // Default fallback
                 this.view = 'series';
                 this.selectedBook = null;
                 this.selectedSeries = null;
