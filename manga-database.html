@@ -370,38 +370,36 @@ createApp({
             }
         },
         checkUrlParameters() {
-            // 1. Get the actual string from the address bar manually
             const fullUrl = window.location.href;
-            const queryString = fullUrl.substring(fullUrl.indexOf('?') + 1);
             
-            // If no '?' is found, queryString will be the full URL, so we check:
-            if (!fullUrl.includes('?')) {
-                this.debugInfo.urlIsbn = 'NO QUERY IN ADDR';
-                return;
+            // Function to extract a parameter using a Regular Expression
+            const getParam = (name) => {
+                const results = new RegExp('[?&]' + name + '=([^&#]*)').exec(fullUrl);
+                return results ? decodeURIComponent(results[1].replace(/\+/g, ' ')) : null;
+            };
+        
+            // 1. Force capture from the raw URL string
+            const urlRegion = (getParam('region') || '').toUpperCase().trim();
+            const urlIsbn = (getParam('isbn') || '').toString().trim();
+            const urlSeries = (getParam('series') || '').trim();
+        
+            // 2. Update Debugger with the raw findings
+            this.debugInfo.urlRegion = urlRegion || 'REGEX FAILED';
+            this.debugInfo.urlIsbn = urlIsbn || 'REGEX FAILED';
+            this.debugInfo.urlSeries = urlSeries || 'REGEX FAILED';
+        
+            const cleanIsbn = urlIsbn.replace(/\D/g, '');
+        
+            // 3. Set Region
+            if (urlRegion === 'JP' || urlRegion === 'HK') {
+                this.region = urlRegion;
             }
         
-            // 2. Manually parse the pairs
-            const pairs = queryString.split('&');
-            let params = {};
-            pairs.forEach(pair => {
-                const [key, value] = pair.split('=');
-                if (key) params[key.toLowerCase()] = decodeURIComponent(value || '');
-            });
-        
-            // 3. Update Debugger with what we manually found
-            this.debugInfo.urlRegion = (params.region || '').toUpperCase().trim();
-            this.debugInfo.urlIsbn = (params.isbn || '').toString().trim();
-            this.debugInfo.urlSeries = (params.series || '').trim();
-        
-            const cleanIsbn = this.debugInfo.urlIsbn.replace(/\D/g, '');
-        
-            // 4. Set Region
-            if (this.debugInfo.urlRegion === 'JP' || this.debugInfo.urlRegion === 'HK') {
-                this.region = this.debugInfo.urlRegion;
-            }
-        
-            // 5. Search Logic (Ensure db is populated)
+            // 4. Search the loaded Database
             if (cleanIsbn && this.db.hk.length > 0) {
+                // Log to console so you can see the search happening in mobile inspect
+                console.log("Searching for ISBN:", cleanIsbn);
+                
                 const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn) || 
                              this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn);
                 
@@ -409,13 +407,13 @@ createApp({
                     this.selectedBook = book;
                     this.selectedSeries = (this.region === 'HK' ? (book.Title || book.類) : (book.類 || book.標題));
                     this.view = 'detail';
-                    console.log("Match Found via Manual Parse!");
                     return;
                 }
             } 
         
-            if (this.debugInfo.urlSeries) {
-                this.selectedSeries = this.debugInfo.urlSeries;
+            // 5. Fallback to Series View if no book match
+            if (urlSeries) {
+                this.selectedSeries = urlSeries;
                 this.view = 'books';
             } else {
                 this.view = 'series';
