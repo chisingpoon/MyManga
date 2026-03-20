@@ -33,26 +33,22 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 18px 12px; border-bottom: 1px solid #f1f5f9; font-size: 15px; vertical-align: middle; }
 
-        /* Updated Link Styling to accommodate Chapter text */
-        .vol-link { display: flex; flex-direction: column; font-size: 9px; font-weight: 900; color: white !important; padding: 6px 8px; border-radius: 8px; line-height: 1.2; text-align: center; min-width: 80px; text-decoration: none !important; transition: all 0.15s; }
-        .vol-link .main-label { font-size: 13px; margin-top: 2px; letter-spacing: -0.02em; }
-        .vol-link:hover { filter: brightness(110%); transform: translateY(-2px); }
+        .vol-link { display: flex; flex-direction: column; font-size: 9px; font-weight: 900; color: white !important; padding: 6px 8px; border-radius: 8px; line-height: 1.2; text-align: center; min-width: 90px; text-decoration: none !important; transition: all 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .vol-link .main-label { font-size: 12px; margin-top: 2px; letter-spacing: -0.01em; }
+        .vol-link:hover { filter: brightness(115%); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
         
         .year-btn { padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 900; transition: all 0.2s; border: 2px solid #e2e8f0; background: white; color: #64748b; text-transform: uppercase; }
-        .year-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        .year-btn.active { background: #1e293b; color: white; border-color: #1e293b; }
         
-        .search-container { position: relative; display: flex; align-items: center; }
-        .clear-search-btn { 
-            position: absolute; right: 16px; 
-            height: 32px; width: 32px;
-            display: flex; align-items: center; justify-content: center;
-            color: #94a3b8; cursor: pointer; transition: color 0.2s;
-            z-index: 10;
-        }
-        .clear-search-btn:hover { color: #ef4444; }
+        .search-container { position: relative; }
+        .clear-search-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; z-index: 10; padding: 4px; }
 
-        .pagination-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 800; font-size: 12px; transition: 0.2s; }
+        .pagination-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; font-size: 12px; transition: 0.2s; }
         .id-badge { background: #f1f5f9; color: #64748b; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; font-weight: 700; }
+
+        /* Jump to Top Button */
+        .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #4f46e5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4); cursor: pointer; transition: 0.3s; z-index: 1000; opacity: 0; pointer-events: none; }
+        .back-to-top.visible { opacity: 1; pointer-events: auto; }
     </style>
 </head>
 <body class="bg-grid" oncontextmenu="return false;">
@@ -76,19 +72,19 @@
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
             <div class="mb-8">
                 <div class="flex flex-col xl:flex-row gap-6 items-end mb-6">
-                    <div class="w-full max-w-2xl search-container">
-                        <div class="w-full">
-                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
+                    <div class="w-full max-w-2xl">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
+                        <div class="search-container">
                             <input type="text" v-model="searchQuery" placeholder="Search titles, IDs, or notes..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                        </div>
-                        <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn" style="bottom: 12px;">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </div>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="block text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Broadcast Decade Filter</label>
                         <div class="flex flex-wrap gap-2">
-                            <button @click="activeYears = []" class="year-btn" :class="{ 'active': activeYears.length === 0 }">Show All ({{ anime.length }})</button>
+                            <button @click="activeYears = []" class="year-btn" :class="{ 'active': activeYears.length === 0 }">All ({{ anime.length }})</button>
                             <button v-for="(count, decade) in yearStats" :key="decade" @click="toggleYear(decade)" class="year-btn" :class="{ 'active': activeYears.includes(decade) }">
                                 {{ decade }}s ({{ count }})
                             </button>
@@ -104,7 +100,7 @@
                             <tr>
                                 <th>Media ID</th>
                                 <th>Titles (JP / HK)</th>
-                                <th>IDs (Chapter / Show)</th>
+                                <th>IDs (CH / SH)</th>
                                 <th>Show Date (JP / HK)</th>
                                 <th>45卷/P+/カラー</th>
                                 <th>大全集</th>
@@ -120,8 +116,8 @@
                                 </td>
                                 <td>
                                     <div class="flex flex-col gap-1">
-                                        <div class="flex items-center gap-2 text-[10px] text-slate-400 font-black">CH <span class="id-badge">{{ row['JP Chapter ID'] || '-' }}</span></div>
-                                        <div class="flex items-center gap-2 text-[10px] text-slate-400 font-black">SH <span class="id-badge">{{ row['JP Show ID'] || '-' }}</span></div>
+                                        <div class="flex items-center gap-2 text-[9px] text-slate-400 font-black">CH <span class="id-badge">{{ row['JP Chapter ID'] || '-' }}</span></div>
+                                        <div class="flex items-center gap-2 text-[9px] text-slate-400 font-black">SH <span class="id-badge">{{ row['JP Show ID'] || '-' }}</span></div>
                                     </div>
                                 </td>
                                 <td class="text-[12px] whitespace-nowrap">
@@ -130,20 +126,27 @@
                                 </td>
 
                                 <td>
-                                    <a v-if="m = getMapping(row['Work ID'], ['45卷', 'カラー作品集', 'プラス'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link bg-emerald-500">
+                                    <a v-if="m = getMapping(row['Work ID'], ['45卷', 'カラー作品集', 'プラス'])" 
+                                       :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
+                                       target="_blank" 
+                                       class="vol-link"
+                                       :class="getLabelColor(m.type)">
                                         <span>{{m.type}}</span>
-                                        <span class="main-label">Vol. {{m.vol}} Chapter {{m.chapter}}</span>
+                                        <span class="main-label">{{m.vol}} Ch.{{m.chapter}}</span>
                                     </a>
                                 </td>
 
                                 <td>
-                                    <a v-if="m = getMapping(row['Work ID'], ['大全集', '大長編大全集'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link bg-indigo-500">
+                                    <a v-if="m = getMapping(row['Work ID'], ['大全集', '大長編大全集'])" 
+                                       :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
+                                       target="_blank" 
+                                       class="vol-link bg-indigo-500">
                                         <span>{{m.type}}</span>
-                                        <span class="main-label">Vol. {{m.vol}} Chapter {{m.chapter}}</span>
+                                        <span class="main-label">{{m.vol}} Ch.{{m.chapter}}</span>
                                     </a>
                                 </td>
 
-                                <td class="text-slate-400 italic text-[13px] max-w-xs">{{ row.Note }}</td>
+                                <td class="text-slate-400 italic text-[13px] max-w-[200px]">{{ row.Note }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -151,16 +154,20 @@
 
                 <div class="bg-slate-50 p-6 flex flex-col md:flex-row items-center justify-between border-t border-slate-200 gap-4">
                     <div class="text-[11px] font-black uppercase text-slate-400 tracking-widest">
-                        Total {{ filteredData.length }} results found
+                        Page {{ currentPage }} of {{ totalPages }} ({{ filteredData.length }} results)
                     </div>
                     <div class="flex gap-2">
                         <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
-                                :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-500 border border-slate-200'" 
+                                :class="p === currentPage ? 'bg-slate-900 text-white' : 'bg-white text-slate-400 border border-slate-200'" 
                                 class="pagination-btn">{{ p }}</button>
                     </div>
                 </div>
             </div>
         </main>
+
+        <button @click="scrollToTop" class="back-to-top" :class="{ 'visible': showScrollBtn }">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+        </button>
     </div>
 
     <script>
@@ -173,6 +180,7 @@
                     activeYears: [],
                     currentPage: 1,
                     itemsPerPage: 50,
+                    showScrollBtn: false,
                     anime: [],
                     contents: [],
                     publishHk: []
@@ -186,12 +194,10 @@
                 yearStats() {
                     const stats = {};
                     this.anime.forEach(r => {
-                        if (r['JP Show Date']) {
-                            const year = parseInt(r['JP Show Date'].split('/')[2]);
-                            if (year) {
-                                const decade = Math.floor(year / 10) * 10;
-                                stats[decade] = (stats[decade] || 0) + 1;
-                            }
+                        const yrStr = r['JP Show Date']?.split('/')[2];
+                        if (yrStr) {
+                            const decade = Math.floor(parseInt(yrStr) / 10) * 10;
+                            stats[decade] = (stats[decade] || 0) + 1;
                         }
                     });
                     return stats;
@@ -232,6 +238,7 @@
                         ]);
                         this.anime = a; this.contents = c; this.publishHk = h;
                         this.loading = false;
+                        window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 500; });
                     } catch (e) { console.error(e); }
                 },
                 toggleYear(year) {
@@ -240,25 +247,24 @@
                     if (idx > -1) this.activeYears.splice(idx, 1);
                     else this.activeYears.push(decade);
                 },
-                changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
+                getLabelColor(type) {
+                    if (type === '45卷') return 'bg-blue-600';
+                    if (type === 'プラス') return 'bg-indigo-600';
+                    if (type === 'カラー作品集') return 'bg-rose-500';
+                    return 'bg-emerald-500';
+                },
+                changePage(p) { this.currentPage = p; this.scrollToTop(); },
+                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 getMapping(workId, types) {
                     if(!workId || workId === "-") return null;
                     const idStr = workId.toString().trim();
                     const match = this.contents.find(c => c.作品番?.toString().trim() === idStr && types.includes(c.類));
-                    return this.processMatch(match);
-                },
-                processMatch(match) {
                     if (!match || !match.ISBN) return null;
                     const isbn = match.ISBN.trim();
                     const matches = this.publishHk.filter(h => (h.ISBN_JP && h.ISBN_JP.trim() === isbn) || (h.ISBN && h.ISBN.trim() === isbn));
                     if (matches.length === 0) return null;
                     const latestHk = matches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
-                    return { 
-                        vol: match.卷 || match.巻, 
-                        chapter: match.收錄話 || '-', // Added Chapter Number mapping
-                        hkIsbn: latestHk.ISBN, 
-                        type: match.類 
-                    };
+                    return { vol: match.卷 || match.巻, chapter: match.收錄話 || '-', hkIsbn: latestHk.ISBN, type: match.類 };
                 }
             },
             mounted() { this.init(); }
