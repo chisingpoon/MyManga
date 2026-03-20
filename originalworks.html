@@ -289,8 +289,26 @@
                 processMatch(match) {
                     if (!match || !match.ISBN) return null;
                     const isbn = match.ISBN.trim();
-                    const hk = this.publishHk.find(h => h.ISBN_JP === isbn || h.ISBN === isbn);
-                    return hk ? { vol: match.卷 || match.巻, hkIsbn: hk.ISBN, type: match.類 } : null;
+                    
+                    // 1. Find ALL matches from the HK catalog
+                    const matches = this.publishHk.filter(h => h.ISBN_JP === isbn || h.ISBN === isbn);
+                    
+                    if (matches.length === 0) return null;
+                
+                    // 2. Sort matches by issuedate descending (Newest first)
+                    // We handle the date as a string or number safely
+                    const latestHk = matches.sort((a, b) => {
+                        const dateA = new Date(a.issuedate || 0);
+                        const dateB = new Date(b.issuedate || 0);
+                        return dateB - dateA;
+                    })[0];
+                
+                    // 3. Return the latest record's data
+                    return { 
+                        vol: match.卷 || match.巻, 
+                        hkIsbn: latestHk.ISBN, 
+                        type: match.類 
+                    };
                 },
                 getSubtitleInfo(workId) {
                     const idStr = workId?.toString().trim();
