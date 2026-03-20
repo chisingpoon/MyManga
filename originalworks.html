@@ -290,20 +290,25 @@
                     if (!match || !match.ISBN) return null;
                     const isbn = match.ISBN.trim();
                     
-                    // 1. Find ALL matches from the HK catalog
-                    const matches = this.publishHk.filter(h => h.ISBN_JP === isbn || h.ISBN === isbn);
+                    // 1. Find all HK records that match the ISBN_JP or ISBN
+                    const matches = this.publishHk.filter(h => 
+                        (h.ISBN_JP && h.ISBN_JP.trim() === isbn) || 
+                        (h.ISBN && h.ISBN.trim() === isbn)
+                    );
                     
                     if (matches.length === 0) return null;
                 
-                    // 2. Sort matches by issuedate descending (Newest first)
-                    // We handle the date as a string or number safely
+                    // 2. Sort by 'IssueDate' (Matching your sheet header exactly)
                     const latestHk = matches.sort((a, b) => {
-                        const dateA = new Date(a.issuedate || 0);
-                        const dateB = new Date(b.issuedate || 0);
+                        // Create date objects, falling back to 0 (1970) if empty
+                        const dateA = new Date(a.IssueDate || 0);
+                        const dateB = new Date(b.IssueDate || 0);
+                        
+                        // Descending sort: Newest Date first
                         return dateB - dateA;
                     })[0];
                 
-                    // 3. Return the latest record's data
+                    // 3. Return the data from the most recent edition found
                     return { 
                         vol: match.卷 || match.巻, 
                         hkIsbn: latestHk.ISBN, 
