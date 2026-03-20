@@ -15,7 +15,6 @@
         }
         .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
         
-        /* 1. HEADER FONT ALIGNMENT (Matching original) */
         th { 
             font-size: 12px; font-weight: 800; padding: 16px 12px; 
             text-align: left; color: #64748b; background: #f8fafc; 
@@ -34,20 +33,21 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 18px 12px; border-bottom: 1px solid #f1f5f9; font-size: 15px; vertical-align: middle; }
 
-        .vol-link { display: flex; flex-direction: column; font-size: 10px; font-weight: 900; color: white !important; padding: 6px 4px; border-radius: 8px; line-height: 1; text-align: center; min-width: 50px; text-decoration: none !important; transition: all 0.15s; }
-        .vol-link span:last-child { font-size: 14px; margin-top: 2px; }
+        /* Updated Link Styling to accommodate Chapter text */
+        .vol-link { display: flex; flex-direction: column; font-size: 9px; font-weight: 900; color: white !important; padding: 6px 8px; border-radius: 8px; line-height: 1.2; text-align: center; min-width: 80px; text-decoration: none !important; transition: all 0.15s; }
+        .vol-link .main-label { font-size: 13px; margin-top: 2px; letter-spacing: -0.02em; }
         .vol-link:hover { filter: brightness(110%); transform: translateY(-2px); }
         
         .year-btn { padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 900; transition: all 0.2s; border: 2px solid #e2e8f0; background: white; color: #64748b; text-transform: uppercase; }
         .year-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
         
-        /* 2. CENTERED SEARCH CLEAR BUTTON */
         .search-container { position: relative; display: flex; align-items: center; }
         .clear-search-btn { 
             position: absolute; right: 16px; 
             height: 32px; width: 32px;
             display: flex; align-items: center; justify-content: center;
             color: #94a3b8; cursor: pointer; transition: color 0.2s;
+            z-index: 10;
         }
         .clear-search-btn:hover { color: #ef4444; }
 
@@ -81,7 +81,7 @@
                             <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
                             <input type="text" v-model="searchQuery" placeholder="Search titles, IDs, or notes..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
                         </div>
-                        <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn" style="top: 34px;">
+                        <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn" style="bottom: 12px;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </div>
                     </div>
@@ -95,11 +95,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <div v-if="activeYears.length > 0" class="mb-4 text-[11px] font-black text-indigo-500 uppercase flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"/></svg>
-                    Currently Filtering: {{ activeYears.sort().join('s, ') }}s Era
-                </div>
             </div>
 
             <div class="main-card">
@@ -109,7 +104,8 @@
                             <tr>
                                 <th>Media ID</th>
                                 <th>Titles (JP / HK)</th>
-                                <th>IDs (Chapter / Show)</th> <th>Show Date (JP / HK)</th>
+                                <th>IDs (Chapter / Show)</th>
+                                <th>Show Date (JP / HK)</th>
                                 <th>45卷/P+/カラー</th>
                                 <th>大全集</th>
                                 <th>Note</th>
@@ -132,16 +128,21 @@
                                     <div class="flex items-center gap-2 font-bold"><span class="w-4 text-slate-300">🇯🇵</span> {{ row['JP Show Date'] || '-' }}</div>
                                     <div class="flex items-center gap-2 mt-1 font-bold text-slate-500"><span class="w-4 text-slate-300">🇭🇰</span> {{ row['HK Show Date'] || '-' }}</div>
                                 </td>
+
                                 <td>
                                     <a v-if="m = getMapping(row['Work ID'], ['45卷', 'カラー作品集', 'プラス'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link bg-emerald-500">
-                                        <span>{{m.type}}</span><span>{{m.vol}}</span>
+                                        <span>{{m.type}}</span>
+                                        <span class="main-label">Vol. {{m.vol}} Chapter {{m.chapter}}</span>
                                     </a>
                                 </td>
+
                                 <td>
                                     <a v-if="m = getMapping(row['Work ID'], ['大全集', '大長編大全集'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link bg-indigo-500">
-                                        <span>{{m.vol}}</span>
+                                        <span>{{m.type}}</span>
+                                        <span class="main-label">Vol. {{m.vol}} Chapter {{m.chapter}}</span>
                                     </a>
                                 </td>
+
                                 <td class="text-slate-400 italic text-[13px] max-w-xs">{{ row.Note }}</td>
                             </tr>
                         </tbody>
@@ -252,7 +253,12 @@
                     const matches = this.publishHk.filter(h => (h.ISBN_JP && h.ISBN_JP.trim() === isbn) || (h.ISBN && h.ISBN.trim() === isbn));
                     if (matches.length === 0) return null;
                     const latestHk = matches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
-                    return { vol: match.卷 || match.巻, hkIsbn: latestHk.ISBN, type: match.類 };
+                    return { 
+                        vol: match.卷 || match.巻, 
+                        chapter: match.收錄話 || '-', // Added Chapter Number mapping
+                        hkIsbn: latestHk.ISBN, 
+                        type: match.類 
+                    };
                 }
             },
             mounted() { this.init(); }
