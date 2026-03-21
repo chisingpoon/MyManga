@@ -65,25 +65,25 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Connecting Database...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Updating Archive View...</p>
         </div>
 
         <nav class="top-nav">
             <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
                     <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </div>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadgets Archive</h1>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadgets in Media</h1>
                 </div>
-                <span class="counter-badge">{{ filteredData.length }} Items Found</span>
+                <span class="counter-badge">{{ filteredData.length }} Results</span>
             </div>
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
             <div class="flex items-center justify-between mb-8 gap-6">
-                <input type="text" v-model="searchQuery" placeholder="Search Gadget ID or Name..." class="flex-1 max-w-xl bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                <select v-model="selectedMovie" class="bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none cursor-pointer focus:border-indigo-500 min-w-[300px]">
+                <input type="text" v-model.trim="searchQuery" @input="currentPage = 1" placeholder="Search by Japanese name or any translation..." class="flex-1 max-w-xl bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                <select v-model="selectedMovie" @change="currentPage = 1" class="bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none cursor-pointer focus:border-indigo-500 min-w-[300px]">
                     <option value="">All Movie References</option>
                     <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
                 </select>
@@ -94,23 +94,21 @@
                     <table>
                         <thead>
                             <tr>
-                                <th class="w-[12%] th-gadget">Gadget (JP)</th>
+                                <th class="w-[15%] th-gadget">Gadget (JP)</th>
                                 <th class="w-[18%] th-media">Movie Reference</th>
                                 <th class="w-[12%] th-media">HK Translation</th>
                                 <th class="w-[10%] th-media">JP Release</th>
-                                <th class="w-[16%] th-manga">Grand Collection</th>
-                                <th class="w-[16%] th-manga">Standard Manga</th>
-                                <th class="w-[16%] th-manga">Publisher Trans.</th>
+                                <th class="w-[15%] th-manga">Grand Collection</th>
+                                <th class="w-[15%] th-manga">Standard Manga</th>
+                                <th class="w-[15%] th-manga">Publisher Trans.</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="gadget in paginatedData" :key="gadget['Gadget ID']">
-                                <td class="font-black text-slate-900 text-[15px] border-r border-slate-100">
+                                <td class="font-black text-slate-900 text-[16px] border-r border-slate-100">
                                     {{ gadget['JP Title'] }}
-                                    <div class="text-[9px] text-slate-400 mt-1 font-bold">{{ gadget['Gadget ID'] }}</div>
                                 </td>
 
-                                <!-- Media Group -->
                                 <td>
                                     <div v-for="m in gadget.appearances" class="appearance-item">
                                         <a v-if="m['Movie ID'] && m['Movie ID'] !== '-'" 
@@ -132,7 +130,6 @@
                                     </div>
                                 </td>
 
-                                <!-- Manga Group (Deduplicated) -->
                                 <td>
                                     <div v-for="book in getCombinedManga(gadget, true)" :key="book.hkIsbn">
                                         <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="archive-link manga-grand">
@@ -162,7 +159,6 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 <div class="bg-slate-50 p-6 flex items-center justify-between border-t border-slate-200">
                     <div class="text-[11px] font-black text-slate-400 uppercase">Page {{ currentPage }} / {{ totalPages }}</div>
                     <div class="flex gap-2">
@@ -197,22 +193,33 @@
                         }));
                 },
                 filteredData() {
-                    const q = this.searchQuery.toLowerCase().trim();
+                    const q = this.searchQuery.toLowerCase();
                     return this.groupedData.filter(gadget => {
+                        // 1. Movie Reference Filter
                         if (this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
-                        const matchText = [gadget['JP Title'], gadget['Gadget ID']].join(' ').toLowerCase();
-                        return !q || matchText.includes(q);
+                        
+                        // 2. Search logic (JP Name + All Translations)
+                        const hkList = gadget.appearances.map(a => a['HK Translation'] || '').join(' ');
+                        const pubCulList = gadget.appearances.map(a => a['CultureCom Trans'] || '').join(' ');
+                        const pubChiList = gadget.appearances.map(a => a['HKChingWin Trans'] || '').join(' ');
+                        
+                        const haystack = [
+                            gadget['JP Title'] || '', 
+                            hkList, 
+                            pubCulList, 
+                            pubChiList
+                        ].join(' ').toLowerCase();
+                        
+                        return !q || haystack.includes(q);
                     });
                 },
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.filteredData.slice(start, start + this.itemsPerPage);
                 },
-                totalPages() {
-                    return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1;
-                },
+                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
                 uniqueMovies() {
-                    const ids = [...new Set(this.filteredData.flatMap(g => g.appearances.map(a => a['Movie ID'])))].filter(id => id && id !== "-");
+                    const ids = [...new Set(this.groupedData.flatMap(g => g.appearances.map(a => a['Movie ID'])))].filter(id => id && id !== "-");
                     return ids.map(id => {
                         const m = this.movies.find(movie => movie['Media ID'] === id);
                         return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
@@ -243,7 +250,7 @@
                         this.contents = Array.isArray(s) ? s : [];
                         this.publishHk = Array.isArray(h) ? h : [];
                         this.loading = false;
-                    } catch (e) { console.error("Data Load Error:", e); }
+                    } catch (e) { console.error("Load Error", e); }
                 },
                 getMovieData(id, field) {
                     const m = this.movies.find(x => x['Media ID'] === id);
