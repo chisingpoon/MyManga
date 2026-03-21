@@ -1,14 +1,4 @@
-<script>
-    const { createApp } = Vue;
-    createApp({
-        data() {
-            return {
-                loading: true, searchQuery: '', selectedMovie: '',
-                currentPage: 1, itemsPerPage: 40, showScrollBtn: false,
-                gadgetsMaster: [], // This is now the primary data source
-                gadgetMedia: [], movies: [], contents: [], publishHk: []
-            }
-        },Q<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
@@ -25,7 +15,6 @@
         }
         .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
         
-        /* Fixed Header Heights */
         th { 
             font-size: 11px; font-weight: 800; padding: 16px 12px; 
             text-align: left; color: #64748b; background: #f8fafc; 
@@ -44,7 +33,6 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: middle; }
 
-        /* Links */
         .archive-link { 
             display: flex; flex-direction: column; 
             padding: 8px 12px; border-radius: 10px; 
@@ -52,9 +40,8 @@
             line-height: 1.2; border: 1px solid rgba(0,0,0,0.05);
             margin-bottom: 6px; min-width: 170px;
         }
-        .archive-link:last-child { margin-bottom: 0; }
-        .archive-link .label-top { font-weight: 900; font-size: 12px; margin-bottom: 2px; }
-        .archive-link .label-bottom { opacity: 0.85; font-weight: 600; font-size: 10px; }
+        .archive-link .label-top { font-weight: 900; font-size: 11px; margin-bottom: 2px; }
+        .archive-link .label-bottom { opacity: 0.85; font-weight: 600; font-size: 9px; }
         
         .manga-standard { background: #4f46e5; color: white !important; } 
         .manga-grand { background: #be185d; color: white !important; }     
@@ -69,7 +56,7 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Rebuilding Master Archive...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Master Archive...</p>
         </div>
 
         <nav class="top-nav">
@@ -86,7 +73,7 @@
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
             <div class="flex items-center justify-between mb-8 gap-6">
                 <div class="relative flex-1 max-w-xl">
-                    <input type="text" v-model="searchQuery" placeholder="Search gadget or media keywords..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                    <input type="text" v-model="searchQuery" placeholder="Search gadget name or media keyword..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
                     <div v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer">✕</div>
                 </div>
                 <div class="flex items-center gap-4">
@@ -94,7 +81,7 @@
                         <option value="">All Movie References</option>
                         <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
                     </select>
-                    <span class="counter-badge">{{ filteredData.length }} results</span>
+                    <span class="counter-badge">{{ filteredData.length }} Records</span>
                     <span v-if="isFiltered" @click="resetFilters" class="reset-link">Reset</span>
                 </div>
             </div>
@@ -115,12 +102,8 @@
                         </thead>
                         <tbody>
                             <tr v-for="row in paginatedData" :key="row.media['Gadget Media ID']">
-                                <td class="font-black text-slate-900 text-[15px]">
-                                    {{ row.master['JP Title'] || 'Unknown' }}
-                                </td>
-                                <td class="font-bold text-slate-700">
-                                    {{ row.media['HK Translation'] || '-' }}
-                                </td>
+                                <td class="font-black text-slate-900 text-[15px]">{{ row.master['JP Title'] }}</td>
+                                <td class="font-bold text-slate-700">{{ row.media['HK Translation'] || '-' }}</td>
                                 <td class="text-[12px] font-bold text-slate-500">
                                     <div class="mb-1 text-slate-900">文傳: {{ row.media['CultureCom TransHK'] || '-' }}</div>
                                     <div>青文: {{ row.media['ChingWin Trans'] || '-' }}</div>
@@ -187,38 +170,33 @@
             computed: {
                 isFiltered() { return this.searchQuery !== '' || this.selectedMovie !== ''; },
                 
-                // Unified Data Source: Only media records belonging to ACTIVE gadgets
-                activeMappedData() {
+                // CRITICAL LOGIC: Create combined list where Gadget is ACTIVE
+                activeMediaList() {
                     const activeGadgets = this.gadgetsMaster.filter(g => g['Active']?.toLowerCase() === 'yes');
                     const results = [];
-                    
                     this.gadgetMedia.forEach(media => {
                         const master = activeGadgets.find(g => g['Gadget ID'] === media['Gadget ID']);
-                        if (master) {
-                            results.push({ master, media });
-                        }
+                        if (master) results.push({ master, media });
                     });
                     return results;
                 },
 
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
-                    return this.activeMappedData.filter(row => {
+                    return this.activeMediaList.filter(row => {
                         if (this.selectedMovie && row.media['Movie ID'] !== this.selectedMovie) return false;
-                        
                         const movie = this.movies.find(m => m['Media ID'] === row.media['Movie ID']) || {};
                         const searchFields = [
                             row.master['JP Title'], row.media['HK Translation'], 
                             row.media['CultureCom TransHK'], row.media['ChingWin Trans'],
                             movie['JP Title'], movie['HK Title']
                         ].join(' ').toLowerCase();
-                        
                         return !q || searchFields.includes(q);
                     });
                 },
 
                 uniqueMovies() {
-                    const ids = [...new Set(this.activeMappedData.map(r => r.media['Movie ID']).filter(id => id && id !== "-"))];
+                    const ids = [...new Set(this.activeMediaList.map(r => r.media['Movie ID']).filter(id => id && id !== "-"))];
                     return ids.map(id => {
                         const m = this.movies.find(movie => movie['Media ID'] === id);
                         return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
@@ -287,170 +265,3 @@
     </script>
 </body>
 </html>
-        computed: {
-            isFiltered() { return this.searchQuery !== '' || this.selectedMovie !== ''; },
-            
-            // Filters based on the Active Gadgets list
-            filteredData() {
-                const q = this.searchQuery.toLowerCase().trim();
-                return this.gadgetsMaster.filter(g => {
-                    // Filter: Only 'yes' active
-                    if (g['Active']?.toLowerCase() !== 'yes') return false;
-
-                    // Get all media appearances for this specific gadget
-                    const appearances = this.gadgetMedia.filter(m => m['Gadget ID'] === g['Gadget ID']);
-                    
-                    // Filter: Movie Selection (If a movie is selected, the gadget must appear in it)
-                    if (this.selectedMovie && !appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
-
-                    // Search Logic: Search Gadget Title or any of its media appearance translations
-                    const appearanceTrans = appearances.map(a => 
-                        `${a['HK Translation']} ${a['CultureCom TransHK']} ${a['ChingWin Trans']}`
-                    ).join(' ');
-                    
-                    const searchFields = [
-                        g['JP Title'], 
-                        g['Gadget ID'],
-                        appearanceTrans
-                    ].join(' ').toLowerCase();
-                    
-                    return !q || searchFields.includes(q);
-                });
-            },
-
-            uniqueMovies() {
-                // Get all movie IDs that are actually linked to active gadgets
-                const activeGadgetIds = this.filteredData.map(g => g['Gadget ID']);
-                const movieIds = [...new Set(
-                    this.gadgetMedia
-                        .filter(m => activeGadgetIds.includes(m['Gadget ID']))
-                        .map(m => m['Movie ID'])
-                        .filter(id => id && id !== "-")
-                )];
-                
-                return movieIds.map(id => {
-                    const m = this.movies.find(movie => movie['Media ID'] === id);
-                    return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
-                }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
-            },
-
-            totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
-            paginatedData() {
-                const start = (this.currentPage - 1) * this.itemsPerPage;
-                return this.filteredData.slice(start, start + this.itemsPerPage);
-            },
-            paginationRange() {
-                const current = this.currentPage, last = this.totalPages, range = [];
-                for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
-                const res = []; let l;
-                for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
-                return res;
-            }
-        },
-        methods: {
-            async init() {
-                try {
-                    const [g, gm, m, s, h] = await Promise.all([
-                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/法寶").then(r => r.json()),
-                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/媒體與法寶").then(r => r.json()),
-                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫").then(r => r.json()),
-                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
-                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
-                    ]);
-                    this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
-                    
-                    // URL Param: Filter by ID
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const gid = urlParams.get('gadgetid');
-                    if (gid) this.searchQuery = gid;
-
-                    this.loading = false;
-                    window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
-                } catch (e) { console.error(e); }
-            },
-
-            // Helper to get all media records for a specific Gadget
-            getMediaRows(gadgetId) {
-                return this.gadgetMedia.filter(m => m['Gadget ID'] === gadgetId);
-            },
-
-            getMovieData(movieId, field) {
-                const movie = this.movies.find(m => m['Media ID'] === movieId);
-                return movie ? (movie[field] || '-') : (field === 'Media ID' ? movieId : '-');
-            },
-
-            getMangaByCat(workId, isGrand) {
-                if(!workId || workId === "-") return null;
-                const idStr = workId.toString().trim();
-                const contentsMatches = this.contents.filter(item => {
-                    const matchId = item.作品番?.toString().trim() === idStr;
-                    const isGrandType = (item.類 === '大長編大全集' || item.類 === '大全集');
-                    return matchId && (isGrand ? isGrandType : !isGrandType);
-                });
-                
-                const mapped = [];
-                contentsMatches.forEach(match => {
-                    const hkItems = this.publishHk.filter(h => h.ISBN_JP?.trim() === match.ISBN?.trim());
-                    hkItems.forEach(h => {
-                        mapped.push({ hkIsbn: h.ISBN, title: h.Title, sub: (h.Volume ? `Vol.${h.Volume} ` : '') + (h.Subtitle || ''), date: new Date(h.IssueDate || 0) });
-                    });
-                });
-                return mapped.length ? mapped.sort((a,b) => b.date - a.date) : null;
-            },
-            resetFilters() { this.searchQuery = ''; this.selectedMovie = ''; },
-            changePage(p) { this.currentPage = p; this.scrollToTop(); },
-            scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-        },
-        mounted() { this.init(); }
-    }).mount('#app')
-</script>
-
-<tr v-for="gadget in paginatedData" :key="gadget['Gadget ID']">
-    <td class="font-black text-slate-900 text-[15px]">
-        {{ gadget['JP Title'] }}
-    </td>
-    
-    <td colspan="6" class="p-0">
-        <table class="w-full border-none">
-            <tr v-for="media in getMediaRows(gadget['Gadget ID'])" :key="media['Gadget Media ID']" class="border-none">
-                <td class="w-[14.1%] border-none font-bold text-slate-700">
-                    {{ media['HK Translation'] || '-' }}
-                </td>
-                <td class="w-[17.6%] border-none text-[12px] font-bold text-slate-500">
-                    <div class="mb-1 text-slate-900">文傳: {{ media['CultureCom TransHK'] || '-' }}</div>
-                    <div>青文: {{ media['ChingWin Trans'] || '-' }}</div>
-                </td>
-                <td class="w-[11.8%] border-none text-[13px] font-bold text-slate-600">
-                    {{ getMovieData(media['Movie ID'], 'JP Release Date') }}
-                </td>
-                <td class="w-[18.8%] border-none">
-                    <a v-if="media['Movie ID'] && media['Movie ID'] !== '-'" 
-                       :href="'movie.html?mediaid=' + getMovieData(media['Movie ID'], 'Media ID')" class="archive-link movie-btn">
-                        <span class="label-top">{{ getMovieData(media['Movie ID'], 'JP Title') }}</span>
-                        <span class="label-bottom">{{ getMovieData(media['Movie ID'], 'HK Title') }}</span>
-                    </a>
-                </td>
-                <td class="w-[18.8%] border-none">
-                    <div v-if="mList = getMangaByCat(media['Work ID'], true)" class="flex flex-col">
-                        <a v-for="m in mList" :key="m.hkIsbn" 
-                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                           target="_blank" class="archive-link manga-grand">
-                            <span class="label-top">{{ m.title }}</span>
-                            <span class="label-bottom">{{ m.sub }}</span>
-                        </a>
-                    </div>
-                </td>
-                <td class="w-[18.8%] border-none">
-                    <div v-if="mList = getMangaByCat(media['Work ID'], false)" class="flex flex-col">
-                        <a v-for="m in mList" :key="m.hkIsbn" 
-                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                           target="_blank" class="archive-link manga-standard">
-                            <span class="label-top">{{ m.title }}</span>
-                            <span class="label-bottom">{{ m.sub }}</span>
-                        </a>
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </td>
-</tr>
