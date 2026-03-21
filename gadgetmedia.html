@@ -8,50 +8,83 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
+        
+        /* THEME CORE: Background & Typography */
         body { 
             -webkit-user-select: none; user-select: none;
-            min-height: 100vh; background-color: #f1f5f9; 
-            font-family: 'Inter', 'Noto Sans TC', system-ui, sans-serif; color: #1e293b;
+            min-height: 100vh; 
+            background-color: #f1f5f9; /* Original Slate Background */
+            font-family: 'Inter', 'Noto Sans TC', system-ui, sans-serif; 
+            color: #1e293b;
         }
         
-        /* Sticky Header Logic */
-        .table-container { max-height: 80vh; overflow-y: auto; border-radius: 0 0 20px 20px; scroll-behavior: smooth; }
+        /* THEME CORE: Table Container & Sticky Logic */
+        .table-container { 
+            max-height: 80vh; 
+            overflow-y: auto; 
+            border-radius: 0 0 20px 20px; 
+            scroll-behavior: smooth; 
+            background: white; 
+        }
         thead th { 
-            position: sticky; top: 0; z-index: 20; 
+            position: sticky; top: 0; z-index: 30; 
             font-size: 11px; font-weight: 800; padding: 14px 12px; 
             text-align: left; text-transform: uppercase; letter-spacing: 0.05em;
             box-shadow: inset 0 -2px 0 #e2e8f0;
         }
 
-        /* Modern Visual Separation */
+        /* VISUAL SEPARATION: Gadget vs Data Zones */
         .th-gadget { background-color: #ffffff; color: #1e293b; border-right: 4px solid #f1f5f9; }
-        .td-gadget { background-color: #ffffff; border-right: 4px solid #f1f5f9; position: sticky; left: 0; z-index: 5; }
+        .td-gadget { 
+            background-color: #ffffff; 
+            border-right: 4px solid #f1f5f9; 
+            position: sticky; left: 0; z-index: 10; 
+            font-weight: 900;
+        }
 
+        /* MEDIA COLOR ZONES */
         .col-media { background-color: #f0fdfa; color: #0f766e; box-shadow: inset 0 -2px 0 #5eead4 !important; }
         .col-manga { background-color: #f5f3ff; color: #5b21b6; box-shadow: inset 0 -2px 0 #c4b5fd !important; }
 
-        .main-card { background: white; border-radius: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: 1px solid #e2e8f0; }
+        /* THEME CORE: Cards & Tables */
+        .main-card { 
+            background: white; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); 
+            border: 1px solid #e2e8f0; 
+            overflow: hidden; 
+        }
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: top; }
 
-        .archive-link { display: flex; flex-direction: column; padding: 8px 12px; border-radius: 8px; transition: 0.2s; line-height: 1.2; margin-bottom: 4px; }
-        .manga-standard { background: #4f46e5; color: white !important; } 
-        .manga-grand { background: #be185d; color: white !important; }     
+        /* BUTTONS & LINKS (Restored Original Colors) */
+        .archive-link { 
+            display: flex; flex-direction: column; 
+            padding: 8px 12px; border-radius: 8px; 
+            transition: 0.2s; line-height: 1.2; margin-bottom: 4px;
+            text-decoration: none !important;
+        }
         .movie-btn { background: #0d9488; color: white !important; }      
+        .manga-grand { background: #be185d; color: white !important; }     
+        .manga-standard { background: #4f46e5; color: white !important; } 
         .archive-link:hover { transform: translateY(-1px); filter: brightness(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
         .appearance-item { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
         .appearance-item:last-child { border-bottom: none; }
 
+        /* BACK TO TOP (Enhanced Centering) */
         .back-to-top {
             position: fixed; bottom: 30px; right: 30px;
             width: 50px; height: 50px; background: #1e293b; color: white;
             border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); cursor: pointer;
-            transition: all 0.3s ease; z-index: 50; opacity: 0; visibility: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 50; 
+            opacity: 0; visibility: hidden;
         }
         .back-to-top.show { opacity: 1; visibility: visible; }
+        .back-to-top:hover { background: #4f46e5; transform: translateY(-5px); }
 
+        /* LOADER */
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -61,7 +94,7 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[10px] font-bold uppercase tracking-tighter text-slate-400">Syncing Parameters...</p>
+            <p class="mt-4 text-[10px] font-bold uppercase tracking-tighter text-slate-400">Restoring Style & Data...</p>
         </div>
 
         <div class="back-to-top" :class="{ 'show': showScrollBtn }" @click="scrollToTop">
@@ -71,14 +104,13 @@
         <header class="mb-8 flex items-center justify-between">
             <div>
                 <h1 class="text-3xl font-black tracking-tighter text-slate-900 uppercase">Gadget Media Registry</h1>
-                <p class="text-slate-500 font-medium text-sm">Real-time filtering for Movies & Manga Collections</p>
+                <p class="text-slate-500 font-medium text-sm">Cross-referencing Movies & Manga Collections</p>
             </div>
             <div class="px-4 py-2 bg-white border border-slate-200 rounded-full shadow-sm text-xs font-bold text-slate-600">
-                {{ filteredData.length }} Results
+                {{ filteredData.length }} Entries Found
             </div>
         </header>
 
-        <!-- Search Bar -->
         <div class="flex items-center gap-3 mb-6 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
             <div class="relative flex-1">
                 <input type="text" v-model.trim="searchQuery" @input="currentPage = 1" placeholder="Search gadgets..." 
@@ -87,19 +119,23 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3"></path></svg>
                 </div>
             </div>
-            <select v-model="selectedMovie" @change="currentPage = 1" class="w-44 bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-black uppercase outline-none">
+            
+            <select v-model="selectedMovie" @change="currentPage = 1" class="w-44 bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-black uppercase outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">All Movies</option>
                 <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
             </select>
-            <select v-model="selectedGrandType" @change="currentPage = 1" class="w-44 bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-black uppercase outline-none">
+            
+            <select v-model="selectedGrandType" @change="currentPage = 1" class="w-44 bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-black uppercase outline-none focus:ring-2 focus:ring-pink-500">
                 <option value="">Grand: Dynamic</option>
                 <option v-for="type in dynamicGrandTypes" :key="type" :value="type">{{ type }}</option>
             </select>
-            <select v-model="selectedStandardTitle" @change="currentPage = 1" class="w-56 bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-black uppercase outline-none">
+            
+            <select v-model="selectedStandardTitle" @change="currentPage = 1" class="w-56 bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-black uppercase outline-none focus:ring-2 focus:ring-indigo-500">
                 <option value="">Standard: Dynamic</option>
                 <option v-for="title in dynamicStandardTitles" :key="title" :value="title">{{ title }}</option>
             </select>
-            <button @click="resetFilters" class="px-5 py-3 bg-slate-900 text-white text-xs font-black uppercase rounded-xl hover:bg-red-600 transition-colors">
+
+            <button @click="resetFilters" class="px-6 py-3 bg-slate-900 text-white text-xs font-black uppercase rounded-xl hover:bg-indigo-600 transition-all shadow-md active:scale-95">
                 Reset
             </button>
         </div>
@@ -120,9 +156,8 @@
                     </thead>
                     <tbody>
                         <tr v-for="gadget in paginatedData" :key="gadget['Gadget ID']" class="hover:bg-slate-50/80 transition-colors">
-                            <td class="font-black text-slate-900 text-[15px] td-gadget">{{ gadget['JP Title'] }}</td>
+                            <td class="td-gadget text-slate-900 text-[15px]">{{ gadget['JP Title'] }}</td>
                             
-                            <!-- Movie Section -->
                             <td class="bg-emerald-50/20">
                                 <div v-for="m in gadget.appearances" class="appearance-item">
                                     <a v-if="m['Movie ID'] && m['Movie ID'] !== '-'" :href="'movie.html?mediaid=' + getMovieData(m['Movie ID'], 'Media ID')" class="archive-link movie-btn shadow-sm">
@@ -139,7 +174,6 @@
                                 <div v-for="m in gadget.appearances" class="appearance-item">{{ getMovieData(m['Movie ID'], 'JP Release Date') }}</div>
                             </td>
 
-                            <!-- Manga Section -->
                             <td class="bg-indigo-50/20">
                                 <div v-for="book in getCombinedManga(gadget, true)" :key="book.hkIsbn">
                                     <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="archive-link manga-grand shadow-sm">
@@ -189,7 +223,7 @@
                 return {
                     loading: true, searchQuery: '', selectedMovie: '',
                     selectedGrandType: '', selectedStandardTitle: '',
-                    urlGadgetID: '', // Specific gadget focus
+                    urlGadgetID: '', 
                     currentPage: 1, itemsPerPage: 30,
                     gadgetsMaster: [], gadgetMedia: [], movies: [], contents: [], publishHk: [],
                     showScrollBtn: false
@@ -213,15 +247,15 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase();
                     return this.groupedData.filter(gadget => {
-                        // URL Parameter: gadgetid
+                        // URL Focus Logic
                         if (this.urlGadgetID && gadget['Gadget ID'] !== this.urlGadgetID) return false;
                         
-                        // Dropdown filters
+                        // Dropdown Logic
                         if (this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
                         if (this.selectedGrandType && !this.getCombinedManga(gadget, true).some(b => b.type === this.selectedGrandType)) return false;
                         if (this.selectedStandardTitle && !this.getCombinedManga(gadget, false).some(b => b.title === this.selectedStandardTitle)) return false;
                         
-                        // Text Search
+                        // Search Logic
                         const text = [gadget['JP Title'] || '', gadget.appearances.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')].join(' ').toLowerCase();
                         return !q || text.includes(q);
                     });
@@ -256,13 +290,11 @@
                         if (exclude !== 'selectedMovie' && this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
                         if (exclude !== 'selectedGrandType' && this.selectedGrandType && !this.getCombinedManga(gadget, true).some(b => b.type === this.selectedGrandType)) return false;
                         if (exclude !== 'selectedStandardTitle' && this.selectedStandardTitle && !this.getCombinedManga(gadget, false).some(b => b.title === this.selectedStandardTitle)) return false;
-                        const text = [gadget['JP Title'] || '', gadget.appearances.map(a => a['HK Translation']).join(' ')].join(' ').toLowerCase();
-                        return !q || text.includes(q);
+                        return true;
                     });
                 },
                 async init() {
                     try {
-                        // Check URL Parameters
                         const params = new URLSearchParams(window.location.search);
                         this.urlGadgetID = params.get('gadgetid') || '';
                         this.selectedMovie = params.get('movieid') || '';
@@ -280,7 +312,6 @@
                 resetFilters() { 
                     this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; 
                     this.selectedStandardTitle = ''; this.urlGadgetID = ''; this.currentPage = 1; 
-                    // Clear URL params without reloading
                     window.history.replaceState({}, document.title, window.location.pathname);
                 },
                 getMovieData(id, field) {
