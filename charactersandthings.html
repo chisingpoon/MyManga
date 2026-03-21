@@ -44,12 +44,12 @@
         .archive-link .label-top { font-weight: 900; font-size: 12px; margin-bottom: 2px; }
         .archive-link .label-bottom { opacity: 0.85; font-weight: 600; font-size: 10px; }
         
-        /* Manga Colors Based on Title Keywords */
-        .manga-standard { background: #4f46e5; color: white !important; } /* Indigo: 哆啦A夢 */
-        .manga-long { background: #7c3aed; color: white !important; }     /* Purple: 大長編 */
-        .manga-plus { background: #059669; color: white !important; }     /* Green: PLUS/彩色版 */
-        .manga-movie { background: #be185d; color: white !important; }    /* Pink: 電影完全版 */
-        .manga-default { background: #64748b; color: white !important; }  /* Slate: Others */
+        /* Specific Colors Based on Title */
+        .manga-grand { background: #7c3aed !important; color: white !important; }   /* Purple: 大長編 */
+        .manga-plus { background: #059669 !important; color: white !important; }    /* Green: PLUS / 彩色版 */
+        .manga-movie { background: #db2777 !important; color: white !important; }   /* Pink: 電影 / 映畫 */
+        .manga-classic { background: #2563eb !important; color: white !important; } /* Blue: 哆啦A夢 (Standard) */
+        .manga-other { background: #64748b !important; color: white !important; }   /* Slate: Everything else */
 
         .manga-btn:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         
@@ -281,13 +281,30 @@
                     return movie[field] || '-';
                 },
                 getMangaClass(title) {
-                    if (!title) return 'manga-default';
-                    // Check for specific Title keywords
-                    if (title.includes('大長編')) return 'manga-long';
-                    if (title.includes('PLUS') || title.includes('彩色版') || title.includes('特別篇')) return 'manga-plus';
-                    if (title.includes('電影完全版') || title.includes('彩色電影版')) return 'manga-movie';
-                    if (title.includes('哆啦A夢')) return 'manga-standard';
-                    return 'manga-default';
+                    if (!title) return 'manga-other';
+                    
+                    // 1. Check for Long Stories first (Most specific)
+                    if (title.includes('大長編')) {
+                        return 'manga-grand';
+                    }
+                    
+                    // 2. Check for Movie-related manga
+                    if (title.includes('電影') || title.includes('映畫') || title.includes('完全版')) {
+                        return 'manga-movie';
+                    }
+                    
+                    // 3. Check for Plus or Special editions
+                    if (title.includes('PLUS') || title.includes('彩色') || title.includes('特別篇')) {
+                        return 'manga-plus';
+                    }
+                    
+                    // 4. Check for the standard series
+                    if (title.includes('哆啦A夢') || title.includes('多啦A夢')) {
+                        return 'manga-classic';
+                    }
+                    
+                    // 5. Default
+                    return 'manga-other';
                 },
                 getMappingList(workId) {
                     if(!workId || workId === "-") return null;
