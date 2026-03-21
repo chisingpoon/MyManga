@@ -33,16 +33,16 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
 
-        .manga-link { display: inline-flex; flex-direction: column; background: #4f46e5; color: white !important; padding: 8px 12px; border-radius: 10px; font-size: 10px; text-decoration: none !important; transition: 0.2s; min-width: 160px; line-height: 1.2; }
+        .manga-link { display: inline-flex; flex-direction: column; background: #4f46e5; color: white !important; padding: 8px 12px; border-radius: 10px; font-size: 10px; text-decoration: none !important; transition: 0.2s; min-width: 170px; line-height: 1.2; border: 1px solid rgba(0,0,0,0.1); }
         .manga-link .title-row { font-weight: 900; font-size: 12px; margin-bottom: 2px; }
-        .manga-link .sub-row { opacity: 0.85; font-weight: 500; font-size: 10px; }
+        .manga-link .sub-row { opacity: 0.9; font-weight: 600; font-size: 10px; }
         .manga-link:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
         
         .movie-link { display: block; color: #0891b2; font-weight: 800; text-decoration: none; line-height: 1.3; }
         .movie-link:hover { color: #0e7490; text-decoration: underline; }
 
         .search-container { position: relative; max-width: 600px; }
-        .clear-search-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .clear-search-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .clear-search-btn:hover { background: #fee2e2; color: #ef4444; }
 
         .type-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
@@ -57,7 +57,7 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Movie Archive...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Master Database...</p>
         </div>
 
         <nav class="top-nav">
@@ -66,7 +66,7 @@
                     <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Movie Characters & Objects</h1>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Movie Characters & Things</h1>
                 </div>
             </div>
         </nav>
@@ -75,7 +75,7 @@
             <div class="mb-8">
                 <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
                 <div class="search-container">
-                    <input type="text" v-model="searchQuery" placeholder="Search Names, Movies, Translations..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                    <input type="text" v-model="searchQuery" placeholder="Search Names, Movies, Manga, Translations..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
                     <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </div>
@@ -90,7 +90,7 @@
                                 <th>Type</th>
                                 <th>Titles (JP / HK)</th>
                                 <th>HK Translation</th>
-                                <th>Japan Release</th>
+                                <th>JP Release Date</th>
                                 <th>Movie Reference</th>
                                 <th>Original Manga</th>
                                 <th class="w-1/4">Description</th>
@@ -112,7 +112,7 @@
                                     <div>青文: {{ row['HKChingWin Trans'] || '-' }}</div>
                                 </td>
                                 <td class="text-[13px] font-bold text-slate-600 whitespace-nowrap">
-                                    {{ getMovieData(row['Movie ID'], 'Japan Release Date') }}
+                                    {{ getMovieData(row['Movie ID'], 'JP Release Date') }}
                                 </td>
                                 <td>
                                     <a :href="'movie.html?mediaid=' + getMovieData(row['Movie ID'], 'Media ID')" class="movie-link text-[13px]">
@@ -178,7 +178,17 @@
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.characters.filter(r => {
                         if (!r['Movie ID'] || r['Movie ID'] === "-") return false;
-                        const searchFields = [r['JP Title'], r['HK Title'], r['Movie ID'], r['Description'], r['CultureCom Trans'], r['HKChingWin Trans']].join(' ').toLowerCase();
+                        
+                        const movie = this.movies.find(m => m['Media ID'] === r['Movie ID']) || {};
+                        const manga = this.getMapping(r['Work ID']) || {};
+
+                        const searchFields = [
+                            r['JP Title'], r['HK Title'], r['Description'], 
+                            r['CultureCom Trans'], r['HKChingWin Trans'],
+                            movie['JP Title'], movie['HK Title'],
+                            manga['title'], manga['sub']
+                        ].join(' ').toLowerCase();
+                        
                         return !q || searchFields.includes(q);
                     });
                 },
@@ -207,11 +217,13 @@
                         this.characters = c; this.movies = m; this.contents = s; this.publishHk = h;
                         this.loading = false;
                         window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
-                    } catch (e) { console.error("Fetch Error:", e); }
+                    } catch (e) { console.error("Sync Error:", e); }
                 },
                 getMovieData(movieId, field) {
+                    if (!movieId) return '-';
                     const movie = this.movies.find(m => m['Media ID'] === movieId);
-                    return movie ? movie[field] : (field === 'Media ID' ? movieId : '-');
+                    if (!movie) return (field === 'Media ID' ? movieId : '-');
+                    return movie[field] || '-';
                 },
                 getMapping(workId) {
                     if(!workId || workId === "-") return null;
