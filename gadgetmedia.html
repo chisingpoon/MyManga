@@ -52,15 +52,15 @@
         .counter-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid #e2e8f0; }
         .reset-link { color: #6366f1; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
 
-        .trans-item { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px dashed #e2e8f0; }
-        .trans-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .entry-group { min-height: 58px; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px dashed #e2e8f0; display: flex; flex-direction: column; justify-content: center; }
+        .entry-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Processing Gadget Groups...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Updating Publisher Mappings...</p>
         </div>
 
         <nav class="top-nav">
@@ -112,37 +112,37 @@
                                 </td>
 
                                 <td class="font-bold text-slate-700">
-                                    <div v-for="m in gadget.appearances" class="trans-item">
+                                    <div v-for="m in gadget.appearances" class="entry-group">
                                         {{ m['HK Translation'] || '-' }}
                                     </div>
                                 </td>
 
                                 <td class="text-[12px] font-bold text-slate-500">
-                                    <div v-for="m in gadget.appearances" class="trans-item">
-                                        <div class="text-slate-900">文: {{ m['CultureCom TransHK'] || '-' }}</div>
-                                        <div>青: {{ m['ChingWin Trans'] || '-' }}</div>
+                                    <div v-for="m in gadget.appearances" class="entry-group">
+                                        <div class="text-slate-900">文傳: {{ m['CultureCom Trans'] || '-' }}</div>
+                                        <div class="mt-0.5">青文: {{ m['HKChingWin Trans'] || '-' }}</div>
                                     </div>
                                 </td>
 
                                 <td class="text-[13px] font-bold text-slate-600 whitespace-nowrap">
-                                    <div v-for="m in gadget.appearances" class="h-[58px] flex items-center mb-1.5 last:mb-0">
+                                    <div v-for="m in gadget.appearances" class="entry-group">
                                         {{ getMovieData(m['Movie ID'], 'JP Release Date') }}
                                     </div>
                                 </td>
 
                                 <td>
-                                    <div v-for="m in gadget.appearances" class="mb-1.5 last:mb-0">
+                                    <div v-for="m in gadget.appearances" class="entry-group">
                                         <a v-if="m['Movie ID'] && m['Movie ID'] !== '-'" 
                                            :href="'movie.html?mediaid=' + getMovieData(m['Movie ID'], 'Media ID')" class="archive-link movie-btn">
                                             <span class="label-top">{{ getMovieData(m['Movie ID'], 'JP Title') }}</span>
                                             <span class="label-bottom">{{ getMovieData(m['Movie ID'], 'HK Title') }}</span>
                                         </a>
-                                        <div v-else class="h-[42px]"></div>
+                                        <div v-else class="h-[42px] flex items-center text-slate-300 font-bold">—</div>
                                     </div>
                                 </td>
 
                                 <td>
-                                    <div v-for="m in gadget.appearances" class="mb-1.5 last:mb-0">
+                                    <div v-for="m in gadget.appearances" class="entry-group">
                                         <div v-if="mList = getMangaByCat(m['Work ID'], true)" class="flex flex-col">
                                             <a v-for="book in mList" :key="book.hkIsbn" 
                                                :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" 
@@ -155,7 +155,7 @@
                                 </td>
 
                                 <td>
-                                    <div v-for="m in gadget.appearances" class="mb-1.5 last:mb-0">
+                                    <div v-for="m in gadget.appearances" class="entry-group">
                                         <div v-if="mList = getMangaByCat(m['Work ID'], false)" class="flex flex-col">
                                             <a v-for="book in mList" :key="book.hkIsbn" 
                                                :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" 
@@ -198,11 +198,8 @@
             computed: {
                 isFiltered() { return this.searchQuery !== '' || this.selectedMovie !== ''; },
                 
-                // 1. Filter ACTIVE Gadgets
-                // 2. Attach an 'appearances' array to each gadget
                 groupedData() {
                     const activeGadgets = this.gadgetsMaster.filter(g => g['Active']?.toLowerCase() === 'yes');
-                    
                     return activeGadgets.map(gadget => {
                         const appearances = this.gadgetMedia.filter(m => m['Gadget ID'] === gadget['Gadget ID']);
                         return { ...gadget, appearances };
@@ -212,13 +209,9 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.groupedData.filter(gadget => {
-                        // Filter by Movie: If a movie is selected, the gadget must appear in it
                         if (this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
-
-                        // Search: Check Gadget Title or any translation in its appearances
-                        const appText = gadget.appearances.map(a => `${a['HK Translation']} ${a['CultureCom TransHK']}`).join(' ');
+                        const appText = gadget.appearances.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ');
                         const searchFields = [gadget['JP Title'], gadget['Gadget ID'], appText].join(' ').toLowerCase();
-                        
                         return !q || searchFields.includes(q);
                     });
                 },
@@ -256,10 +249,6 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
                         this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
-                        
-                        const gid = new URLSearchParams(window.location.search).get('gadgetid');
-                        if (gid) this.searchQuery = gid;
-                        
                         this.loading = false;
                     } catch (e) { console.error(e); }
                 },
