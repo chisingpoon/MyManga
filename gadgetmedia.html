@@ -177,4 +177,127 @@
                 <div class="bg-slate-50 p-6 flex items-center justify-between border-t border-slate-200">
                     <div class="text-[11px] font-black text-slate-400">Page {{ currentPage }} / {{ totalPages }}</div>
                     <div class="flex gap-2">
-                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" :class="p === currentPage ? 'bg-slate-900
+                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400'" class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs transition-all">
+                            {{ p }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    loading: true, searchQuery: '', selectedMovie: '',
+                    selectedGrandType: '', selectedStandardTitle: '',
+                    currentPage: 1, itemsPerPage: 30,
+                    gadgetsMaster: [], gadgetMedia: [], movies: [], contents: [], publishHk: []
+                }
+            },
+            computed: {
+                processedData() {
+                    if (this.loading) return [];
+                    return (this.gadgetsMaster || []).filter(g => g['Active']?.toLowerCase() === 'yes')
+                        .map(gadget => ({ 
+                            ...gadget, 
+                            appearances: this.gadgetMedia.filter(m => m['Gadget ID'] === gadget['Gadget ID']),
+                            _grandManga: this.getCombinedManga(gadget, true),
+                            _standardManga: this.getCombinedManga(gadget, false)
+                        }));
+                },
+                // The results based ONLY on text search
+                searchResultSet() {
+                    const q = this.searchQuery.toLowerCase();
+                    return this.processedData.filter(g => {
+                        const text = [g['JP Title'] || '', g.appearances.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')].join(' ').toLowerCase();
+                        return !q || text.includes(q);
+                    });
+                },
+                // DYNAMIC OPTIONS for dropdowns based on searchResultSet
+                dynamicMovies() {
+                    const ids = [...new Set(this.searchResultSet.flatMap(g => g.appearances.map(a => a['Movie ID'])))].filter(id => id && id !== "-");
+                    return ids.map(id => {
+                        const m = this.movies.find(movie => movie['Media ID'] === id);
+                        return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
+                    }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
+                },
+                dynamicGrandTypes() {
+                    return [...new Set(this.searchResultSet.flatMap(g => g._grandManga.map(b => b.type)))].filter(Boolean).sort();
+                },
+                dynamicStandardTitles() {
+                    return [...new Set(this.searchResultSet.flatMap(g => g._standardManga.map(b => b.title)))].filter(Boolean).sort();
+                },
+                // FINAL TABLE DATA (Applying select filters)
+                filteredData() {
+                    return this.searchResultSet.filter(gadget => {
+                        if (this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
+                        if (this.selectedGrandType && !gadget._grandManga.some(b => b.type === this.selectedGrandType)) return false;
+                        if (this.selectedStandardTitle && !gadget._standardManga.some(b => b.title === this.selectedStandardTitle)) return false;
+                        return true;
+                    });
+                },
+                paginatedData() { return this.filteredData.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage); },
+                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
+                paginationRange() {
+                    const current = this.currentPage, last = this.totalPages, range = [];
+                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
+                    const res = []; let l;
+                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
+                    return res;
+                }
+            },
+            methods: {
+                async init() {
+                    try {
+                        const baseUrl = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
+                        const [g, gm, m, s, h] = await Promise.all([
+                            fetch(baseUrl + "法寶").then(r => r.json()), fetch(baseUrl + "媒體與法寶").then(r => r.json()),
+                            fetch(baseUrl + "電影動畫").then(r => r.json()), fetch(baseUrl + "書籍收錄作品").then(r => r.json()),
+                            fetch(baseUrl + "出版目録HK").then(r => r.json())
+                        ]);
+                        this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
+                        this.loading = false;
+                    } catch (e) { console.error("Data Load Error:", e); }
+                },
+                getCombinedManga(gadget, isGrand) {
+                    if (!this.contents.length) return [];
+                    const allWorkIds = [...new Set(gadget.appearances.map(a => a['Work ID']).filter(id => id && id !== "-"))];
+                    let allBooks = [];
+                    allWorkIds.forEach(wid => {
+                        const matchingContent = this.contents.filter(item => {
+                            const isGrandType = (item.類 === '大長編大全集' || item.類 === '大全集');
+                            return String(item.作品番) === String(wid) && (isGrand ? isGrandType : !isGrandType);
+                        });
+                        matchingContent.forEach(contentItem => {
+                            const matches = this.publishHk.filter(h => h.ISBN_JP?.trim() === contentItem.ISBN?.trim());
+                            if (matches.length > 0) {
+                                const latestMatch = matches[0];
+                                allBooks.push({
+                                    hkIsbn: latestMatch.ISBN, title: latestMatch.Title,
+                                    sub: (latestMatch.Volume ? `Vol.${latestMatch.Volume} ` : '') + (latestMatch.Subtitle || ''),
+                                    type: contentItem.類
+                                });
+                            }
+                        });
+                    });
+                    return Array.from(new Map(allBooks.map(b => [b.hkIsbn, b])).values());
+                },
+                getMovieData(id, field) {
+                    const m = this.movies.find(x => x['Media ID'] === id);
+                    return m ? (m[field] || '-') : (field === 'Media ID' ? id : '-');
+                },
+                getUniquePubTrans(gadget) {
+                    const trans = gadget.appearances.map(a => ({ culture: a['CultureCom Trans'] || '-', chingwin: a['HKChingWin Trans'] || '-' }));
+                    return [...new Set(trans.map(t => JSON.stringify(t)))].map(s => JSON.parse(s));
+                },
+                resetFilters() { this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; this.selectedStandardTitle = ''; this.currentPage = 1; },
+                changePage(p) { this.currentPage = p; window.scrollTo({top:0, behavior:'smooth'}); }
+            },
+            mounted() { this.init(); }
+        }).mount('#app')
+    </script>
+</body>
+</html>
