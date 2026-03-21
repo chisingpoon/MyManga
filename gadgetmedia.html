@@ -59,21 +59,13 @@
 
         .archive-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .counter-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid #e2e8f0; }
-        
-        /* Filter Select Styling */
-        .filter-select {
-            background-color: white; border: 2px solid #e2e8f0; border-radius: 12px;
-            padding: 8px 12px; font-size: 12px; font-weight: 700; color: #475569;
-            outline: none; transition: all 0.2s; cursor: pointer;
-        }
-        .filter-select:focus { border-color: #6366f1; }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Refining Archive Logic...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Media Archive...</p>
         </div>
 
         <nav class="top-nav">
@@ -82,20 +74,23 @@
                     <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </div>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadget Archive</h1>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadgets Archive</h1>
                 </div>
-                <span class="counter-badge">{{ filteredData.length }} Gadgets Listed</span>
+                <span class="counter-badge">{{ filteredData.length }} Items</span>
             </div>
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
             <div class="grid grid-cols-12 gap-4 mb-8">
-                <div class="col-span-5 flex gap-2">
-                    <div class="relative flex-1">
-                        <input type="text" v-model.trim="searchQuery" @keyup.enter="currentPage = 1" placeholder="Search name or translation..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                <div class="col-span-5 relative group">
+                    <input type="text" v-model.trim="searchQuery" @input="currentPage = 1" placeholder="Search by name or translation..." 
+                           class="w-full bg-white border-2 border-slate-200 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </div>
-                    <button @click="currentPage = 1" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg active:scale-95">
-                        Search
+                    <button v-if="searchQuery" @click="searchQuery = ''; currentPage = 1" 
+                            class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </button>
                 </div>
 
@@ -108,14 +103,14 @@
 
                 <div class="col-span-2">
                     <select v-model="selectedGrandType" @change="currentPage = 1" class="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold outline-none cursor-pointer focus:border-indigo-500 shadow-sm">
-                        <option value="">All Grand Types</option>
+                        <option value="">Manga: Grand Type</option>
                         <option v-for="type in grandTypes" :key="type" :value="type">{{ type }}</option>
                     </select>
                 </div>
 
                 <div class="col-span-2">
                     <select v-model="selectedStandardType" @change="currentPage = 1" class="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold outline-none cursor-pointer focus:border-indigo-500 shadow-sm">
-                        <option value="">All Standard Types</option>
+                        <option value="">Manga: Standard Type</option>
                         <option v-for="type in standardTypes" :key="type" :value="type">{{ type }}</option>
                     </select>
                 </div>
@@ -234,27 +229,27 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase();
                     return this.groupedData.filter(gadget => {
-                        // 1. Movie Filter (Fix: check if any appearance matches selectedMovie ID)
+                        // 1. Movie Filter
                         if (this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
                         
-                        // 2. Manga Type Filters (Grand)
+                        // 2. Grand Manga Type Filter
                         if (this.selectedGrandType) {
                            const books = this.getCombinedManga(gadget, true);
                            if (!books.some(b => b.type === this.selectedGrandType)) return false;
                         }
                         
-                        // 3. Manga Type Filters (Standard)
+                        // 3. Standard Manga Type Filter
                         if (this.selectedStandardType) {
                            const books = this.getCombinedManga(gadget, false);
                            if (!books.some(b => b.type === this.selectedStandardType)) return false;
                         }
 
-                        // 4. Global Text Search
+                        // 4. Instant Search logic
                         const hkList = gadget.appearances.map(a => a['HK Translation'] || '').join(' ');
                         const pubCulList = gadget.appearances.map(a => a['CultureCom Trans'] || '').join(' ');
                         const pubChiList = gadget.appearances.map(a => a['HKChingWin Trans'] || '').join(' ');
-                        
                         const haystack = [gadget['JP Title'] || '', hkList, pubCulList, pubChiList].join(' ').toLowerCase();
+                        
                         return !q || haystack.includes(q);
                     });
                 },
@@ -283,10 +278,8 @@
                     try {
                         const baseUrl = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                         const [g, gm, m, s, h] = await Promise.all([
-                            fetch(baseUrl + "法寶").then(r => r.json()),
-                            fetch(baseUrl + "媒體與法寶").then(r => r.json()),
-                            fetch(baseUrl + "電影動畫").then(r => r.json()),
-                            fetch(baseUrl + "書籍收錄作品").then(r => r.json()),
+                            fetch(baseUrl + "法寶").then(r => r.json()), fetch(baseUrl + "媒體與法寶").then(r => r.json()),
+                            fetch(baseUrl + "電影動畫").then(r => r.json()), fetch(baseUrl + "書籍收錄作品").then(r => r.json()),
                             fetch(baseUrl + "出版目録HK").then(r => r.json())
                         ]);
                         this.gadgetsMaster = Array.isArray(g) ? g : [];
@@ -295,7 +288,7 @@
                         this.contents = Array.isArray(s) ? s : [];
                         this.publishHk = Array.isArray(h) ? h : [];
                         this.loading = false;
-                    } catch (e) { console.error("Load Error", e); }
+                    } catch (e) { console.error(e); }
                 },
                 getMovieData(id, field) {
                     const m = this.movies.find(x => x['Media ID'] === id);
@@ -306,28 +299,19 @@
                     let allBooks = [];
                     allWorkIds.forEach(wid => {
                         const matches = this.contents.filter(item => {
-                            const matchId = item.作品番?.toString().trim() === wid.toString().trim();
                             const isGrandType = (item.類 === '大長編大全集' || item.類 === '大全集');
-                            return matchId && (isGrand ? isGrandType : !isGrandType);
+                            return item.作品番?.toString().trim() === wid.toString().trim() && (isGrand ? isGrandType : !isGrandType);
                         });
                         matches.forEach(match => {
                             this.publishHk.filter(h => h.ISBN_JP?.trim() === match.ISBN?.trim()).forEach(h => {
-                                allBooks.push({ 
-                                    hkIsbn: h.ISBN, 
-                                    title: h.Title, 
-                                    sub: (h.Volume ? `Vol.${h.Volume} ` : '') + (h.Subtitle || ''),
-                                    type: match.類
-                                });
+                                allBooks.push({ hkIsbn: h.ISBN, title: h.Title, sub: (h.Volume ? `Vol.${h.Volume} ` : '') + (h.Subtitle || ''), type: match.類 });
                             });
                         });
                     });
                     return Array.from(new Map(allBooks.map(b => [b.hkIsbn, b])).values());
                 },
                 getUniquePubTrans(gadget) {
-                    const trans = gadget.appearances.map(a => ({
-                        culture: a['CultureCom Trans'] || '-',
-                        chingwin: a['HKChingWin Trans'] || '-'
-                    }));
+                    const trans = gadget.appearances.map(a => ({ culture: a['CultureCom Trans'] || '-', chingwin: a['HKChingWin Trans'] || '-' }));
                     return [...new Set(trans.map(t => JSON.stringify(t)))].map(s => JSON.parse(s));
                 },
                 changePage(p) { this.currentPage = p; window.scrollTo({top:0, behavior:'smooth'}); }
