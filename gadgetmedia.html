@@ -59,10 +59,15 @@
 
         .archive-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .counter-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid #e2e8f0; }
+        
+        /* Floating Button */
+        .back-top { position: fixed; bottom: 24px; right: 24px; width: 48px; height: 48px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: 0.3s; z-index: 50; }
+        .back-top.show { opacity: 1; }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
+        <!-- Loading -->
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
             <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Media Archive...</p>
@@ -81,12 +86,11 @@
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
+            <!-- Filters -->
             <div class="flex flex-wrap gap-4 mb-8">
                 <div class="flex-1 min-w-[300px] relative">
                     <input type="text" v-model.trim="searchQuery" @input="currentPage = 1" placeholder="Search by name or translation..." class="w-full bg-white border-2 border-slate-200 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </div>
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
                     <button v-if="searchQuery" @click="searchQuery = ''; currentPage = 1" class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-slate-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </button>
@@ -102,14 +106,10 @@
                     <option v-for="type in grandTypes" :key="type" :value="type">{{ type }}</option>
                 </select>
 
-                <select v-model="selectedStandardTitle" @change="currentPage = 1" class="min-w-[200px] bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold outline-none">
-                    <option value="">Standard: All Titles</option>
-                    <option v-for="title in standardTitles" :key="title" :value="title">{{ title }}</option>
-                </select>
-
-                <button @click="resetFilters" class="px-6 py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl">Reset</button>
+                <button @click="resetFilters" class="px-6 py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl transition-colors">Reset</button>
             </div>
 
+            <!-- Table Card -->
             <div class="main-card">
                 <div class="overflow-x-auto">
                     <table>
@@ -176,16 +176,22 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Pagination -->
                 <div class="bg-slate-50 p-6 flex items-center justify-between border-t border-slate-200">
                     <div class="text-[11px] font-black text-slate-400">Page {{ currentPage }} / {{ totalPages }}</div>
                     <div class="flex gap-2">
-                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400'" class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs">
+                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400'" class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs transition-all">
                             {{ p }}
                         </button>
                     </div>
                 </div>
             </div>
         </main>
+
+        <div class="back-top" :class="{ 'show': showBackTop }" @click="scrollTop">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </div>
     </div>
 
     <script>
@@ -195,28 +201,29 @@
                 return {
                     loading: true, searchQuery: '', selectedMovie: '',
                     selectedGrandType: '', selectedStandardTitle: '',
-                    currentPage: 1, itemsPerPage: 30,
+                    currentPage: 1, itemsPerPage: 30, showBackTop: false,
                     gadgetsMaster: [], gadgetMedia: [], movies: [], contents: [], publishHk: []
                 }
             },
             computed: {
                 groupedData() {
                     return this.gadgetsMaster.filter(g => g['Active']?.toLowerCase() === 'yes')
-                        .map(gadget => ({ ...gadget, appearances: this.gadgetMedia.filter(m => m['Gadget ID'] === gadget['Gadget ID']) }));
+                        .map(gadget => ({ 
+                            ...gadget, 
+                            appearances: this.gadgetMedia.filter(m => m['Gadget ID'] === gadget['Gadget ID']) 
+                        }));
                 },
                 grandTypes() { return [...new Set(this.contents.filter(c => c.類 === '大長編大全集' || c.類 === '大全集').map(c => c.類))].filter(Boolean); },
-                standardTitles() {
-                    const standardIsbns = new Set(this.contents.filter(c => c.類 !== '大長編大全集' && c.類 !== '大全集').map(c => c.ISBN));
-                    return [...new Set(this.publishHk.filter(h => standardIsbns.has(h.ISBN_JP)).map(h => h.Title))].filter(Boolean).sort();
-                },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase();
                     return this.groupedData.filter(gadget => {
                         if (this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
                         if (this.selectedGrandType && !this.getCombinedManga(gadget, true).some(b => b.type === this.selectedGrandType)) return false;
-                        if (this.selectedStandardTitle && !this.getCombinedManga(gadget, false).some(b => b.title === this.selectedStandardTitle)) return false;
                         
-                        const text = [gadget['JP Title'] || '', gadget.appearances.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')].join(' ').toLowerCase();
+                        const text = [
+                            gadget['JP Title'] || '', 
+                            gadget.appearances.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')
+                        ].join(' ').toLowerCase();
                         return !q || text.includes(q);
                     });
                 },
@@ -248,9 +255,10 @@
                         ]);
                         this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
                         this.loading = false;
+                        window.addEventListener('scroll', () => { this.showBackTop = window.scrollY > 400; });
                     } catch (e) { console.error(e); }
                 },
-                resetFilters() { this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; this.selectedStandardTitle = ''; this.currentPage = 1; },
+                resetFilters() { this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; this.currentPage = 1; },
                 getMovieData(id, field) {
                     const m = this.movies.find(x => x['Media ID'] === id);
                     return m ? (m[field] || '-') : (field === 'Media ID' ? id : '-');
@@ -258,45 +266,31 @@
                 getCombinedManga(gadget, isGrand) {
                     const allWorkIds = [...new Set(gadget.appearances.map(a => a['Work ID']).filter(id => id && id !== "-"))];
                     let allBooks = [];
-
                     allWorkIds.forEach(wid => {
-                        // Find matching ISBNs from contents
                         const matchingContent = this.contents.filter(item => {
                             const isGrandType = (item.類 === '大長編大全集' || item.類 === '大全集');
                             return item.作品番?.toString().trim() === wid.toString().trim() && (isGrand ? isGrandType : !isGrandType);
                         });
-
                         matchingContent.forEach(contentItem => {
-                            // Find all HK publication matches for this ISBN_JP
                             const matches = this.publishHk.filter(h => h.ISBN_JP?.trim() === contentItem.ISBN?.trim());
-                            
                             if (matches.length > 0) {
-                                // Sort by IssueDate descending (Latest first)
-                                // Standardized to compare dates accurately
-                                const latestMatch = matches.sort((a, b) => {
-                                    const dateA = new Date(a.IssueDate || '1900-01-01');
-                                    const dateB = new Date(b.IssueDate || '1900-01-01');
-                                    return dateB - dateA;
-                                })[0];
-
+                                const latestMatch = matches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
                                 allBooks.push({
-                                    hkIsbn: latestMatch.ISBN,
-                                    title: latestMatch.Title,
+                                    hkIsbn: latestMatch.ISBN, title: latestMatch.Title,
                                     sub: (latestMatch.Volume ? `Vol.${latestMatch.Volume} ` : '') + (latestMatch.Subtitle || ''),
                                     type: contentItem.類
                                 });
                             }
                         });
                     });
-
-                    // Unique by ISBN to avoid duplicates from different work IDs mapping to same book
                     return Array.from(new Map(allBooks.map(b => [b.hkIsbn, b])).values());
                 },
                 getUniquePubTrans(gadget) {
                     const trans = gadget.appearances.map(a => ({ culture: a['CultureCom Trans'] || '-', chingwin: a['HKChingWin Trans'] || '-' }));
                     return [...new Set(trans.map(t => JSON.stringify(t)))].map(s => JSON.parse(s));
                 },
-                changePage(p) { this.currentPage = p; window.scrollTo({top:0, behavior:'smooth'}); }
+                changePage(p) { this.currentPage = p; this.scrollTop(); },
+                scrollTop() { window.scrollTo({top:0, behavior:'smooth'}); }
             },
             mounted() { this.init(); }
         }).mount('#app')
