@@ -53,6 +53,26 @@
 
         .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s; }
         .back-to-top.visible { opacity: 1; pointer-events: auto; }
+    
+        .counter-badge {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            border: 1px solid #e2e8f0;
+        }
+        .reset-link {
+            color: #6366f1;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .reset-link:hover { color: #4338ca; text-decoration: underline; }
     </style>
 </head>
 <body class="bg-grid">
@@ -74,6 +94,20 @@
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
+            <div class="flex items-end justify-between mb-4 px-1">
+                <div class="flex items-center gap-3">
+                    <span class="counter-badge">
+                        Showing {{ filteredData.length }} of {{ characters.length }} Entries
+                    </span>
+                    <span v-if="isFiltered" @click="resetFilters" class="reset-link">
+                        ✕ Reset All Filters
+                    </span>
+                </div>
+                <div class="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                    Archive Version 2.4.1
+                </div>
+            </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="search-container">
                     <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Search Keywords</label>
@@ -196,6 +230,9 @@
                 }
             },
             computed: {
+                isFiltered() {
+                    return this.searchQuery !== '' || this.selectedMovie !== '' || this.selectedManga !== '';
+                },
                 uniqueMovies() {
                     const ids = [...new Set(this.characters.map(c => c['Movie ID']).filter(id => id && id !== "-"))];
                     return ids.map(id => {
@@ -289,7 +326,13 @@
                     };
                 },
                 changePage(p) { this.currentPage = p; this.scrollToTop(); },
-                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
+                resetFilters() {
+                    this.searchQuery = '';
+                    this.selectedMovie = '';
+                    this.selectedManga = '';
+                    this.currentPage = 1;
+                }
             },
             mounted() { this.init(); }
         }).mount('#app')
