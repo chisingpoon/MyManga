@@ -9,7 +9,7 @@
     <style>
         [v-cloak] { display: none; }
         
-        /* THEME CORE: Background & Grid */
+        /* THEME CORE: Background & Grid (Restored from your reference) */
         body { 
             -webkit-user-select: none; user-select: none;
             min-height: 100vh; 
@@ -24,152 +24,146 @@
             background-size: 40px 40px;
         }
 
-        /* HEADER STYLE: Deep Blue Gradient (Restored) */
-        .header-gradient {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border-bottom: 4px solid #3b82f6;
+        /* HEADER STYLE: Deep Navy (Restored from index styling) */
+        .top-nav { 
+            background: rgba(15, 23, 42, 0.9); 
+            backdrop-filter: blur(12px); 
+            border-bottom: 4px solid #3b82f6; 
+            position: sticky; top: 0; z-index: 100; 
         }
-        
-        /* FLOATING UI (Restored) */
+
+        /* FLOATING HOME BUTTON (Restored) */
         .home-btn {
             position: fixed; bottom: 30px; left: 30px;
             width: 56px; height: 56px; background: #0f172a; color: white;
             border-radius: 18px; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); cursor: pointer;
-            z-index: 100; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .home-btn:hover { background: #3b82f6; transform: scale(1.1) rotate(-5deg); }
-
-        .back-to-top {
-            position: fixed; bottom: 30px; right: 30px;
-            width: 56px; height: 56px; background: #ffffff; color: #1e293b;
-            border-radius: 18px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); cursor: pointer;
-            transition: all 0.3s ease; z-index: 100; opacity: 0; visibility: hidden;
-            border: 1px solid #e2e8f0;
-        }
-        .back-to-top.show { opacity: 1; visibility: visible; }
 
         /* TABLE & CARDS */
         .main-card { 
             background: white; 
-            border-radius: 24px; 
+            border-radius: 20px; 
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); 
             border: 1px solid #e2e8f0; 
             overflow: hidden; 
+            margin-bottom: 3rem;
         }
-        .table-container { max-height: 70vh; overflow-y: auto; scroll-behavior: smooth; }
+        .table-container { max-height: 72vh; overflow-y: auto; scroll-behavior: smooth; }
         
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        thead th { 
+        
+        /* Fixed Column Styling */
+        th { 
             position: sticky; top: 0; z-index: 40; 
             font-size: 11px; font-weight: 800; padding: 16px 12px; 
             text-align: left; text-transform: uppercase; letter-spacing: 0.05em;
             background: #f8fafc; border-bottom: 2px solid #e2e8f0;
+            color: #64748b;
         }
 
         .td-gadget { 
             background-color: #ffffff; 
             border-right: 4px solid #f1f5f9; 
             position: sticky; left: 0; z-index: 10; 
-            font-weight: 900;
+            font-weight: 900; font-size: 15px; color: #0f172a;
         }
 
-        /* MEDIA COLOR ZONES */
-        .col-media { background-color: #f0fdfa; color: #0f766e; }
-        .col-manga { background-color: #f5f3ff; color: #5b21b6; }
+        /* DATA ROW COLORS */
+        .col-media { background-color: #f0fdfa; }
+        .col-manga { background-color: #f5f3ff; }
 
-        .archive-link { 
+        /* LINK BUTTONS (Original Archive Style) */
+        .gadget-link { 
             display: flex; flex-direction: column; 
-            padding: 8px 12px; border-radius: 8px; 
+            padding: 6px 10px; border-radius: 8px; 
             transition: 0.2s; line-height: 1.2; margin-bottom: 4px;
+            font-size: 11px; font-weight: 800; color: white !important;
+            text-decoration: none !important;
         }
-        .movie-btn { background: #0d9488; color: white !important; }      
-        .manga-grand { background: #4f46e5; color: white !important; }     
-        .manga-standard { background: #be185d; color: white !important; } 
+        .btn-movie { background: #0d9488; }      
+        .btn-grand { background: #4f46e5; }     
+        .btn-standard { background: #be185d; } 
+        .gadget-link:hover { transform: translateY(-1px); filter: brightness(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
         .appearance-item { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
         .appearance-item:last-child { border-bottom: none; }
 
         .loader-wrapper { position: fixed; inset: 0; background: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #1e293b; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #1e293b; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-grid pb-20">
+<body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-6 text-[11px] font-black uppercase tracking-[0.2em] text-blue-400">Loading Media Registry...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-blue-400">Loading Master Archive...</p>
         </div>
 
-        <!-- Floating Home Button -->
         <a href="index.html" class="home-btn" title="Back to Home">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </a>
 
-        <div class="back-to-top" :class="{ 'show': showScrollBtn }" @click="scrollToTop">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </div>
-
-        <!-- HEADER SECTION (Restored) -->
-        <header class="header-gradient pt-16 pb-24 px-8 mb-[-80px]">
-            <div class="max-w-[1600px] mx-auto flex items-end justify-between">
-                <div>
-                    <h1 class="text-5xl font-black tracking-tighter text-white uppercase italic">Media Gadget Registry</h1>
-                    <p class="text-blue-300 font-bold text-sm tracking-[0.3em] uppercase mt-2 opacity-80">Cross-Referencing Movies & Publication History</p>
-                </div>
-                <div class="bg-white/10 backdrop-blur-md border border-white/20 px-8 py-3 rounded-2xl shadow-2xl">
-                    <span class="text-white text-2xl font-black">{{ filteredData.length }}</span>
-                    <span class="text-blue-200 text-xs font-bold uppercase ml-3 tracking-widest">Entries Found</span>
+        <nav class="top-nav">
+            <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </a>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadget Media Registry</h1>
                 </div>
             </div>
-        </header>
+        </nav>
 
-        <main class="max-w-[1600px] mx-auto px-8">
-            <!-- Filter Bar (Restored Card Style) -->
-            <div class="flex items-center gap-4 mb-8 bg-white p-5 rounded-3xl border border-slate-200 shadow-xl">
+        <main class="max-w-[1800px] mx-auto px-8">
+            <div class="flex items-center gap-4 mb-8 bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-slate-200 shadow-xl">
                 <div class="relative flex-1">
-                    <input type="text" v-model.trim="searchQuery" @input="currentPage = 1" placeholder="Search gadgets or translations..." 
-                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl pl-12 pr-4 py-4 text-base font-bold outline-none focus:border-blue-500 transition-all">
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search gadgets..." 
+                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold outline-none focus:border-blue-500 transition-all">
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3"></path></svg>
                     </div>
                 </div>
                 
-                <select v-model="selectedMovie" @change="currentPage = 1" class="w-56 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-4 text-xs font-black uppercase outline-none focus:border-emerald-500">
+                <select v-model="selectedMovie" class="w-64 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-4 text-xs font-black uppercase outline-none focus:border-emerald-500">
                     <option value="">All Movies</option>
                     <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
                 </select>
                 
-                <button @click="resetFilters" class="px-10 py-4 bg-slate-900 text-white text-xs font-black uppercase rounded-2xl hover:bg-blue-600 transition-all shadow-lg">
+                <button @click="resetFilters" class="px-10 py-4 bg-slate-900 text-white text-xs font-black uppercase rounded-2xl hover:bg-blue-600 transition-all shadow-lg active:scale-95">
                     Reset
                 </button>
             </div>
 
             <div class="main-card">
-                <div class="table-container" id="scrollContainer" @scroll="handleScroll">
+                <div class="table-container" id="scrollContainer">
                     <table>
                         <thead>
                             <tr>
                                 <th class="w-[15%] td-gadget">Gadget (JP)</th>
-                                <th class="w-[18%] col-media">Movie Reference</th>
-                                <th class="w-[12%] col-media">HK Translation</th>
-                                <th class="w-[10%] col-media text-center">JP Release</th>
-                                <th class="w-[15%] col-manga">Grand Collection</th>
-                                <th class="w-[15%] col-manga">Standard Manga</th>
-                                <th class="w-[15%] col-manga border-l border-indigo-100">Publisher Trans.</th>
+                                <th class="w-[20%] col-media text-teal-700">Movie Reference</th>
+                                <th class="w-[12%] col-media text-teal-700">HK Translation</th>
+                                <th class="w-[10%] col-media text-teal-700 text-center">JP Release</th>
+                                <th class="w-[14%] col-manga text-indigo-700">Grand Collection</th>
+                                <th class="w-[14%] col-manga text-indigo-700">Standard Manga</th>
+                                <th class="w-[15%] col-manga text-indigo-700 border-l border-indigo-100">Publisher Trans.</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="gadget in paginatedData" :key="gadget['Gadget ID']" class="hover:bg-slate-50 transition-colors">
-                                <td class="td-gadget text-slate-900 text-[16px] p-4">{{ gadget['JP Title'] }}</td>
+                                <td class="td-gadget p-4">{{ gadget['JP Title'] }}</td>
                                 
                                 <td class="bg-emerald-50/20">
                                     <div v-for="m in gadget.appearances" class="appearance-item px-2">
-                                        <a v-if="m['Movie ID'] && m['Movie ID'] !== '-'" :href="'movie.html?mediaid=' + getMovieData(m['Movie ID'], 'Media ID')" class="archive-link movie-btn shadow-sm">
-                                            <span class="text-[11px] font-black">{{ getMovieData(m['Movie ID'], 'JP Title') }}</span>
-                                            <span class="text-[9px] opacity-80 uppercase">{{ getMovieData(m['Movie ID'], 'HK Title') }}</span>
+                                        <a v-if="m['Movie ID'] && m['Movie ID'] !== '-'" 
+                                           :href="'movie.html?mediaid=' + getMovieData(m['Movie ID'], 'Media ID')" 
+                                           class="gadget-link btn-movie shadow-sm">
+                                            <span>{{ getMovieData(m['Movie ID'], 'JP Title') }}</span>
+                                            <span class="text-[9px] opacity-75">{{ getMovieData(m['Movie ID'], 'HK Title') }}</span>
                                         </a>
                                         <div v-else class="text-slate-300 italic text-[11px]">—</div>
                                     </div>
@@ -183,25 +177,25 @@
 
                                 <td class="bg-indigo-50/20">
                                     <div v-for="book in getCombinedManga(gadget, true)" :key="book.hkIsbn" class="px-2">
-                                        <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="archive-link manga-grand shadow-sm">
-                                            <span class="text-[10px] font-black text-center">{{ book.title }}</span>
-                                            <span class="text-[9px] opacity-80 text-center uppercase">{{ book.sub }}</span>
+                                        <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="gadget-link btn-grand shadow-sm">
+                                            <span class="text-center">{{ book.title }}</span>
+                                            <span class="text-[9px] opacity-75 text-center">{{ book.sub }}</span>
                                         </a>
                                     </div>
                                 </td>
                                 <td class="bg-indigo-50/20">
                                     <div v-for="book in getCombinedManga(gadget, false)" :key="book.hkIsbn" class="px-2">
-                                        <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="archive-link manga-standard shadow-sm">
-                                            <span class="text-[10px] font-black text-center">{{ book.title }}</span>
-                                            <span class="text-[9px] opacity-80 text-center uppercase">{{ book.sub }}</span>
+                                        <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="gadget-link btn-standard shadow-sm">
+                                            <span class="text-center">{{ book.title }}</span>
+                                            <span class="text-[9px] opacity-75 text-center">{{ book.sub }}</span>
                                         </a>
                                     </div>
                                 </td>
-                                <td class="bg-indigo-50/20 border-l border-indigo-100 text-[11px] font-bold">
-                                    <div class="mx-2 my-1 p-3 rounded-xl border border-indigo-100 bg-white/80 shadow-sm">
+                                <td class="bg-indigo-50/20 border-l border-indigo-100 p-3">
+                                    <div class="bg-white/80 rounded-xl border border-indigo-100 p-2 text-[11px] font-bold">
                                         <div v-for="(trans, idx) in getUniquePubTrans(gadget)" :key="idx" class="mb-2 last:mb-0 pb-2 border-b last:border-0 border-indigo-50">
-                                            <div class="text-indigo-900 flex justify-between"><span>文傳:</span> <span>{{ trans.culture || '-' }}</span></div>
-                                            <div class="text-indigo-400 flex justify-between mt-1"><span>青文:</span> <span>{{ trans.chingwin || '-' }}</span></div>
+                                            <div class="text-indigo-900">文傳: {{ trans.culture || '-' }}</div>
+                                            <div class="text-indigo-400">青文: {{ trans.chingwin || '-' }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -210,12 +204,12 @@
                     </table>
                 </div>
 
-                <div class="bg-slate-50 p-8 flex items-center justify-between border-t border-slate-200">
-                    <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} / {{ totalPages }}</div>
+                <div class="bg-white p-6 flex items-center justify-between border-t border-slate-100">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} / {{ totalPages }}</div>
                     <div class="flex gap-2">
                         <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
-                                :class="p === currentPage ? 'bg-blue-600 text-white shadow-lg scale-110' : 'bg-white text-slate-400 hover:bg-slate-100'" 
-                                class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs transition-all border border-slate-200">
+                                :class="p === currentPage ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'" 
+                                class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs transition-all">
                             {{ p }}
                         </button>
                     </div>
@@ -232,13 +226,15 @@
                     loading: true, searchQuery: '', selectedMovie: '',
                     urlGadgetID: '', currentPage: 1, itemsPerPage: 40,
                     gadgetsMaster: [], gadgetMedia: [], movies: [], contents: [], publishHk: [],
-                    showScrollBtn: false
                 }
             },
             computed: {
                 groupedData() {
                     return this.gadgetsMaster.filter(g => g['Active']?.toLowerCase() === 'yes')
-                        .map(gadget => ({ ...gadget, appearances: this.gadgetMedia.filter(m => m['Gadget ID'] === gadget['Gadget ID']) }));
+                        .map(gadget => ({ 
+                            ...gadget, 
+                            appearances: this.gadgetMedia.filter(m => m['Gadget ID'] === gadget['Gadget ID']) 
+                        }));
                 },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase();
@@ -267,10 +263,6 @@
                 }
             },
             methods: {
-                handleScroll(e) { this.showScrollBtn = e.target.scrollTop > 300; },
-                scrollToTop() {
-                    document.getElementById('scrollContainer').scrollTo({ top: 0, behavior: 'smooth' });
-                },
                 async init() {
                     try {
                         const params = new URLSearchParams(window.location.search);
@@ -279,8 +271,10 @@
 
                         const baseUrl = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                         const [g, gm, m, s, h] = await Promise.all([
-                            fetch(baseUrl + "法寶").then(r => r.json()), fetch(baseUrl + "媒體與法寶").then(r => r.json()),
-                            fetch(baseUrl + "電影動畫").then(r => r.json()), fetch(baseUrl + "書籍收錄作品").then(r => r.json()),
+                            fetch(baseUrl + "法寶").then(r => r.json()), 
+                            fetch(baseUrl + "媒體與法寶").then(r => r.json()),
+                            fetch(baseUrl + "電影動畫").then(r => r.json()), 
+                            fetch(baseUrl + "書籍收錄作品").then(r => r.json()),
                             fetch(baseUrl + "出版目録HK").then(r => r.json())
                         ]);
                         this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
@@ -307,7 +301,7 @@
                             const matches = this.publishHk.filter(h => h.ISBN_JP?.trim() === contentItem.ISBN?.trim());
                             if (matches.length > 0) {
                                 const latestMatch = matches.sort((a, b) => new Date(b.IssueDate || '1900-01-01') - new Date(a.IssueDate || '1900-01-01'))[0];
-                                allBooks.push({ hkIsbn: latestMatch.ISBN, title: latestMatch.Title, sub: (latestMatch.Volume ? `Vol.${latestMatch.Volume} ` : '') + (latestMatch.Subtitle || ''), type: contentItem.類 });
+                                allBooks.push({ hkIsbn: latestMatch.ISBN, title: latestMatch.Title, sub: (latestMatch.Volume ? `Vol.${latestMatch.Volume} ` : '') + (latestMatch.Subtitle || '') });
                             }
                         });
                     });
