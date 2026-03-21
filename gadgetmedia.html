@@ -167,115 +167,172 @@
     </div>
 
     <script>
-    const { createApp } = Vue;
-    createApp({
-        data() {
-            return {
-                loading: true, searchQuery: '', selectedMovie: '',
-                selectedGrandType: '', selectedStandardTitle: '',
-                paramGadgetId: null,
-                currentPage: 1, itemsPerPage: 30,
-                gadgetsMaster: [], gadgetMedia: [], movies: [], contents: [], publishHk: []
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    loading: true,
+                    searchQuery: '',
+                    selectedMovie: '',
+                    selectedGrandType: '',
+                    selectedStandardTitle: '',
+                    paramGadgetId: null,
+                    currentPage: 1,
+                    itemsPerPage: 30,
+                    gadgetsMaster: [],
+                    gadgetMedia: [],
+                    movies: [],
+                    contents: [],
+                    publishHk: []
+                }
+            },
+            // IMPORTANT: This triggers the data load
+            mounted() {
+                this.init();
+            },
+            computed: {
+                filteredData() {
+                    if (this.loading) return [];
+                    const q = this.searchQuery.toLowerCase().trim();
+                    const targetMovie = this.selectedMovie ? String(this.selectedMovie).trim() : null;
+        
+                    return this.gadgetsMaster.filter(g => {
+                        // 1. Basic Visibility
+                        if ((g['Active'] || 'yes').toLowerCase().trim() !== 'yes') return false;
+        
+                        // 2. URL Gadget ID Filter
+                        if (this.paramGadgetId && String(g['Gadget ID']).trim() !== String(this.paramGadgetId).trim()) return false;
+        
+                        // Get all possible appearances for this gadget
+                        const allApps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
+        
+                        // 3. Movie Filter Logic
+                        if (targetMovie) {
+                            const hasMatch = allApps.some(a => String(a['Movie ID']).trim() === targetMovie);
+                            if (!hasMatch) return false;
+                        }
+        
+                        // 4. Manga Type/Title Filters
+                        if (this.selectedGrandType && !this.getMangaData(g, true).some(b => b.type === this.selectedGrandType)) return false;
+                        if (this.selectedStandardTitle && !this.getMangaData(g, false).some(b => b.title === this.selectedStandardTitle)) return false;
+        
+                        // 5. Text Search
+                        if (q) {
+                            const searchableText = (g['JP Title'] + ' ' + allApps.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')).toLowerCase();
+                            if (!searchableText.includes(q)) return false;
+                        }
+        
+                        return true;
+                    }).map(g => {
+                        // Return original gadget but with filtered appearances array inside it
+                        let apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
+                        if (targetMovie) {
+                            apps = apps.filter(a => String(a['Movie ID']).trim() === targetMovie);
+                        }
+                        return { ...g, appearances: apps };
+                    });
+                },
+        
+                paginatedData() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    return this.filteredData.slice(start, start + this.itemsPerPage);
+                },
+        
+                totalPages() {
+                    return Math.ceil(this.filteredData.length / this.itemsPerPage);
+                },
+        
+                paginationRange() {
+                    let range = [];
+                    for (let i = 1; i <= this.totalPages; i++) range.push(i);
+                    return range;
+                },
+        
+                dynamicMovies() {
+                    const ids = [...new Set(this.gadgetMedia.map(m => m['Movie ID']))].filter(id => id && id !== "-");
+                    return ids.map(id => {
+                        const m = this.movies.find(movie => String(movie['Media ID']).trim() === String(id).trim());
+                        return { id: id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
+                    }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
+                },
+        
+                dynamicGrandTypes() {
+                    return [...new Set(this.contents.filter(c => c['Grand Collection'] === 'yes').map(c => c['Manga Type']))].filter(Boolean).sort();
+                },
+        
+                dynamicStandardTitles() {
+                    return [...new Set(this.contents.filter(c => c['Grand Collection'] !== 'yes').map(c => c['Standard Manga Title']))].filter(Boolean).sort();
+                }
+            },
+            methods: {
+                async init() {
+                    try {
+                        const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
+                        const [g, gm, m, s, h] = await Promise.all([
+                            fetch(base + "法寶").then(r => r.json()), 
+                            fetch(base + "媒體與法寶").then(r => r.json()),
+                            fetch(base + "電影動畫").then(r => r.json()), 
+                            fetch(base + "書籍收錄作品").then(r => r.json()),
+                            fetch(base + "出版目録HK").then(r => r.json())
+                        ]);
+                        this.gadgetsMaster = g;
+                        this.gadgetMedia = gm;
+                        this.movies = m;
+                        this.contents = s;
+                        this.publishHk = h;
+                        
+                        const params = new URLSearchParams(window.location.search);
+                        if (params.get('gadgetid')) this.paramGadgetId = params.get('gadgetid').trim();
+                        if (params.get('movieid')) this.selectedMovie = params.get('movieid').trim();
+                        
+                        this.loading = false;
+                    } catch (e) {
+                        console.error("Fetch Error:", e);
+                        this.loading = false;
+                    }
+                },
+        
+                getMovieData(id, field) {
+                    const movie = this.movies.find(m => String(m['Media ID']).trim() === String(id).trim());
+                    return movie ? movie[field] : (field === 'Media ID' ? id : '-');
+                },
+        
+                getMangaData(gadget, isGrand) {
+                    const gid = String(gadget['Gadget ID']).trim();
+                    return this.contents
+                        .filter(c => String(c['Gadget ID']).trim() === gid && (isGrand ? c['Grand Collection'] === 'yes' : c['Grand Collection'] !== 'yes'))
+                        .map(c => ({
+                            title: isGrand ? c['Manga Type'] : c['Standard Manga Title'],
+                            sub: isGrand ? c['JP Title'] : `Vol.${c['Volume']} Ch.${c['Chapter']}`,
+                            hkIsbn: c['HK ISBN'],
+                            type: c['Manga Type']
+                        }));
+                },
+        
+                getUniquePubTrans(gadget) {
+                    const gid = String(gadget['Gadget ID']).trim();
+                    const matches = this.publishHk.filter(p => String(p['Gadget ID']).trim() === gid);
+                    if (!matches.length) return [{ culture: '-', chingwin: '-' }];
+                    return matches.map(m => ({ culture: m['CultureCom Trans'] || '-', chingwin: m['HKChingWin Trans'] || '-' }));
+                },
+        
+                changePage(p) {
+                    this.currentPage = p;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+        
+                resetFilters() {
+                    this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = '';
+                    this.selectedStandardTitle = ''; this.paramGadgetId = null; this.currentPage = 1;
+                    window.history.replaceState({}, '', window.location.pathname);
+                },
+        
+                handleManualInput() {
+                    this.currentPage = 1;
+                }
             }
-        },
-        computed: {
-            filteredData() {
-                if (this.loading) return [];
-                const q = this.searchQuery.toLowerCase().trim();
-                const targetMovie = this.selectedMovie ? String(this.selectedMovie).trim() : null;
-    
-                return this.gadgetsMaster.filter(g => {
-                    // 1. Basic Visibility
-                    if ((g['Active'] || 'yes').toLowerCase().trim() !== 'yes') return false;
-    
-                    // 2. URL Gadget ID Filter
-                    if (this.paramGadgetId && String(g['Gadget ID']).trim() !== String(this.paramGadgetId).trim()) return false;
-    
-                    // Get all possible appearances for this gadget
-                    const allApps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
-    
-                    // 3. Movie Filter Logic
-                    // If a movie is selected, the gadget MUST appear in that movie to stay in the list
-                    if (targetMovie) {
-                        const hasMatch = allApps.some(a => String(a['Movie ID']).trim() === targetMovie);
-                        if (!hasMatch) return false;
-                    }
-    
-                    // 4. Manga Type/Title Filters
-                    if (this.selectedGrandType && !this.getMangaData(g, true).some(b => b.type === this.selectedGrandType)) return false;
-                    if (this.selectedStandardTitle && !this.getMangaData(g, false).some(b => b.title === this.selectedStandardTitle)) return false;
-    
-                    // 5. Text Search
-                    if (q) {
-                        const searchableText = (g['JP Title'] + ' ' + allApps.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')).toLowerCase();
-                        if (!searchableText.includes(q)) return false;
-                    }
-    
-                    return true;
-                }).map(g => {
-                    // DYNAMIC FILTERING OF CELL CONTENT:
-                    // We only return the appearances that match the current movie filter
-                    let apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
-                    
-                    if (targetMovie) {
-                        apps = apps.filter(a => String(a['Movie ID']).trim() === targetMovie);
-                    }
-    
-                    return { ...g, appearances: apps };
-                });
-            },
-    
-            paginatedData() {
-                const start = (this.currentPage - 1) * this.itemsPerPage;
-                return this.filteredData.slice(start, start + this.itemsPerPage);
-            },
-    
-            // Dropdowns always show options based on current text search/gadget id
-            dynamicMovies() {
-                const currentGadgetIds = new Set(this.gadgetsMaster
-                    .filter(g => !this.paramGadgetId || String(g['Gadget ID']).trim() === String(this.paramGadgetId).trim())
-                    .map(g => String(g['Gadget ID']).trim()));
-    
-                const movieIds = [...new Set(this.gadgetMedia
-                    .filter(m => currentGadgetIds.has(String(m['Gadget ID']).trim()))
-                    .map(m => m['Movie ID'])
-                )].filter(id => id && id !== "-");
-    
-                return movieIds.map(id => {
-                    const m = this.movies.find(movie => String(movie['Media ID']).trim() === String(id).trim());
-                    return { id: id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
-                }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
-            },
-            // ... (Keep dynamicGrandTypes and dynamicStandardTitles)
-        },
-        methods: {
-            async init() {
-                try {
-                    const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
-                    const [g, gm, m, s, h] = await Promise.all([
-                        fetch(base + "法寶").then(r => r.json()), 
-                        fetch(base + "媒體與法寶").then(r => r.json()),
-                        fetch(base + "電影動畫").then(r => r.json()), 
-                        fetch(base + "書籍收錄作品").then(r => r.json()),
-                        fetch(base + "出版目録HK").then(r => r.json())
-                    ]);
-                    this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
-                    
-                    const params = new URLSearchParams(window.location.search);
-                    if (params.get('gadgetid')) this.paramGadgetId = params.get('gadgetid').trim();
-                    if (params.get('movieid')) this.selectedMovie = params.get('movieid').trim();
-                    
-                    this.loading = false;
-                } catch (e) { console.error(e); this.loading = false; }
-            },
-            // ... (Keep getMangaData, getMovieData, getUniquePubTrans helpers)
-            resetFilters() {
-                this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = '';
-                this.selectedStandardTitle = ''; this.paramGadgetId = null; this.currentPage = 1;
-                window.history.replaceState({}, '', window.location.pathname);
-            }
-        }
-    }).mount('#app')
+        }).mount('#app');
     </script>
 </body>
 </html>
