@@ -59,13 +59,21 @@
 
         .archive-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .counter-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid #e2e8f0; }
+        
+        /* Filter Select Styling */
+        .filter-select {
+            background-color: white; border: 2px solid #e2e8f0; border-radius: 12px;
+            padding: 8px 12px; font-size: 12px; font-weight: 700; color: #475569;
+            outline: none; transition: all 0.2s; cursor: pointer;
+        }
+        .filter-select:focus { border-color: #6366f1; }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Updating Archive View...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Refining Archive Logic...</p>
         </div>
 
         <nav class="top-nav">
@@ -74,19 +82,43 @@
                     <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </div>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadgets in Media</h1>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadget Archive</h1>
                 </div>
-                <span class="counter-badge">{{ filteredData.length }} Results</span>
+                <span class="counter-badge">{{ filteredData.length }} Gadgets Listed</span>
             </div>
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <div class="flex items-center justify-between mb-8 gap-6">
-                <input type="text" v-model.trim="searchQuery" @input="currentPage = 1" placeholder="Search by Japanese name or any translation..." class="flex-1 max-w-xl bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                <select v-model="selectedMovie" @change="currentPage = 1" class="bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none cursor-pointer focus:border-indigo-500 min-w-[300px]">
-                    <option value="">All Movie References</option>
-                    <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
-                </select>
+            <div class="grid grid-cols-12 gap-4 mb-8">
+                <div class="col-span-5 flex gap-2">
+                    <div class="relative flex-1">
+                        <input type="text" v-model.trim="searchQuery" @keyup.enter="currentPage = 1" placeholder="Search name or translation..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                    </div>
+                    <button @click="currentPage = 1" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg active:scale-95">
+                        Search
+                    </button>
+                </div>
+
+                <div class="col-span-3">
+                    <select v-model="selectedMovie" @change="currentPage = 1" class="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold outline-none cursor-pointer focus:border-indigo-500 shadow-sm">
+                        <option value="">All Movie References</option>
+                        <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
+                    </select>
+                </div>
+
+                <div class="col-span-2">
+                    <select v-model="selectedGrandType" @change="currentPage = 1" class="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold outline-none cursor-pointer focus:border-indigo-500 shadow-sm">
+                        <option value="">All Grand Types</option>
+                        <option v-for="type in grandTypes" :key="type" :value="type">{{ type }}</option>
+                    </select>
+                </div>
+
+                <div class="col-span-2">
+                    <select v-model="selectedStandardType" @change="currentPage = 1" class="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold outline-none cursor-pointer focus:border-indigo-500 shadow-sm">
+                        <option value="">All Standard Types</option>
+                        <option v-for="type in standardTypes" :key="type" :value="type">{{ type }}</option>
+                    </select>
+                </div>
             </div>
 
             <div class="main-card">
@@ -179,6 +211,7 @@
             data() {
                 return {
                     loading: true, searchQuery: '', selectedMovie: '',
+                    selectedGrandType: '', selectedStandardType: '',
                     currentPage: 1, itemsPerPage: 30,
                     gadgetsMaster: [], gadgetMedia: [], movies: [], contents: [], publishHk: []
                 }
@@ -192,24 +225,36 @@
                             appearances: this.gadgetMedia.filter(m => m['Gadget ID'] === gadget['Gadget ID'])
                         }));
                 },
+                grandTypes() {
+                    return [...new Set(this.contents.filter(c => c.類 === '大長編大全集' || c.類 === '大全集').map(c => c.類))];
+                },
+                standardTypes() {
+                    return [...new Set(this.contents.filter(c => c.類 !== '大長編大全集' && c.類 !== '大全集').map(c => c.類))].filter(Boolean);
+                },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase();
                     return this.groupedData.filter(gadget => {
-                        // 1. Movie Reference Filter
+                        // 1. Movie Filter (Fix: check if any appearance matches selectedMovie ID)
                         if (this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
                         
-                        // 2. Search logic (JP Name + All Translations)
+                        // 2. Manga Type Filters (Grand)
+                        if (this.selectedGrandType) {
+                           const books = this.getCombinedManga(gadget, true);
+                           if (!books.some(b => b.type === this.selectedGrandType)) return false;
+                        }
+                        
+                        // 3. Manga Type Filters (Standard)
+                        if (this.selectedStandardType) {
+                           const books = this.getCombinedManga(gadget, false);
+                           if (!books.some(b => b.type === this.selectedStandardType)) return false;
+                        }
+
+                        // 4. Global Text Search
                         const hkList = gadget.appearances.map(a => a['HK Translation'] || '').join(' ');
                         const pubCulList = gadget.appearances.map(a => a['CultureCom Trans'] || '').join(' ');
                         const pubChiList = gadget.appearances.map(a => a['HKChingWin Trans'] || '').join(' ');
                         
-                        const haystack = [
-                            gadget['JP Title'] || '', 
-                            hkList, 
-                            pubCulList, 
-                            pubChiList
-                        ].join(' ').toLowerCase();
-                        
+                        const haystack = [gadget['JP Title'] || '', hkList, pubCulList, pubChiList].join(' ').toLowerCase();
                         return !q || haystack.includes(q);
                     });
                 },
@@ -267,7 +312,12 @@
                         });
                         matches.forEach(match => {
                             this.publishHk.filter(h => h.ISBN_JP?.trim() === match.ISBN?.trim()).forEach(h => {
-                                allBooks.push({ hkIsbn: h.ISBN, title: h.Title, sub: (h.Volume ? `Vol.${h.Volume} ` : '') + (h.Subtitle || '') });
+                                allBooks.push({ 
+                                    hkIsbn: h.ISBN, 
+                                    title: h.Title, 
+                                    sub: (h.Volume ? `Vol.${h.Volume} ` : '') + (h.Subtitle || ''),
+                                    type: match.類
+                                });
                             });
                         });
                     });
