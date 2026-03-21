@@ -24,29 +24,17 @@
         }
 
         /* Modern Visual Separation */
-        .th-gadget { 
-            background-color: #ffffff; color: #1e293b; 
-            border-right: 4px solid #f1f5f9; 
-        }
-        .td-gadget { 
-            background-color: #ffffff; 
-            border-right: 4px solid #f1f5f9; 
-            position: sticky; left: 0; z-index: 5; 
-        }
+        .th-gadget { background-color: #ffffff; color: #1e293b; border-right: 4px solid #f1f5f9; }
+        .td-gadget { background-color: #ffffff; border-right: 4px solid #f1f5f9; position: sticky; left: 0; z-index: 5; }
 
         .col-media { background-color: #f0fdfa; color: #0f766e; box-shadow: inset 0 -2px 0 #5eead4 !important; }
         .col-manga { background-color: #f5f3ff; color: #5b21b6; box-shadow: inset 0 -2px 0 #c4b5fd !important; }
 
         .main-card { background: white; border-radius: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: 1px solid #e2e8f0; }
-        
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: top; }
 
-        .archive-link { 
-            display: flex; flex-direction: column; 
-            padding: 8px 12px; border-radius: 8px; 
-            transition: 0.2s; line-height: 1.2; margin-bottom: 4px;
-        }
+        .archive-link { display: flex; flex-direction: column; padding: 8px 12px; border-radius: 8px; transition: 0.2s; line-height: 1.2; margin-bottom: 4px; }
         .manga-standard { background: #4f46e5; color: white !important; } 
         .manga-grand { background: #be185d; color: white !important; }     
         .movie-btn { background: #0d9488; color: white !important; }      
@@ -55,7 +43,6 @@
         .appearance-item { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
         .appearance-item:last-child { border-bottom: none; }
 
-        /* Back to Top Button */
         .back-to-top {
             position: fixed; bottom: 30px; right: 30px;
             width: 50px; height: 50px; background: #1e293b; color: white;
@@ -64,7 +51,6 @@
             transition: all 0.3s ease; z-index: 50; opacity: 0; visibility: hidden;
         }
         .back-to-top.show { opacity: 1; visibility: visible; }
-        .back-to-top:hover { transform: translateY(-5px); background: #4f46e5; }
 
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -75,7 +61,7 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[10px] font-bold uppercase tracking-tighter text-slate-400">Updating Archive...</p>
+            <p class="mt-4 text-[10px] font-bold uppercase tracking-tighter text-slate-400">Syncing Parameters...</p>
         </div>
 
         <div class="back-to-top" :class="{ 'show': showScrollBtn }" @click="scrollToTop">
@@ -92,6 +78,7 @@
             </div>
         </header>
 
+        <!-- Search Bar -->
         <div class="flex items-center gap-3 mb-6 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
             <div class="relative flex-1">
                 <input type="text" v-model.trim="searchQuery" @input="currentPage = 1" placeholder="Search gadgets..." 
@@ -135,6 +122,7 @@
                         <tr v-for="gadget in paginatedData" :key="gadget['Gadget ID']" class="hover:bg-slate-50/80 transition-colors">
                             <td class="font-black text-slate-900 text-[15px] td-gadget">{{ gadget['JP Title'] }}</td>
                             
+                            <!-- Movie Section -->
                             <td class="bg-emerald-50/20">
                                 <div v-for="m in gadget.appearances" class="appearance-item">
                                     <a v-if="m['Movie ID'] && m['Movie ID'] !== '-'" :href="'movie.html?mediaid=' + getMovieData(m['Movie ID'], 'Media ID')" class="archive-link movie-btn shadow-sm">
@@ -151,6 +139,7 @@
                                 <div v-for="m in gadget.appearances" class="appearance-item">{{ getMovieData(m['Movie ID'], 'JP Release Date') }}</div>
                             </td>
 
+                            <!-- Manga Section -->
                             <td class="bg-indigo-50/20">
                                 <div v-for="book in getCombinedManga(gadget, true)" :key="book.hkIsbn">
                                     <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="archive-link manga-grand shadow-sm">
@@ -191,7 +180,7 @@
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
     <script>
         const { createApp } = Vue;
@@ -200,6 +189,7 @@
                 return {
                     loading: true, searchQuery: '', selectedMovie: '',
                     selectedGrandType: '', selectedStandardTitle: '',
+                    urlGadgetID: '', // Specific gadget focus
                     currentPage: 1, itemsPerPage: 30,
                     gadgetsMaster: [], gadgetMedia: [], movies: [], contents: [], publishHk: [],
                     showScrollBtn: false
@@ -223,9 +213,15 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase();
                     return this.groupedData.filter(gadget => {
+                        // URL Parameter: gadgetid
+                        if (this.urlGadgetID && gadget['Gadget ID'] !== this.urlGadgetID) return false;
+                        
+                        // Dropdown filters
                         if (this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
                         if (this.selectedGrandType && !this.getCombinedManga(gadget, true).some(b => b.type === this.selectedGrandType)) return false;
                         if (this.selectedStandardTitle && !this.getCombinedManga(gadget, false).some(b => b.title === this.selectedStandardTitle)) return false;
+                        
+                        // Text Search
                         const text = [gadget['JP Title'] || '', gadget.appearances.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')].join(' ').toLowerCase();
                         return !q || text.includes(q);
                     });
@@ -256,6 +252,7 @@
                 applyOtherFilters(exclude) {
                     const q = this.searchQuery.toLowerCase();
                     return this.groupedData.filter(gadget => {
+                        if (this.urlGadgetID && gadget['Gadget ID'] !== this.urlGadgetID) return false;
                         if (exclude !== 'selectedMovie' && this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
                         if (exclude !== 'selectedGrandType' && this.selectedGrandType && !this.getCombinedManga(gadget, true).some(b => b.type === this.selectedGrandType)) return false;
                         if (exclude !== 'selectedStandardTitle' && this.selectedStandardTitle && !this.getCombinedManga(gadget, false).some(b => b.title === this.selectedStandardTitle)) return false;
@@ -265,6 +262,11 @@
                 },
                 async init() {
                     try {
+                        // Check URL Parameters
+                        const params = new URLSearchParams(window.location.search);
+                        this.urlGadgetID = params.get('gadgetid') || '';
+                        this.selectedMovie = params.get('movieid') || '';
+
                         const baseUrl = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                         const [g, gm, m, s, h] = await Promise.all([
                             fetch(baseUrl + "法寶").then(r => r.json()), fetch(baseUrl + "媒體與法寶").then(r => r.json()),
@@ -275,7 +277,12 @@
                         this.loading = false;
                     } catch (e) { console.error(e); }
                 },
-                resetFilters() { this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; this.selectedStandardTitle = ''; this.currentPage = 1; },
+                resetFilters() { 
+                    this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; 
+                    this.selectedStandardTitle = ''; this.urlGadgetID = ''; this.currentPage = 1; 
+                    // Clear URL params without reloading
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                },
                 getMovieData(id, field) {
                     const m = this.movies.find(x => x['Media ID'] === id);
                     return m ? (m[field] || '-') : (field === 'Media ID' ? id : '-');
