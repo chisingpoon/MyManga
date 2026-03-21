@@ -33,7 +33,6 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
 
-        /* Unified Link Styles */
         .archive-link { 
             display: flex; flex-direction: column; 
             padding: 8px 12px; border-radius: 10px; 
@@ -45,27 +44,26 @@
         .archive-link .label-top { font-weight: 900; font-size: 12px; margin-bottom: 2px; }
         .archive-link .label-bottom { opacity: 0.85; font-weight: 600; font-size: 10px; }
         
-        /* Manga Specific Style */
-        .manga-btn { background: #4f46e5; color: white !important; }
-        .manga-btn:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        /* Manga Colors Based on Type */
+        .manga-default { background: #4f46e5; color: white !important; } /* Standard Indigo */
+        .manga-grand { background: #7c3aed; color: white !important; }   /* Purple for 大長編 */
+        .manga-plus { background: #059669; color: white !important; }    /* Green for Plus/Special */
+        .manga-tc { background: #dc2626; color: white !important; }      /* Red for Tentomushi Comics */
+
+        .manga-btn:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         
-        /* Movie Specific Style */
         .movie-btn { background: #0891b2; color: white !important; }
         .movie-btn:hover { background: #0e7490; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3); }
 
         .filter-select { background-color: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; font-size: 13px; font-weight: 700; outline: none; transition: 0.2s; cursor: pointer; width: 100%; }
         .filter-select:focus { border-color: #4f46e5; }
-
         .search-container { position: relative; }
         .clear-search-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
-
         .counter-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid #e2e8f0; }
         .reset-link { color: #6366f1; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
-
         .type-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
         .badge-char { background: #dcfce7; color: #166534; }
         .badge-obj { background: #fef9c3; color: #854d0e; }
-
         .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s; }
         .back-to-top.visible { opacity: 1; pointer-events: auto; }
     </style>
@@ -162,9 +160,10 @@
                                     <div v-if="mList = getMappingList(row['Work ID'])" class="flex flex-col">
                                         <a v-for="m in mList" :key="m.hkIsbn" 
                                            :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                                           target="_blank" class="archive-link manga-btn">
-                                            <span class="label-top">{{ m.title }}</span>
-                                            <span class="label-bottom">{{ m.sub }}</span>
+                                           target="_blank" class="archive-link manga-btn"
+                                           :class="getMangaClass(m.type)">
+                                             <span class="label-top">{{ m.title }}</span>
+                                             <span class="label-bottom">{{ m.sub }}</span>
                                         </a>
                                     </div>
                                     <span v-else class="text-slate-300 text-[11px] font-bold italic">No Manga Ref</span>
@@ -280,6 +279,13 @@
                     if (!movie) return (field === 'Media ID' ? movieId : '-');
                     return movie[field] || '-';
                 },
+                getMangaClass(type) {
+                    if (!type) return 'manga-default';
+                    if (type.includes('大長編')) return 'manga-grand';
+                    if (type.includes('PLUS') || type.includes('特別篇')) return 'manga-plus';
+                    if (type.includes('單行本')) return 'manga-tc';
+                    return 'manga-default';
+                },
                 getMappingList(workId) {
                     if(!workId || workId === "-") return null;
                     const idStr = workId.toString().trim();
@@ -289,12 +295,14 @@
                     const mapped = [];
                     contentsMatches.forEach(match => {
                         const isbnJp = match.ISBN?.trim();
+                        const bookType = match.類?.trim(); // Get the type from the contents sheet
                         const hkItems = this.publishHk.filter(h => h.ISBN_JP?.trim() === isbnJp);
                         hkItems.forEach(h => {
                             mapped.push({
                                 hkIsbn: h.ISBN,
                                 title: h.Title,
                                 sub: (h.Volume ? `Vol.${h.Volume} ` : '') + (h.Subtitle || ''),
+                                type: bookType, // Save type here
                                 date: new Date(h.IssueDate || 0)
                             });
                         });
